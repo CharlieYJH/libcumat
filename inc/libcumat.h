@@ -4,10 +4,12 @@
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
 #include <thrust/fill.h>
-#include "cublas_v2.h"
+#include <cublas_v2.h>
+#include <helper_cuda.h>
 
 #include <iostream>
-#include <utility>
+#include <iomanip>
+#include <algorithm>
 #include <assert.h>
 #include <cstdlib>
 
@@ -20,7 +22,13 @@ class cumat
 	size_t m_cols;
 	thrust::device_vector<T> m_data;
 
-	T generateRandom(const T &min, const T &max);
+	T generateRandom(const T min, const T max);
+
+	//----------------------------------------------
+	// cuBLAS Wrappers
+	//----------------------------------------------
+	void cublasTranspose(cublasHandle_t &handle, const int rows, const int cols, const T *alpha, const T *in_mat, const T *beta, T *out_mat);
+	void cublasAxpy(cublasHandle_t &handle, const int size, const T alpha, const T *x, const int incx, T *y, const int incy);
 
 	public:
 
@@ -31,17 +39,26 @@ class cumat
 	size_t cols(void) const;
 	size_t size(void) const;
 
-	T get(const size_t &row, const size_t &col) const;
-	void set(const size_t &row, const size_t &col, const T &val);
+	T get(const size_t row, const size_t col) const;
+	void set(const size_t row, const size_t col, const T val);
 
-	void fill(const T &val);
+	void fill(const T val);
 	void zero(void);
 	void rand(void);
-	void rand(const T &min, const T &max);
+	void rand(const T min, const T max);
+
+	cumat<T> transpose(void);
 
 	//----------------------------------------------
 	// Operator Overloads
 	//----------------------------------------------
+	
+	// -------------- Assignment --------------
+	cumat<T>& operator=(cumat<T> rhs);
+
+	// -------------- Addition --------------
+	cumat<T>& operator+=(const T val);
+	cumat<T> operator+(const T val);
 
 	friend std::ostream& operator<<(std::ostream &os, const cumat &mat)
 	{
@@ -51,7 +68,7 @@ class cumat
 		for (int i = 0; i < rows; i++) {
 
 			for (int j = 0; j < cols; j++)
-				os << mat.get(i, j) << ' ';
+				os << std::setw(10) << mat.get(i, j) << ' ';
 
 			if (i < rows - 1)
 				os << "\r\n";

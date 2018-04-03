@@ -5,12 +5,12 @@
 int main(int argc, char const* argv[])
 {
 	srand(time(0));
-	cumat<double> mat(5, 5);
-	mat.fill(2);
-	std::cout << mat << std::endl;
+	cumat<double> mat(4, 5);
 	mat.rand();
-	std::cout << mat << std::endl;
-	mat.rand(-5, 7);
+	std::cout << mat << std::endl << std::endl;
+	mat = mat + 2;
+	std::cout << mat << std::endl << std::endl;
+	mat = mat.transpose();
 	std::cout << mat << std::endl;
 	return 0;
 }
