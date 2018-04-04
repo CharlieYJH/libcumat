@@ -1,16 +1,17 @@
 #include "inc/libcumat.h"
 #include <iostream>
-#include <time.h>
 
 int main(int argc, char const* argv[])
 {
-	srand(time(0));
-	cumat<double> mat(4, 5);
+	Cumat<double> mat(5, 1);
+	Cumat<double> mat2(1, 6);
 	mat.rand();
+	mat2.rand();
 	std::cout << mat << std::endl << std::endl;
-	mat = mat + 2;
+	std::cout << mat2 << std::endl << std::endl;
+	mat = mat - 3;
 	std::cout << mat << std::endl << std::endl;
-	mat = mat.transpose();
+	mat = mat.mmul(mat2);
 	std::cout << mat << std::endl;
 	return 0;
 }

@@ -1,11 +1,15 @@
-#ifndef LIBCUMAT_H_
-#define LIBCUMAT_H_
+#ifndef LIBCumat_H_
+#define LIBCumat_H_
 
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
+#include <thrust/functional.h>
+#include <thrust/execution_policy.h>
+#include <thrust/transform.h>
 #include <thrust/fill.h>
 #include <cublas_v2.h>
 #include <helper_cuda.h>
+#include <curand.h>
 
 #include <iostream>
 #include <iomanip>
@@ -14,7 +18,7 @@
 #include <cstdlib>
 
 template<typename T>
-class cumat
+class Cumat
 {
 	private:
 
@@ -25,15 +29,18 @@ class cumat
 	T generateRandom(const T min, const T max);
 
 	//----------------------------------------------
-	// cuBLAS Wrappers
+	// CUDA Library Wrappers
 	//----------------------------------------------
+	void curandGenerateRandom(curandGenerator_t &generator, T *output, size_t size);
 	void cublasTranspose(cublasHandle_t &handle, const int rows, const int cols, const T *alpha, const T *in_mat, const T *beta, T *out_mat);
 	void cublasAxpy(cublasHandle_t &handle, const int size, const T alpha, const T *x, const int incx, T *y, const int incy);
+	void cublasScal(cublasHandle_t &handle, const int size, const T alpha, T *x, const int incx);
+	void cublasGemm(cublasHandle_t &handle, int m, int n, int k, const T alpha, const T *A, int lda, const T *B, int ldb, const T beta, T *C, int ldc);
 
 	public:
 
-	cumat(size_t rows, size_t cols);
-	cumat(void);
+	Cumat(size_t rows, size_t cols);
+	Cumat(void);
 
 	size_t rows(void) const;
 	size_t cols(void) const;
@@ -44,26 +51,60 @@ class cumat
 
 	void fill(const T val);
 	void zero(void);
-	void rand(void);
-	void rand(const T min, const T max);
+	void rand(const T min = -1.0, const T max = 1.0);
 
-	cumat<T> transpose(void);
+	Cumat<T> transpose(void);
+	Cumat<T> mmul(const Cumat<T> &mat);
 
 	//----------------------------------------------
 	// Operator Overloads
 	//----------------------------------------------
 	
 	// -------------- Assignment --------------
-	cumat<T>& operator=(cumat<T> rhs);
+	Cumat<T>& operator=(Cumat<T> rhs);
 
-	// -------------- Addition --------------
-	cumat<T>& operator+=(const T val);
-	cumat<T> operator+(const T val);
+	// -------------- Negation --------------
+	Cumat<T> operator-(void);
 
-	friend std::ostream& operator<<(std::ostream &os, const cumat &mat)
+	// -------------- Scalar Addition --------------
+	Cumat<T>& operator+=(const T val);
+	Cumat<T> operator+(const T val);
+
+	// -------------- Matrix Addition --------------
+	Cumat<T>& operator+=(const Cumat<T> &rhs);
+	Cumat<T> operator+(const Cumat<T> &rhs);
+
+	// -------------- Scalar Subtraction --------------
+	Cumat<T>& operator-=(const T val);
+	Cumat<T> operator-(const T val);
+
+	// -------------- Matrix Subtraction --------------
+	Cumat<T>& operator-=(const Cumat<T> &rhs);
+	Cumat<T> operator-(const Cumat<T> &rhs);
+
+	// -------------- Scalar Multiplication --------------
+	Cumat<T>& operator*=(const T val);
+	Cumat<T> operator*(const T val);
+
+	// -------------- Matrix Multiplication (element-wise) --------------
+	Cumat<T>& operator*=(const Cumat<T> &rhs);
+	Cumat<T> operator*(const Cumat<T> &rhs);
+
+	// -------------- Scalar Division (element-wise) --------------
+	Cumat<T>& operator/=(const T val);
+	Cumat<T> operator/(const T val);
+
+	// -------------- Matrix Division (element-wise) --------------
+	Cumat<T>& operator/=(const Cumat<T> &rhs);
+	Cumat<T> operator/(const Cumat<T> &rhs);
+
+	friend std::ostream& operator<<(std::ostream &os, const Cumat &mat)
 	{
 		const size_t rows = mat.rows();
 		const size_t cols = mat.cols();
+
+		if (rows == 0 || cols == 0)
+			return os;
 
 		for (int i = 0; i < rows; i++) {
 
