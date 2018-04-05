@@ -3,15 +3,11 @@
 
 int main(int argc, char const* argv[])
 {
-	Cumat<double> mat(5, 1);
-	Cumat<double> mat2(1, 6);
-	mat.rand();
-	mat2.rand();
-	std::cout << mat << std::endl << std::endl;
-	std::cout << mat2 << std::endl << std::endl;
-	mat = mat - 3;
-	std::cout << mat << std::endl << std::endl;
-	mat = mat.mmul(mat2);
-	std::cout << mat << std::endl;
+	Cumat<double> mat = std::move(Cumat<double>::random(5, 3));
+	Cumat<double> mat2 = std::move(Cumat<double>::random(3, 6));
+	std::cout << "A = " << std::endl << mat << std::endl << std::endl;
+	std::cout << "B = " << std::endl << mat2 << std::endl << std::endl;
+	mat = ~mat2 ^ ~mat;
+	std::cout << "A x B = " << std::endl << mat << std::endl;
 	return 0;
 }

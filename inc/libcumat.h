@@ -46,12 +46,13 @@ class Cumat
 	size_t cols(void) const;
 	size_t size(void) const;
 
-	T get(const size_t row, const size_t col) const;
 	void set(const size_t row, const size_t col, const T val);
 
 	void fill(const T val);
 	void zero(void);
 	void rand(const T min = -1.0, const T max = 1.0);
+
+	static Cumat<T> random(const size_t rows, const size_t cols, const T min = -1.0, const T max = 1.0);
 
 	Cumat<T> transpose(void);
 	Cumat<T> mmul(const Cumat<T> &mat);
@@ -63,8 +64,18 @@ class Cumat
 	// -------------- Assignment --------------
 	Cumat<T>& operator=(Cumat<T> rhs);
 
+	// -------------- Accessor --------------
+	T operator()(const size_t row, const size_t col) const;
+	T operator()(const size_t idx) const;
+	
 	// -------------- Negation --------------
 	Cumat<T> operator-(void);
+
+	// -------------- Transpose --------------
+	Cumat<T> operator~(void);
+
+	// -------------- Matrix Multiplication --------------
+	Cumat<T> operator^(const Cumat<T> &rhs);
 
 	// -------------- Scalar Addition --------------
 	Cumat<T>& operator+=(const T val);
@@ -109,7 +120,7 @@ class Cumat
 		for (int i = 0; i < rows; i++) {
 
 			for (int j = 0; j < cols; j++)
-				os << std::setw(10) << mat.get(i, j) << ' ';
+				os << std::setw(10) << mat(i, j) << ' ';
 
 			if (i < rows - 1)
 				os << "\r\n";

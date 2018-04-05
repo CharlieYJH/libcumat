@@ -1,6 +1,6 @@
 #include "libCumat.h"
 
-#define CURAND_CALL(x) do { if((x)!=CURAND_STATUS_SUCCESS) { \
+#define CURAND_CALL(x) do { if((x) != CURAND_STATUS_SUCCESS) { \
     printf("Error at %s:%d\n" , __FILE__ , __LINE__);		 \
     exit(EXIT_FAILURE);}} while(0)
 
@@ -91,6 +91,11 @@ Cumat<T>::Cumat(size_t rows, size_t cols):
 	m_rows(rows),
 	m_cols(cols)
 {
+	if (rows == 0 || cols == 0) {
+		m_rows = 0;
+		m_cols = 0;
+	}
+
 	m_data.resize(rows * cols);
 }
 
@@ -116,13 +121,6 @@ template<typename T>
 size_t Cumat<T>::size(void) const
 {
 	return m_rows * m_cols;
-}
-
-template<typename T>
-T Cumat<T>::get(const size_t row, const size_t col) const
-{
-	assert(row < m_rows && col < m_cols);
-	return m_data[row * m_cols + col];
 }
 
 template<typename T>
@@ -155,6 +153,15 @@ void Cumat<T>::rand(const T min, const T max)
 	Cumat<T>::curandGenerateRandom(prng, thrust::raw_pointer_cast(m_data.data()), m_rows * m_cols);
 
 	(*this *= (max - min)) += min;
+}
+
+template<typename T>
+Cumat<T> Cumat<T>::random(const size_t rows, const size_t cols, const T min, const T max)
+{
+	assert(max > min);
+	Cumat<T> mat(rows, cols);
+	mat.rand(min, max);
+	return mat;
 }
 
 template<typename T>
@@ -220,12 +227,41 @@ Cumat<T>& Cumat<T>::operator=(Cumat<T> rhs)
 	return *this;
 }
 
+// -------------- Accessor --------------
+template<typename T>
+T Cumat<T>::operator()(const size_t row, const size_t col) const
+{
+	assert(row < m_rows && col < m_cols);
+	return m_data[row * m_cols + col];
+}
+
+template<typename T>
+T Cumat<T>::operator()(const size_t idx) const
+{
+	assert(idx < m_rows * m_cols);
+	return m_data[idx];
+}
+
 // -------------- Negation --------------
 template<typename T>
 Cumat<T> Cumat<T>::operator-(void)
 {
 	Cumat<T> m = *this;
 	return (*this *= -1);
+}
+
+// -------------- Transpose --------------
+template<typename T>
+Cumat<T> Cumat<T>::operator~(void)
+{
+	return (*this).transpose();
+}
+
+// -------------- Matrix Multiplication --------------
+template<typename T>
+Cumat<T> Cumat<T>::operator^(const Cumat<T> &rhs)
+{
+	return (*this).mmul(rhs);
 }
 
 // -------------- Scalar Addition --------------
@@ -333,6 +369,7 @@ Cumat<T>& Cumat<T>::operator*=(const T val)
 	cublasHandle_t handle;
 	checkCudaErrors(cublasCreate(&handle));
 
+	// Use cublas<t>scal to do x = alpha * x where alpha = val and x = m_data
 	Cumat<T>::cublasScal(handle, m_rows * m_cols, val, thrust::raw_pointer_cast(m_data.data()), 1);
 
 	checkCudaErrors(cublasDestroy(handle));
