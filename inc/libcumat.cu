@@ -84,6 +84,18 @@ void Matrix<double>::cublasGemm(cublasHandle_t &handle, int m, int n, int k, con
 	checkCudaErrors(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, m, n, k, &alpha, A, lda, B, ldb, &beta, C, ldc));
 }
 
+template<>
+void Matrix<float>::cublasNorm(cublasHandle_t &handle, int size, const float *x, int incx, float *result)
+{
+	checkCudaErrors(cublasSnrm2(handle, size, x, incx, result));
+}
+
+template<>
+void Matrix<double>::cublasNorm(cublasHandle_t &handle, int size, const double *x, int incx, double *result)
+{
+	checkCudaErrors(cublasDnrm2(handle, size, x, incx, result));
+}
+
 //----------------------------------------------
 // Public methods
 //----------------------------------------------
@@ -212,6 +224,28 @@ Matrix<T> Matrix<T>::mmul(const Matrix<T> &mat)
 	checkCudaErrors(cublasDestroy(handle));
 
 	return outmat;
+}
+
+template<typename T>
+T Matrix<T>::sum(void)
+{
+	return thrust::reduce(m_data.begin(), m_data.end());
+}
+
+template<typename T>
+T Matrix<T>::norm(void)
+{
+	const T *X = thrust::raw_pointer_cast(m_data.data());
+	T result;
+
+	cublasHandle_t handle;
+	checkCudaErrors(cublasCreate(&handle));
+
+	Matrix<T>::cublasNorm(handle, m_rows * m_cols, X, 1, &result);
+
+	checkCudaErrors(cublasDestroy(handle));
+
+	return result;
 }
 
 //----------------------------------------------
@@ -384,6 +418,173 @@ Matrix<T> Matrix<T>::tanh(void)
 	Matrix<T> mat = *this;
 	Matrix<T>::elementMathOp(mat, MathOp::tanh<T>());
 	return mat;
+}
+
+template<typename T>
+Matrix<T> Matrix<T>::sigmoid(void)
+{
+	Matrix<T> mat = *this;
+	Matrix<T>::elementMathOp(mat, MathOp::sigmoid<T>());
+	return mat;
+}
+
+//----------------------------------------------
+// In-Place Element-Wise Math Operations
+//----------------------------------------------
+
+template<typename T>
+Matrix<T>& Matrix<T>::iabs(void)
+{
+	elementMathOp(*this, MathOp::abs<T>());
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::iinverse(void)
+{
+	elementMathOp(*this, MathOp::inverse<T>());
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::iclip(const T min, const T max)
+{
+	elementMathOp(*this, MathOp::clip<T>(min, max));
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::iexp(void)
+{
+	elementMathOp(*this, MathOp::exp<T>());
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::ilog(void)
+{
+	elementMathOp(*this, MathOp::log<T>());
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::ilog1p(void)
+{
+	elementMathOp(*this, MathOp::log1p<T>());
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::ilog10(void)
+{
+	elementMathOp(*this, MathOp::log10<T>());
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::ipow(const T n)
+{
+	elementMathOp(*this, MathOp::pow<T>(n));
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::isqrt(void)
+{
+	elementMathOp(*this, MathOp::sqrt<T>());
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::irsqrt(void)
+{
+	elementMathOp(*this, MathOp::rsqrt<T>());
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::isquare(void)
+{
+	if (m_rows == 0 || m_cols == 0)
+		return *this;
+	return ((*this) *= (*this));
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::icube(void)
+{
+	elementMathOp(*this, MathOp::cube<T>());
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::isin(void)
+{
+	elementMathOp(*this, MathOp::sin<T>());
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::icos(void)
+{
+	elementMathOp(*this, MathOp::cos<T>());
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::itan(void)
+{
+	elementMathOp(*this, MathOp::tan<T>());
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::iasin(void)
+{
+	elementMathOp(*this, MathOp::asin<T>());
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::iacos(void)
+{
+	elementMathOp(*this, MathOp::acos<T>());
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::iatan(void)
+{
+	elementMathOp(*this, MathOp::atan<T>());
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::isinh(void)
+{
+	elementMathOp(*this, MathOp::sinh<T>());
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::icosh(void)
+{
+	elementMathOp(*this, MathOp::cosh<T>());
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::itanh(void)
+{
+	elementMathOp(*this, MathOp::tanh<T>());
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::isigmoid(void)
+{
+	elementMathOp(*this, MathOp::sigmoid<T>());
+	return *this;
 }
 
 //----------------------------------------------
@@ -563,7 +764,7 @@ template<typename T>
 Matrix<T>& Matrix<T>::operator*=(const Matrix<T> &rhs)
 {
 	assert(m_rows == rhs.m_rows && m_cols == rhs.m_cols);
-	thrust::transform(thrust::device, m_data.begin(), m_data.end(), rhs.m_data.begin(), m_data.begin(), thrust::multiplies<T>());
+	thrust::transform(m_data.begin(), m_data.end(), rhs.m_data.begin(), m_data.begin(), thrust::multiplies<T>());
 	return *this;
 }
 
@@ -594,7 +795,7 @@ template<typename T>
 Matrix<T>& Matrix<T>::operator/=(const Matrix<T> &rhs)
 {
 	assert(m_rows == rhs.m_rows && m_cols == rhs.m_cols);
-	thrust::transform(thrust::device, m_data.begin(), m_data.end(), rhs.m_data.begin(), m_data.begin(), thrust::divides<T>());
+	thrust::transform(m_data.begin(), m_data.end(), rhs.m_data.begin(), m_data.begin(), thrust::divides<T>());
 	return *this;
 }
 

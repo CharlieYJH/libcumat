@@ -175,6 +175,14 @@ namespace Cumat
 			tanh(void) {}
 			__host__ __device__ T operator()(const T val) const { return std::tanh(val); }
 		};
+
+		template<typename T>
+		struct sigmoid
+		{
+			public:
+			sigmoid(void) {}
+			__host__ __device__ T operator()(const T val) const { return 1.0 / (1 + std::exp(-val)); }
+		};
 	}
 }
 

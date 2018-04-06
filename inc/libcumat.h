@@ -4,7 +4,6 @@
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
 #include <thrust/functional.h>
-#include <thrust/execution_policy.h>
 #include <thrust/transform.h>
 #include <thrust/fill.h>
 #include <cublas_v2.h>
@@ -41,6 +40,7 @@ namespace Cumat
 		void cublasAxpy(cublasHandle_t &handle, const int size, const T alpha, const T *x, const int incx, T *y, const int incy);
 		void cublasScal(cublasHandle_t &handle, const int size, const T alpha, T *x, const int incx);
 		void cublasGemm(cublasHandle_t &handle, int m, int n, int k, const T alpha, const T *A, int lda, const T *B, int ldb, const T beta, T *C, int ldc);
+		void cublasNorm(cublasHandle_t &handle, int size, const T *x, int incx, T *result);
 
 		public:
 
@@ -61,6 +61,8 @@ namespace Cumat
 
 		Matrix<T> transpose(void);
 		Matrix<T> mmul(const Matrix<T> &mat);
+		T sum(void);
+		T norm(void);
 
 		//----------------------------------------------
 		// Element-Wise Math Operations
@@ -89,6 +91,38 @@ namespace Cumat
 		Matrix<T> sinh(void);
 		Matrix<T> cosh(void);
 		Matrix<T> tanh(void);
+
+		Matrix<T> sigmoid(void);
+
+		//----------------------------------------------
+		// In-Place Element-Wise Math Operations
+		//----------------------------------------------
+
+		Matrix<T>& iabs(void);
+		Matrix<T>& iinverse(void);
+		Matrix<T>& iclip(const T min, const T max);
+
+		Matrix<T>& iexp(void);
+		Matrix<T>& ilog(void);
+		Matrix<T>& ilog1p(void);
+		Matrix<T>& ilog10(void);
+		Matrix<T>& ipow(const T n);
+		Matrix<T>& isqrt(void);
+		Matrix<T>& irsqrt(void);
+		Matrix<T>& isquare(void);
+		Matrix<T>& icube(void);
+
+		Matrix<T>& isin(void);
+		Matrix<T>& icos(void);
+		Matrix<T>& itan(void);
+		Matrix<T>& iasin(void);
+		Matrix<T>& iacos(void);
+		Matrix<T>& iatan(void);
+		Matrix<T>& isinh(void);
+		Matrix<T>& icosh(void);
+		Matrix<T>& itanh(void);
+
+		Matrix<T>& isigmoid(void);
 
 		//----------------------------------------------
 		// Operator Overloads
@@ -142,6 +176,7 @@ namespace Cumat
 		Matrix<T>& operator/=(const Matrix<T> &rhs);
 		Matrix<T> operator/(const Matrix<T> &rhs);
 
+		// -------------- Output Stream Operator --------------
 		friend std::ostream& operator<<(std::ostream &os, const Matrix &mat)
 		{
 			const size_t rows = mat.rows();
