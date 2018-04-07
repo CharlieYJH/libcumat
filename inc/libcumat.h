@@ -5,6 +5,7 @@
 #include <thrust/host_vector.h>
 #include <thrust/functional.h>
 #include <thrust/transform.h>
+#include <thrust/extrema.h>
 #include <thrust/fill.h>
 #include <cublas_v2.h>
 #include <helper_cuda.h>
@@ -20,6 +21,10 @@
 
 namespace Cumat
 {
+	extern cublasHandle_t cublas_handle;
+	void createCublasHandle(void);
+	void destroyCublasHandle(void);
+
 	template<typename T>
 	class Matrix
 	{
@@ -52,7 +57,8 @@ namespace Cumat
 		size_t size(void) const;
 
 		void set(const size_t row, const size_t col, const T val);
-
+		void set(const size_t idx, const T val);
+		void swap(Matrix<T> &mat);
 		void fill(const T val);
 		void zero(void);
 		void rand(const T min = -1.0, const T max = 1.0);
@@ -60,9 +66,17 @@ namespace Cumat
 		static Matrix<T> random(const size_t rows, const size_t cols, const T min = -1.0, const T max = 1.0);
 
 		Matrix<T> transpose(void);
+		Matrix<T>& transpose(Matrix<T> &mat);
+
 		Matrix<T> mmul(const Matrix<T> &mat);
+		Matrix<T>& mmul(const Matrix<T> &mat, Matrix<T> &outmat);
+
 		T sum(void);
 		T norm(void);
+		T maxElement(void);
+		int maxIndex(void);
+		T minElement(void);
+		int minIndex(void);
 
 		//----------------------------------------------
 		// Element-Wise Math Operations

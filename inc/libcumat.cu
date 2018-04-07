@@ -6,6 +6,19 @@
 
 namespace Cumat
 {
+
+cublasHandle_t cublas_handle;
+
+void createCublasHandle(void)
+{
+	checkCudaErrors(cublasCreate(&Cumat::cublas_handle));
+}
+
+void destroyCublasHandle(void)
+{
+	checkCudaErrors(cublasDestroy(Cumat::cublas_handle));
+}
+
 //----------------------------------------------
 // Private methods
 //----------------------------------------------
@@ -145,6 +158,22 @@ void Matrix<T>::set(const size_t row, const size_t col, const T val)
 }
 
 template<typename T>
+void Matrix<T>::set(const size_t idx, const T val)
+{
+	assert(idx < m_rows * m_cols);
+	m_data[idx] = val;
+}
+
+template<typename T>
+void Matrix<T>::swap(Matrix<T> &mat)
+{
+	if (&mat == this) return;
+	std::swap(m_rows, mat.m_rows);
+	std::swap(m_cols, mat.m_cols);
+	m_data.swap(mat.m_data);
+}
+
+template<typename T>
 void Matrix<T>::fill(const T val)
 {
 	thrust::fill(m_data.begin(), m_data.end(), val);
@@ -183,21 +212,34 @@ Matrix<T> Matrix<T>::transpose(void)
 {
 	Matrix<T> transposed_matrix(m_cols, m_rows);
 
+	Matrix<T>::transpose(transposed_matrix);
+
+	return transposed_matrix;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::transpose(Matrix<T> &mat)
+{
+	assert(&mat != this);
+
+	if (mat.m_rows != m_cols && mat.m_cols != m_rows) {
+
+		if (mat.size() != this->size())
+			mat.m_data.resize(this->size());
+		
+		mat.m_rows = m_cols;
+		mat.m_cols = m_rows;
+	}
+
 	T alpha = 1.0;
 	T beta = 0;
 
 	T *A = thrust::raw_pointer_cast(m_data.data());
-	T *B = thrust::raw_pointer_cast(transposed_matrix.m_data.data());
+	T *B = thrust::raw_pointer_cast(mat.m_data.data());
 
-	cublasHandle_t handle;
-	checkCudaErrors(cublasCreate(&handle));
+	Matrix<T>::cublasTranspose(Cumat::cublas_handle, m_rows, m_cols, &alpha, A, &beta, B);
 
-	// Uses cublas<t>geam() to perform C = alpha * A + beta * B where alpha = 1, A is transposed, and beta = 0
-	Matrix<T>::cublasTranspose(handle, m_rows, m_cols, &alpha, A, &beta, B);
-
-	checkCudaErrors(cublasDestroy(handle));
-
-	return transposed_matrix;
+	return mat;
 }
 
 template<typename T>
@@ -210,18 +252,30 @@ Matrix<T> Matrix<T>::mmul(const Matrix<T> &mat)
 	if (outmat.m_rows == 0 || outmat.m_cols == 0)
 		return outmat;
 
+	Matrix<T>::mmul(mat, outmat);
+
+	return outmat;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::mmul(const Matrix<T> &mat, Matrix<T> &outmat)
+{
+	assert(m_cols == mat.m_rows && this != &outmat && &mat != &outmat);
+
+	// Resize the output matrix if the dimension doesn't match
+	if (outmat.m_rows != m_rows && outmat.m_cols != mat.m_cols) {
+		outmat.m_rows = m_rows;
+		outmat.m_cols = mat.m_cols;
+		outmat.m_data.resize(outmat.m_rows * outmat.m_cols);
+	}
+
 	const T *A = thrust::raw_pointer_cast(m_data.data());
 	const T *B = thrust::raw_pointer_cast(mat.m_data.data());
 	T *C = thrust::raw_pointer_cast(outmat.m_data.data());
 
-	cublasHandle_t handle;
-	checkCudaErrors(cublasCreate(&handle));
-
 	// Use cublas<t>gemm() to perform C = alpha * A * B + beta * C
 	// where alpha = 1, A = m_data, B = mat, beta = 0, and C = outmat
-	Matrix<T>::cublasGemm(handle, mat.m_cols, m_rows, m_cols, 1.0, B, mat.m_cols, A, m_cols, 0, C, mat.m_cols);
-
-	checkCudaErrors(cublasDestroy(handle));
+	Matrix<T>::cublasGemm(Cumat::cublas_handle, mat.m_cols, m_rows, m_cols, 1.0, B, mat.m_cols, A, m_cols, 0, C, mat.m_cols);
 
 	return outmat;
 }
@@ -238,14 +292,37 @@ T Matrix<T>::norm(void)
 	const T *X = thrust::raw_pointer_cast(m_data.data());
 	T result;
 
-	cublasHandle_t handle;
-	checkCudaErrors(cublasCreate(&handle));
-
-	Matrix<T>::cublasNorm(handle, m_rows * m_cols, X, 1, &result);
-
-	checkCudaErrors(cublasDestroy(handle));
+	Matrix<T>::cublasNorm(Cumat::cublas_handle, m_rows * m_cols, X, 1, &result);
 
 	return result;
+}
+
+template<typename T>
+T Matrix<T>::maxElement(void)
+{
+	typename thrust::device_vector<T>::iterator iter = thrust::max_element(m_data.begin(), m_data.end());
+	return *iter;
+}
+
+template<typename T>
+int Matrix<T>::maxIndex(void)
+{
+	typename thrust::device_vector<T>::iterator iter = thrust::max_element(m_data.begin(), m_data.end());
+	return iter - m_data.begin();
+}
+
+template<typename T>
+T Matrix<T>::minElement(void)
+{
+	typename thrust::device_vector<T>::iterator iter = thrust::min_element(m_data.begin(), m_data.end());
+	return *iter;
+}
+
+template<typename T>
+int Matrix<T>::minIndex(void)
+{
+	typename thrust::device_vector<T>::iterator iter = thrust::min_element(m_data.begin(), m_data.end());
+	return iter - m_data.begin();
 }
 
 //----------------------------------------------
@@ -649,14 +726,10 @@ Matrix<T>& Matrix<T>::operator+=(const T val)
 	checkCudaErrors(cudaMalloc((void **)&scalar, sizeof(T)));
 	checkCudaErrors(cudaMemcpy(scalar, &val, sizeof(T), cudaMemcpyHostToDevice));
 
-	cublasHandle_t handle;
-	checkCudaErrors(cublasCreate(&handle));
-
 	// use cuBLAS saxpy to do y = alpha * x + y where alpha = 1, x = val, and y = m_data
-	Matrix<T>::cublasAxpy(handle, m_rows * m_cols, 1.0, scalar, 0, thrust::raw_pointer_cast(m_data.data()), 1);
+	Matrix<T>::cublasAxpy(Cumat::cublas_handle, m_rows * m_cols, 1.0, scalar, 0, thrust::raw_pointer_cast(m_data.data()), 1);
 
 	checkCudaErrors(cudaFree(scalar));
-	checkCudaErrors(cublasDestroy(handle));
 
 	return *this;
 }
@@ -677,13 +750,8 @@ Matrix<T>& Matrix<T>::operator+=(const Matrix<T> &rhs)
 	const T *X = thrust::raw_pointer_cast(rhs.m_data.data());
 	T *Y = raw_pointer_cast(m_data.data());
 
-	cublasHandle_t handle;
-	checkCudaErrors(cublasCreate(&handle));
-
 	// use cuBLAS saxpy to do y = alpha * x + y where alpha = 1, x = rhs, and y = m_data
-	Matrix<T>::cublasAxpy(handle, m_rows * m_cols, 1.0, X, 1, Y, 1);
-
-	checkCudaErrors(cublasDestroy(handle));
+	Matrix<T>::cublasAxpy(Cumat::cublas_handle, m_rows * m_cols, 1.0, X, 1, Y, 1);
 
 	return *this;
 }
@@ -719,13 +787,8 @@ Matrix<T>& Matrix<T>::operator-=(const Matrix<T> &rhs)
 	const T *X = thrust::raw_pointer_cast(rhs.m_data.data());
 	T *Y = thrust::raw_pointer_cast(m_data.data());
 
-	cublasHandle_t handle;
-	checkCudaErrors(cublasCreate(&handle));
-
 	// use cuBLAS saxpy to do y = alpha * x + y where alpha = -1, x = rhs, and y = m_data
-	Matrix<T>::cublasAxpy(handle, m_rows * m_cols, -1.0, X, 1, Y, 1);
-
-	checkCudaErrors(cublasDestroy(handle));
+	Matrix<T>::cublasAxpy(Cumat::cublas_handle, m_rows * m_cols, -1.0, X, 1, Y, 1);
 
 	return *this;
 }
@@ -741,13 +804,8 @@ Matrix<T> Matrix<T>::operator-(const Matrix<T> &rhs)
 template<typename T>
 Matrix<T>& Matrix<T>::operator*=(const T val)
 {
-	cublasHandle_t handle;
-	checkCudaErrors(cublasCreate(&handle));
-
 	// Use cublas<t>scal to do x = alpha * x where alpha = val and x = m_data
-	Matrix<T>::cublasScal(handle, m_rows * m_cols, val, thrust::raw_pointer_cast(m_data.data()), 1);
-
-	checkCudaErrors(cublasDestroy(handle));
+	Matrix<T>::cublasScal(Cumat::cublas_handle, m_rows * m_cols, val, thrust::raw_pointer_cast(m_data.data()), 1);
 
 	return *this;
 }
