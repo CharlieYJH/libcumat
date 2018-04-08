@@ -1,5 +1,6 @@
 #include <iostream>
 #include <chrono>
+#include <typeinfo>
 #include "inc/libcumat.h"
 
 int main(int argc, char const* argv[])
@@ -20,19 +21,19 @@ int main(int argc, char const* argv[])
 	Cumat::Matrixd tmp3(2000, 2001);
 
 	Cumat::Matrixd Wy(Cumat::Matrixd::random(512, 512));
-	Cumat::Matrixd dy(Cumat::Matrixd::random(512, 512));
+	Cumat::Matrixd dy(512, 512);
 	Cumat::Matrixd tmp4(Wy.rows(), dy.cols());
 
 	auto start = std::chrono::high_resolution_clock::now();
-	for (int i = 0; i < 100; i++) {
-		Wy.mmul(dy, tmp4);
-		Wy.mmul(dy, tmp4);
-		Wy.mmul(dy, tmp4);
-		Wy.mmul(dy, tmp4);
+	for (int i = 0; i < 10; i++) {
+		Wy.mmul(dy, tmp4) += 1;
+		Wy.swap(tmp4);
 	}
 	auto end = std::chrono::high_resolution_clock::now();
+	std::cout << typeid(Wy).name() << std::endl;
 
 	std::cout << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+	std::cout << Wy(0) << std::endl;
 
 	// std::cout << Wy << std::endl;
 
