@@ -8,6 +8,7 @@ namespace Cumat
 {
 
 cublasHandle_t cublas_handle;
+std::unordered_map<std::string, char *> kernel_cache;
 
 void createCublasHandle(void)
 {

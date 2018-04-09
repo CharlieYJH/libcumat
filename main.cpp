@@ -8,8 +8,8 @@ int main(int argc, char const* argv[])
 	Cumat::createCublasHandle();
 	Cumat::Matrixd mat(std::move(Cumat::Matrixd::random(5, 3)));
 	Cumat::Matrixd mat2(std::move(Cumat::Matrixd::random(3, 6)));
-	Cumat::Matrixd tmp(3, 3);
-	Cumat::Matrixd tmp5(3, 3);
+	Cumat::Matrixd tmp(512, 512);
+	Cumat::Matrixd tmp5(512, 512);
 
 	std::cout << "A = " << std::endl << mat << std::endl << std::endl;
 	std::cout << "B = " << std::endl << mat2 << std::endl << std::endl;
@@ -34,13 +34,21 @@ int main(int argc, char const* argv[])
 	tmp.fill(0.2);
 	tmp5.fill(0.02);
 	tmp = tmp + tmp5 + tmp5 + tmp;
+	tmp = tmp5 + tmp;
+	// tmp = tmp + tmp5 + tmp5 + tmp;
+	// tmp = tmp + tmp;
+	tmp = tmp + tmp + tmp + tmp + tmp + tmp + tmp;
 	auto start = std::chrono::high_resolution_clock::now();
-	tmp = tmp + tmp;
+	tmp = tmp + tmp + tmp + tmp + tmp + tmp + tmp;
 	auto end = std::chrono::high_resolution_clock::now();
-	// tmp = tmp + tmp + tmp + tmp;
 
 	std::cout << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
-	std::cout << tmp << std::endl;
+
+	start = std::chrono::high_resolution_clock::now();
+	tmp = tmp + tmp5 + tmp + tmp5;
+	end = std::chrono::high_resolution_clock::now();
+	std::cout << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+	// std::cout << tmp << std::endl;
 
 	// std::cout << Wy << std::endl;
 

@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <assert.h>
 #include <cstdlib>
+#include <unordered_map>
 
 #include <libcumat_math.h>
 
@@ -45,6 +46,7 @@
 
 namespace Cumat
 {
+	extern std::unordered_map<std::string, char *> kernel_cache;
 	extern cublasHandle_t cublas_handle;
 	void createCublasHandle(void);
 	void destroyCublasHandle(void);
@@ -200,68 +202,8 @@ namespace Cumat
 		//----------------------------------------------
 		
 		// -------------- Assignment --------------
-		// Matrix<T>& operator=(Matrix<T> rhs);
 		template<typename Expr>
 		Matrix<T>& operator=(const Expression<Expr> &rhs);
-		/* { */
-			// const Expr &expr = rhs;
-			// int start_num = 0;
-			// size_t vec_size = m_cols * m_rows;
-			// std::vector<void *> args;
-
-			// data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(m_data.data());
-			// args.push_back(&data_ptr_);
-
-			// std::string params_line = "(" + Matrix<T>::type() + " *out";
-			// std::string eval_line = expr.eval(params_line, start_num, args);
-
-			// args.push_back(&vec_size);
-
-			// params_line += ", size_t n)";
-			// eval_line += ";";
-
-			// std::string kernel_code = "                                         \n\
-				// extern \"C\" __global__                                         \n\
-				// void saxpy" + params_line + "								    \n\
-				// {                                                               \n\
-				  // size_t idx = blockIdx.x * blockDim.x + threadIdx.x;           \n\
-				  // if (idx < n) {                                                \n\
-					// out[idx] = " + eval_line + "                                \n\
-				  // }                                                             \n\
-				// }                                                               \n";
-
-			// nvrtcProgram prog;
-			
-			// NVRTC_SAFE_CALL(nvrtcCreateProgram(&prog, kernel_code.c_str(), "saxpy.cu", 0, NULL, NULL));
-			// nvrtcResult compileResult = nvrtcCompileProgram(prog, 0, NULL);
-
-			// // Obtain compilation log from the program.
-			// size_t logSize;
-			// NVRTC_SAFE_CALL(nvrtcGetProgramLogSize(prog, &logSize));
-			// char *log = new char[logSize];
-			// NVRTC_SAFE_CALL(nvrtcGetProgramLog(prog, log));
-			// std::cout << log << '\n';
-			// delete[] log;
-			// if (compileResult != NVRTC_SUCCESS)
-				// exit(1);
-
-			// // Obtain PTX from the program.
-			// size_t ptxSize;
-			// NVRTC_SAFE_CALL(nvrtcGetPTXSize(prog, &ptxSize));
-			// char *ptx = new char[ptxSize];
-			// NVRTC_SAFE_CALL(nvrtcGetPTX(prog, ptx));
-			// // Destroy the program.
-			// NVRTC_SAFE_CALL(nvrtcDestroyProgram(&prog));
-
-			// CUmodule module;
-			// CUfunction kernel;
-
-			// CUDA_SAFE_CALL(cuModuleLoadDataEx(&module, ptx, 0, 0, 0));
-			// CUDA_SAFE_CALL(cuModuleGetFunction(&kernel, module, "saxpy"));
-			// CUDA_SAFE_CALL(cuLaunchKernel(kernel, 1, 1, 1, 512, 1, 1, 0, NULL, args.data(), 0));
-
-			// return *this;
-		/* } */
 
 		// -------------- Accessor --------------
 		T operator()(const size_t row, const size_t col) const;
@@ -360,28 +302,39 @@ namespace Cumat
 			  }                                                             \n\
 			}                                                               \n";
 
-		nvrtcProgram prog;
-		
-		NVRTC_SAFE_CALL(nvrtcCreateProgram(&prog, kernel_code.c_str(), "cumat_kernel.cu", 0, NULL, NULL));
-		nvrtcResult compileResult = nvrtcCompileProgram(prog, 0, NULL);
+		char *ptx;
 
-		// Obtain compilation log from the program.
-		size_t logSize;
-		NVRTC_SAFE_CALL(nvrtcGetProgramLogSize(prog, &logSize));
-		char *log = new char[logSize];
-		NVRTC_SAFE_CALL(nvrtcGetProgramLog(prog, log));
-		// std::cout << log << '\n';
-		delete[] log;
-		if (compileResult != NVRTC_SUCCESS)
-			exit(1);
+		if (kernel_cache.find(kernel_code) != kernel_cache.end()) {
 
-		// Obtain PTX from the program.
-		size_t ptxSize;
-		NVRTC_SAFE_CALL(nvrtcGetPTXSize(prog, &ptxSize));
-		char *ptx = new char[ptxSize];
-		NVRTC_SAFE_CALL(nvrtcGetPTX(prog, ptx));
-		// Destroy the program.
-		NVRTC_SAFE_CALL(nvrtcDestroyProgram(&prog));
+			ptx = kernel_cache[kernel_code];
+
+		} else {
+
+			nvrtcProgram prog;
+
+			NVRTC_SAFE_CALL(nvrtcCreateProgram(&prog, kernel_code.c_str(), "cumat_kernel.cu", 0, NULL, NULL));
+			nvrtcResult compileResult = nvrtcCompileProgram(prog, 0, NULL);
+
+			// Obtain compilation log from the program.
+			size_t logSize;
+			NVRTC_SAFE_CALL(nvrtcGetProgramLogSize(prog, &logSize));
+			char *log = new char[logSize];
+			NVRTC_SAFE_CALL(nvrtcGetProgramLog(prog, log));
+			// std::cout << log << '\n';
+			delete[] log;
+			if (compileResult != NVRTC_SUCCESS)
+				exit(1);
+
+			// Obtain PTX from the program.
+			size_t ptxSize;
+			NVRTC_SAFE_CALL(nvrtcGetPTXSize(prog, &ptxSize));
+			ptx = new char[ptxSize];
+			NVRTC_SAFE_CALL(nvrtcGetPTX(prog, ptx));
+			// Destroy the program.
+			NVRTC_SAFE_CALL(nvrtcDestroyProgram(&prog));
+
+			kernel_cache[kernel_code] = ptx;
+		}
 
 		CUmodule module;
 		CUfunction kernel;
