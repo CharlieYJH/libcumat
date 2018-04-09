@@ -116,7 +116,8 @@ void Matrix<double>::cublasNorm(cublasHandle_t &handle, int size, const double *
 template<typename T>
 Matrix<T>::Matrix(size_t rows, size_t cols):
 	m_rows(rows),
-	m_cols(cols)
+	m_cols(cols),
+	id_("v")
 {
 	if (rows == 0 || cols == 0) {
 		m_rows = 0;
@@ -124,13 +125,39 @@ Matrix<T>::Matrix(size_t rows, size_t cols):
 	}
 
 	m_data.resize(rows * cols);
+	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(m_data.data());
 }
 
 template<typename T>
 Matrix<T>::Matrix(void):
 	m_rows(0),
-	m_cols(0)
-{}
+	m_cols(0),
+	id_("v")
+{
+	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(m_data.data());
+}
+
+template<typename T>
+std::string Matrix<T>::eval(std::string &params, int &num, std::vector<void *> &args) const
+{
+	args.push_back((void *)&data_ptr_);
+
+	std::string id_num = std::to_string(num++);
+	params += (", " + Matrix<T>::type() + " *" + id_ + id_num);
+	return id_ + id_num + "[idx]";
+}
+
+template<>
+std::string Matrix<float>::type(void) const
+{
+	return "float";
+}
+
+template<>
+std::string Matrix<double>::type(void) const
+{
+	return "double";
+}
 
 template<typename T>
 size_t Matrix<T>::rows(void) const
@@ -669,15 +696,15 @@ Matrix<T>& Matrix<T>::isigmoid(void)
 //----------------------------------------------
 
 // -------------- Assignment --------------
-template<typename T>
-Matrix<T>& Matrix<T>::operator=(Matrix<T> rhs)
-{
-	m_rows = rhs.m_rows;
-	m_cols = rhs.m_cols;
-	m_data.swap(rhs.m_data); // Using swap avoids reallocation of data on the device
+// template<typename T>
+// Matrix<T>& Matrix<T>::operator=(Matrix<T> rhs)
+// {
+	// m_rows = rhs.m_rows;
+	// m_cols = rhs.m_cols;
+	// m_data.swap(rhs.m_data); // Using swap avoids reallocation of data on the device
 
-	return *this;
-}
+	// return *this;
+// }
 
 // -------------- Accessor --------------
 template<typename T>
@@ -756,12 +783,12 @@ Matrix<T>& Matrix<T>::operator+=(const Matrix<T> &rhs)
 	return *this;
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::operator+(const Matrix<T> &rhs)
-{
-	Matrix<T> m = *this;
-	return (m += rhs);
-}
+// template<typename T>
+// Matrix<T> Matrix<T>::operator+(const Matrix<T> &rhs)
+// {
+	// Matrix<T> m = *this;
+	// return (m += rhs);
+// }
 
 // -------------- Scalar Subtraction --------------
 template<typename T>
