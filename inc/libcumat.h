@@ -20,7 +20,8 @@
 #include <cstdlib>
 #include <unordered_map>
 
-#include <libcumat_math.h>
+#include "libcumat_math.h"
+#include "libcumat_expression.h"
 
 #define NVRTC_SAFE_CALL(x)                                        \
   do {                                                            \
@@ -28,7 +29,7 @@
     if (result != NVRTC_SUCCESS) {                                \
       std::cerr << "\nerror: " #x " failed with error "           \
                 << nvrtcGetErrorString(result) << '\n';           \
-      exit(1);                                                    \
+      exit(EXIT_FAILURE);                                         \
     }                                                             \
   } while(0)
 
@@ -40,7 +41,7 @@
       cuGetErrorName(result, &msg);                               \
       std::cerr << "\nerror: " #x " failed with error "           \
                 << msg << '\n';                                   \
-      exit(1);                                                    \
+      exit(EXIT_FAILURE);                                         \
     }                                                             \
   } while(0)
 
@@ -48,45 +49,17 @@ namespace Cumat
 {
 	extern std::unordered_map<std::string, char *> kernel_cache;
 	extern cublasHandle_t cublas_handle;
-	void createCublasHandle(void);
-	void destroyCublasHandle(void);
-
-	template<typename Expr>
-	class Expression
-	{
-		public:
-		operator const Expr&() const { return static_cast<const Expr &>(*this); }
-	};
-	
-	template<typename Expr1, typename Expr2>
-	class SumExpression : public Expression<SumExpression<Expr1, Expr2>>
-	{
-		const Expr1 &u_;
-		const Expr2 &v_;
-
-		public:
-		SumExpression(const Expr1 &u, const Expr2 &v) : u_(u), v_(v) {}
-		std::string eval(std::string &params, int &num, std::vector<void *> &args) const
-		{
-			std::string lhs = u_.eval(params, num, args);
-			std::string rhs = v_.eval(params, num, args);
-			return lhs + " + " + rhs;
-		}
-	};
-
-	template<typename Expr1, typename Expr2>
-	const SumExpression<Expr1, Expr2> operator+(const Expr1 &u, const Expr2 &v) {
-		return SumExpression<Expr1, Expr2>(u, v);
-	};
+	void init(void);
+	void end(void);
 
 	template<typename T>
 	class Matrix : public Expression<Matrix<T>>
 	{
 		private:
 
-		size_t m_rows;
-		size_t m_cols;
-		thrust::device_vector<T> m_data;
+		size_t rows_;
+		size_t cols_;
+		thrust::device_vector<T> data_;
 		CUdeviceptr data_ptr_;
 		std::string id_;
 
@@ -96,6 +69,7 @@ namespace Cumat
 		//----------------------------------------------
 		// CUDA Library Wrappers
 		//----------------------------------------------
+
 		void curandGenerateRandom(curandGenerator_t &generator, T *output, size_t size);
 		void cublasTranspose(cublasHandle_t &handle, const int rows, const int cols, const T *alpha, const T *in_mat, const T *beta, T *out_mat);
 		void cublasAxpy(cublasHandle_t &handle, const int size, const T alpha, const T *x, const int incx, T *y, const int incy);
@@ -105,15 +79,20 @@ namespace Cumat
 
 		public:
 
+		template<typename Expr>
+		Matrix(const Expression<Expr> &rhs);
 		Matrix(size_t rows, size_t cols);
 		Matrix(void);
 		
-		std::string eval(std::string &params, int &num, std::vector<void *> &args) const;
+		template<typename Expr>
+		static void assign(Matrix<T> &mat, const Expression<Expr> &rhs);
+		std::string buildKernel(std::string &params, int &num, std::vector<void *> &args) const;
 		std::string type(void) const;
 
 		size_t rows(void) const;
 		size_t cols(void) const;
 		size_t size(void) const;
+		void resize(size_t rows, size_t cols);
 
 		void set(const size_t row, const size_t col, const T val);
 		void set(const size_t idx, const T val);
@@ -204,6 +183,7 @@ namespace Cumat
 		// -------------- Assignment --------------
 		template<typename Expr>
 		Matrix<T>& operator=(const Expression<Expr> &rhs);
+		Matrix<T>& operator=(const Matrix<T> &rhs);
 
 		// -------------- Accessor --------------
 		T operator()(const size_t row, const size_t col) const;
@@ -220,11 +200,9 @@ namespace Cumat
 
 		// -------------- Scalar Addition --------------
 		Matrix<T>& operator+=(const T val);
-		Matrix<T> operator+(const T val);
 
 		// -------------- Matrix Addition --------------
 		Matrix<T>& operator+=(const Matrix<T> &rhs);
-		// Matrix<T> operator+(const Matrix<T> &rhs);
 
 		// -------------- Scalar Subtraction --------------
 		Matrix<T>& operator-=(const T val);
@@ -274,24 +252,47 @@ namespace Cumat
 
 	template<typename T>
 	template<typename Expr>
-	Matrix<T>& Matrix<T>::operator=(const Expression<Expr> &rhs)
+	Matrix<T>::Matrix(const Expression<Expr> &rhs) :
+		rows_(0),
+		cols_(0)
+	{
+		data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
+		Matrix<T>::assign(*this, rhs);
+	}
+
+	template<typename T>
+	template<typename Expr>
+	void Matrix<T>::assign(Matrix<T> &mat, const Expression<Expr> &rhs)
 	{
 		const Expr &expr = rhs;
 		int start_num = 0;
-		size_t vec_size = m_cols * m_rows;
 		std::vector<void *> args;
 
-		data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(m_data.data());
-		args.push_back(&data_ptr_);
+		size_t rows = expr.rows();
+		size_t cols = expr.cols();
+		size_t vec_size = rows * cols;
 
-		std::string params_line = "(" + Matrix<T>::type() + " *out";
-		std::string eval_line = expr.eval(params_line, start_num, args);
+		// Resize result matrix if necessary
+		if (mat.rows_ != rows || mat.cols_ != cols)
+			mat.resize(rows, cols);
 
+		// Push output pointer to argument array
+		args.push_back(&mat.data_ptr_);
+
+		// Build the parameter list and the evaluation line for the kernel code
+		std::string params_line = "(" + mat.type() + " *out";
+		std::string eval_line = expr.buildKernel(params_line, start_num, args);
+
+		// Push the vector size onto the argument array
 		args.push_back(&vec_size);
 
 		params_line += ", size_t n)";
 		eval_line += ";";
 
+		// std::cout << params_line << std::endl;
+		// std::cout << eval_line << std::endl;
+
+		// Build the kernel code
 		std::string kernel_code = "                                         \n\
 			extern \"C\" __global__                                         \n\
 			void cumat_kernel" + params_line + "							\n\
@@ -306,6 +307,7 @@ namespace Cumat
 
 		if (kernel_cache.find(kernel_code) != kernel_cache.end()) {
 
+			// If this code was used before, load it from the cache to prevent recompiling
 			ptx = kernel_cache[kernel_code];
 
 		} else {
@@ -333,20 +335,43 @@ namespace Cumat
 			// Destroy the program.
 			NVRTC_SAFE_CALL(nvrtcDestroyProgram(&prog));
 
+			// Cache the ptx
 			kernel_cache[kernel_code] = ptx;
 		}
 
 		CUmodule module;
 		CUfunction kernel;
 
+		// Calculated necessary number of blocks needed
 		size_t num_threads = 256;
 		size_t num_blocks = (vec_size + num_threads - 1) / (num_threads);
 
+		// Call the kernel from the ptx
 		CUDA_SAFE_CALL(cuModuleLoadDataEx(&module, ptx, 0, 0, 0));
 		CUDA_SAFE_CALL(cuModuleGetFunction(&kernel, module, "cumat_kernel"));
 		CUDA_SAFE_CALL(cuLaunchKernel(kernel, num_blocks, 1, 1, num_threads, 1, 1, 0, NULL, args.data(), 0));
+	}
 
+	template<typename T>
+	template<typename Expr>
+	Matrix<T>& Matrix<T>::operator=(const Expression<Expr> &rhs)
+	{
+		Matrix<T>::assign(*this, rhs);
 		return *this;
+	}
+
+	template<typename Expr>
+	Matrix<double> eval(const Expression<Expr> &expr)
+	{
+		Matrix<double> mat;
+		Matrix<double>::assign(mat, expr);
+		return mat;
+	}
+
+	template<typename T>
+	const Matrix<T>& eval(const Matrix<T> &mat)
+	{
+		return mat;
 	}
 
 	typedef Matrix<double> Matrixd;
