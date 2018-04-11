@@ -36,6 +36,18 @@ void Matrix<T>::elementMathOp(Matrix<T> &mat, F func)
 	thrust::transform(mat.data_.begin(), mat.data_.end(), mat.data_.begin(), func);
 }
 
+template<>
+std::string Matrix<float>::type(void) const
+{
+	return "float";
+}
+
+template<>
+std::string Matrix<double>::type(void) const
+{
+	return "double";
+}
+
 //----------------------------------------------
 // CUDA Library Wrappers
 //----------------------------------------------
@@ -144,21 +156,9 @@ template<typename T>
 std::string Matrix<T>::buildKernel(std::string &params, int &num, std::vector<void *> &args) const
 {
 	std::string id_num = std::to_string(num++);
-	params += (", " + Matrix<T>::type() + " *" + id_ + id_num);
+	params += (", " + this->type() + " *" + id_ + id_num);
 	args.push_back((void *)&data_ptr_);
 	return id_ + id_num + "[idx]";
-}
-
-template<>
-std::string Matrix<float>::type(void) const
-{
-	return "float";
-}
-
-template<>
-std::string Matrix<double>::type(void) const
-{
-	return "double";
 }
 
 template<typename T>
@@ -449,13 +449,13 @@ Matrix<T> Matrix<T>::rsqrt(void)
 	return mat;
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::square(void)
-{
-	if (rows_ == 0 || cols_ == 0)
-		return *this;
-	return (*this) * (*this);
-}
+// template<typename T>
+// Matrix<T> Matrix<T>::square(void)
+// {
+	// if (rows_ == 0 || cols_ == 0)
+		// return *this;
+	// return (*this) * (*this);
+// }
 
 template<typename T>
 Matrix<T> Matrix<T>::cube(void)
@@ -739,12 +739,12 @@ T Matrix<T>::operator()(const size_t idx) const
 }
 
 // -------------- Negation --------------
-template<typename T>
-Matrix<T> Matrix<T>::operator-(void)
-{
-	Matrix<T> m = *this;
-	return (*this *= -1);
-}
+// template<typename T>
+// Matrix<T> Matrix<T>::operator-(void)
+// {
+	// Matrix<T> m = *this;
+	// return (*this *= -1);
+// }
 
 // -------------- Transpose --------------
 template<typename T>
@@ -801,13 +801,6 @@ Matrix<T>& Matrix<T>::operator-=(const T val)
 	return *this;
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::operator-(const T val)
-{
-	Matrix<T> m = *this;
-	return (m -= val);
-}
-
 // -------------- Matrix Subtraction --------------
 template<typename T>
 Matrix<T>& Matrix<T>::operator-=(const Matrix<T> &rhs)
@@ -823,13 +816,6 @@ Matrix<T>& Matrix<T>::operator-=(const Matrix<T> &rhs)
 	return *this;
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::operator-(const Matrix<T> &rhs)
-{
-	Matrix<T> m = *this;
-	return (m -= rhs);
-}
-
 // -------------- Scalar Multiplication --------------
 template<typename T>
 Matrix<T>& Matrix<T>::operator*=(const T val)
@@ -838,13 +824,6 @@ Matrix<T>& Matrix<T>::operator*=(const T val)
 	Matrix<T>::cublasScal(Cumat::cublas_handle, rows_ * cols_, val, thrust::raw_pointer_cast(data_.data()), 1);
 
 	return *this;
-}
-
-template<typename T>
-Matrix<T> Matrix<T>::operator*(const T val)
-{
-	Matrix<T> m = *this;
-	return (m *= val);
 }
 
 // -------------- Matrix Multiplication (element-wise) --------------
@@ -856,26 +835,12 @@ Matrix<T>& Matrix<T>::operator*=(const Matrix<T> &rhs)
 	return *this;
 }
 
-template<typename T>
-Matrix<T> Matrix<T>::operator*(const Matrix<T> &rhs)
-{
-	Matrix<T> m = *this;
-	return (m *= rhs);
-}
-
 // -------------- Scalar Division (element-wise) --------------
 template<typename T>
 Matrix<T>& Matrix<T>::operator/=(const T val)
 {
 	*this *= (1.0 / val);
 	return *this;
-}
-
-template<typename T>
-Matrix<T> Matrix<T>::operator/(const T val)
-{
-	Matrix<T> m = *this;
-	return (m /= val);
 }
 
 // -------------- Matrix Division (element-wise) --------------
@@ -885,13 +850,6 @@ Matrix<T>& Matrix<T>::operator/=(const Matrix<T> &rhs)
 	assert(rows_ == rhs.rows_ && cols_ == rhs.cols_);
 	thrust::transform(data_.begin(), data_.end(), rhs.data_.begin(), data_.begin(), thrust::divides<T>());
 	return *this;
-}
-
-template<typename T>
-Matrix<T> Matrix<T>::operator/(const Matrix<T> &rhs)
-{
-	Matrix<T> m = *this;
-	return (m /= rhs);
 }
 };
 

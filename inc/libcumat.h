@@ -20,8 +20,8 @@
 #include <cstdlib>
 #include <unordered_map>
 
-#include "libcumat_math.h"
 #include "libcumat_expression.h"
+#include "libcumat_math.h"
 
 #define NVRTC_SAFE_CALL(x)                                        \
   do {                                                            \
@@ -65,6 +65,7 @@ namespace Cumat
 
 		template<class F>
 		void elementMathOp(Matrix<T> &mat, F func);
+		std::string type(void) const;
 
 		//----------------------------------------------
 		// CUDA Library Wrappers
@@ -87,7 +88,6 @@ namespace Cumat
 		template<typename Expr>
 		static void assign(Matrix<T> &mat, const Expression<Expr> &rhs);
 		std::string buildKernel(std::string &params, int &num, std::vector<void *> &args) const;
-		std::string type(void) const;
 
 		size_t rows(void) const;
 		size_t cols(void) const;
@@ -131,7 +131,7 @@ namespace Cumat
 		Matrix<T> pow(const T n);
 		Matrix<T> sqrt(void);
 		Matrix<T> rsqrt(void);
-		Matrix<T> square(void);
+		// Matrix<T> square(void);
 		Matrix<T> cube(void);
 
 		Matrix<T> sin(void);
@@ -190,7 +190,7 @@ namespace Cumat
 		T operator()(const size_t idx) const;
 		
 		// -------------- Negation --------------
-		Matrix<T> operator-(void);
+		// Matrix<T> operator-(void);
 
 		// -------------- Transpose --------------
 		Matrix<T> operator~(void);
@@ -206,27 +206,23 @@ namespace Cumat
 
 		// -------------- Scalar Subtraction --------------
 		Matrix<T>& operator-=(const T val);
-		Matrix<T> operator-(const T val);
 
 		// -------------- Matrix Subtraction --------------
 		Matrix<T>& operator-=(const Matrix<T> &rhs);
-		Matrix<T> operator-(const Matrix<T> &rhs);
 
 		// -------------- Scalar Multiplication --------------
 		Matrix<T>& operator*=(const T val);
-		Matrix<T> operator*(const T val);
 
 		// -------------- Matrix Multiplication (element-wise) --------------
 		Matrix<T>& operator*=(const Matrix<T> &rhs);
-		Matrix<T> operator*(const Matrix<T> &rhs);
 
 		// -------------- Scalar Division (element-wise) --------------
 		Matrix<T>& operator/=(const T val);
-		Matrix<T> operator/(const T val);
+		// Matrix<T> operator/(const T val);
 
 		// -------------- Matrix Division (element-wise) --------------
 		Matrix<T>& operator/=(const Matrix<T> &rhs);
-		Matrix<T> operator/(const Matrix<T> &rhs);
+		// Matrix<T> operator/(const Matrix<T> &rhs);
 
 		// -------------- Output Stream Operator --------------
 		friend std::ostream& operator<<(std::ostream &os, const Matrix &mat)
@@ -289,8 +285,8 @@ namespace Cumat
 		params_line += ", size_t n)";
 		eval_line += ";";
 
-		// std::cout << params_line << std::endl;
-		// std::cout << eval_line << std::endl;
+		std::cout << params_line << std::endl;
+		std::cout << eval_line << std::endl;
 
 		// Build the kernel code
 		std::string kernel_code = "                                         \n\
@@ -313,9 +309,9 @@ namespace Cumat
 		} else {
 
 			nvrtcProgram prog;
-
+			const char *opts[] = {"--gpu-architecture=compute_30", "--fmad=false"};
 			NVRTC_SAFE_CALL(nvrtcCreateProgram(&prog, kernel_code.c_str(), "cumat_kernel.cu", 0, NULL, NULL));
-			nvrtcResult compileResult = nvrtcCompileProgram(prog, 0, NULL);
+			nvrtcResult compileResult = nvrtcCompileProgram(prog, 2, opts);
 
 			// Obtain compilation log from the program.
 			size_t logSize;
@@ -361,16 +357,10 @@ namespace Cumat
 	}
 
 	template<typename Expr>
-	Matrix<double> eval(const Expression<Expr> &expr)
+	Matrix<double> Expression<Expr>::eval(void) const
 	{
 		Matrix<double> mat;
-		Matrix<double>::assign(mat, expr);
-		return mat;
-	}
-
-	template<typename T>
-	const Matrix<T>& eval(const Matrix<T> &mat)
-	{
+		Matrix<double>::assign(mat, *this);
 		return mat;
 	}
 

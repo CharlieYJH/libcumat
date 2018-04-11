@@ -40,6 +40,8 @@ int main(int argc, char const* argv[])
 
 	tmp = 1.0 + tmp5 + 1.0;
 
+	std::cout << (-((-2. * 3. + tmp) / (2.0 / tmp5 + -(1.0 + 1.0f)) - tmp * (-2.0 * tmp * tmp))).eval() << std::endl;
+
 	// std::cout << tmp << std::endl;
 	auto start = std::chrono::high_resolution_clock::now();
 	tmp = -1.0 + 1.0 + 4.3 + tmp + 2.3;
