@@ -132,6 +132,7 @@ template<typename T>
 Matrix<T>::Matrix(size_t rows, size_t cols):
 	rows_(rows),
 	cols_(cols),
+	data_(rows_ * cols_),
 	id_("v")
 {
 	if (rows == 0 || cols == 0) {
@@ -139,7 +140,7 @@ Matrix<T>::Matrix(size_t rows, size_t cols):
 		cols_ = 0;
 	}
 
-	data_.resize(rows * cols);
+	// data_.resize(rows * cols);
 	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
 }
 
@@ -147,6 +148,7 @@ template<typename T>
 Matrix<T>::Matrix(void):
 	rows_(0),
 	cols_(0),
+	data_(rows_ * cols_),
 	id_("v")
 {
 	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
@@ -159,6 +161,12 @@ std::string Matrix<T>::buildKernel(std::string &params, int &num, std::vector<vo
 	params += (", " + this->type() + " *" + id_ + id_num);
 	args.push_back((void *)&data_ptr_);
 	return id_ + id_num + "[idx]";
+}
+
+template<typename T>
+const Matrix<T>& Matrix<T>::eval(void) const
+{
+	return *this;
 }
 
 template<typename T>
@@ -303,11 +311,8 @@ Matrix<T>& Matrix<T>::mmul(const Matrix<T> &mat, Matrix<T> &outmat)
 	assert(cols_ == mat.rows_ && this != &outmat && &mat != &outmat);
 
 	// Resize the output matrix if the dimension doesn't match
-	if (outmat.rows_ != rows_ && outmat.cols_ != mat.cols_) {
-		outmat.rows_ = rows_;
-		outmat.cols_ = mat.cols_;
-		outmat.data_.resize(outmat.rows_ * outmat.cols_);
-	}
+	if (outmat.rows_ != rows_ && outmat.cols_ != mat.cols_)
+		this->resize(rows_, mat.cols_);
 
 	const T *A = thrust::raw_pointer_cast(data_.data());
 	const T *B = thrust::raw_pointer_cast(mat.data_.data());

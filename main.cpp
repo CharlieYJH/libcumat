@@ -39,8 +39,10 @@ int main(int argc, char const* argv[])
 	// auto end = std::chrono::high_resolution_clock::now();
 
 	tmp = 1.0 + tmp5 + 1.0;
+	Cumat::Matrixf fmat(5, 6);
+	fmat.fill(-1);
 
-	std::cout << (-((-2. * 3. + tmp) / (2.0 / tmp5 + -(1.0 + 1.0f)) - tmp * (-2.0 * tmp * tmp))).eval() << std::endl;
+	std::cout << (Cumat::round(Cumat::abs(-2 * 3 + fmat) - 6.6) / (2 / tmp5 + -(1 + 1)) - tmp * (-2.0 * tmp * tmp)).eval() << std::endl;
 
 	// std::cout << tmp << std::endl;
 	auto start = std::chrono::high_resolution_clock::now();

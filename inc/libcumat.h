@@ -88,6 +88,7 @@ namespace Cumat
 		template<typename Expr>
 		static void assign(Matrix<T> &mat, const Expression<Expr> &rhs);
 		std::string buildKernel(std::string &params, int &num, std::vector<void *> &args) const;
+		const Matrix<T>& eval(void) const;
 
 		size_t rows(void) const;
 		size_t cols(void) const;
