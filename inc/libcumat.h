@@ -21,6 +21,7 @@
 #include <unordered_map>
 
 #include "libcumat_expression.h"
+#include "libcumat_transpose.h"
 #include "libcumat_math.h"
 
 #define NVRTC_SAFE_CALL(x)                                        \
@@ -87,7 +88,7 @@ namespace Cumat
 		
 		template<typename Expr>
 		static void assign(Matrix<T> &mat, const Expression<Expr> &rhs);
-		std::string buildKernel(std::string &params, int &num, std::vector<void *> &args) const;
+		std::string buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const;
 		const Matrix<T>& eval(void) const;
 
 		size_t rows(void) const;
@@ -132,7 +133,7 @@ namespace Cumat
 		Matrix<T> pow(const T n);
 		Matrix<T> sqrt(void);
 		Matrix<T> rsqrt(void);
-		// Matrix<T> square(void);
+		Matrix<T> square(void);
 		Matrix<T> cube(void);
 
 		Matrix<T> sin(void);
@@ -189,12 +190,6 @@ namespace Cumat
 		// -------------- Accessor --------------
 		T operator()(const size_t row, const size_t col) const;
 		T operator()(const size_t idx) const;
-		
-		// -------------- Negation --------------
-		// Matrix<T> operator-(void);
-
-		// -------------- Transpose --------------
-		Matrix<T> operator~(void);
 
 		// -------------- Matrix Multiplication --------------
 		Matrix<T> operator^(const Matrix<T> &rhs);
@@ -267,7 +262,7 @@ namespace Cumat
 
 		size_t rows = expr.rows();
 		size_t cols = expr.cols();
-		size_t vec_size = rows * cols;
+		// size_t vec_size = rows * cols;
 
 		// Resize result matrix if necessary
 		if (mat.rows_ != rows || mat.cols_ != cols)
@@ -278,25 +273,27 @@ namespace Cumat
 
 		// Build the parameter list and the evaluation line for the kernel code
 		std::string params_line = "(" + mat.type() + " *out";
-		std::string eval_line = expr.buildKernel(params_line, start_num, args);
+		std::string eval_line = expr.buildKernel(params_line, start_num, args, false);
 
 		// Push the vector size onto the argument array
-		args.push_back(&vec_size);
+		args.push_back(&rows);
+		args.push_back(&cols);
 
-		params_line += ", size_t n)";
+		params_line += ", size_t rows, size_t cols)";
 		eval_line += ";";
 
-		std::cout << params_line << std::endl;
-		std::cout << eval_line << std::endl;
+		// std::cout << params_line << std::endl;
+		// std::cout << eval_line << std::endl;
 
 		// Build the kernel code
-		std::string kernel_code = "                                         \n\
+		const std::string kernel_code = "                                   \n\
 			extern \"C\" __global__                                         \n\
 			void cumat_kernel" + params_line + "							\n\
 			{                                                               \n\
-			  size_t idx = blockIdx.x * blockDim.x + threadIdx.x;           \n\
-			  if (idx < n) {                                                \n\
-				out[idx] = " + eval_line + "                                \n\
+			  size_t x = blockIdx.x * blockDim.x + threadIdx.x;           	\n\
+			  size_t y = blockIdx.y * blockDim.y + threadIdx.y;           	\n\
+			  if (x < cols && y < rows) {                               	\n\
+				out[y * cols + x] = " + eval_line + "                   	\n\
 			  }                                                             \n\
 			}                                                               \n";
 
@@ -340,13 +337,15 @@ namespace Cumat
 		CUfunction kernel;
 
 		// Calculated necessary number of blocks needed
-		size_t num_threads = 256;
-		size_t num_blocks = (vec_size + num_threads - 1) / (num_threads);
+		const size_t num_threads_x = 32;
+		const size_t num_threads_y = 32;
+		size_t num_blocks_x = (cols + num_threads_x - 1) / (num_threads_x);
+		size_t num_blocks_y = (rows + num_threads_y - 1) / (num_threads_y);
 
 		// Call the kernel from the ptx
 		CUDA_SAFE_CALL(cuModuleLoadDataEx(&module, ptx, 0, 0, 0));
 		CUDA_SAFE_CALL(cuModuleGetFunction(&kernel, module, "cumat_kernel"));
-		CUDA_SAFE_CALL(cuLaunchKernel(kernel, num_blocks, 1, 1, num_threads, 1, 1, 0, NULL, args.data(), 0));
+		CUDA_SAFE_CALL(cuLaunchKernel(kernel, num_blocks_x, num_blocks_y, 1, num_threads_x, num_threads_y, 1, 0, NULL, args.data(), 0));
 	}
 
 	template<typename T>

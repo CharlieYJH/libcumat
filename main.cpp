@@ -33,31 +33,20 @@ int main(int argc, char const* argv[])
 	tmp.fill(0.2);
 	tmp5.fill(0.02);
 
-	// tmp = tmp + tmp + tmp + tmp + tmp + tmp + tmp;
-	// auto start = std::chrono::high_resolution_clock::now();
-	// tmp = tmp + tmp + tmp + tmp + tmp + tmp + tmp;
-	// auto end = std::chrono::high_resolution_clock::now();
-
 	tmp = 1.0 + tmp5 + 1.0;
-	Cumat::Matrixf fmat(5, 6);
+	Cumat::Matrixf fmat(6, 5);
 	fmat.fill(-1);
 
-	std::cout << (Cumat::round(Cumat::abs(-2 * 3 + fmat) - 6.6) / (2 / tmp5 + -(1 + 1)) - tmp * (-2.0 * tmp * tmp)).eval() << std::endl;
+	std::cout << (exp2(~abs(-2 * 3 + -(fmat + fmat)) / (2 - 2 / tmp5 - (1 + 1)) - (tmp / 3) * (-2.0 * tmp * tmp))).eval() << std::endl;
 
 	// std::cout << tmp << std::endl;
 	auto start = std::chrono::high_resolution_clock::now();
-	tmp = -1.0 + 1.0 + 4.3 + tmp + 2.3;
+	mat3 = mat3.transpose();
+	// tmp = -1.0 + 1.0 + 4.3 + tmp + 2.3;
 	auto end = std::chrono::high_resolution_clock::now();
 	// std::cout << tmp << std::endl;
 
 	std::cout << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
-
-	// tmp = tmp + tmp5 + tmp5 + tmp;
-	// start = std::chrono::high_resolution_clock::now();
-	// tmp = tmp + tmp5 + tmp + tmp5;
-	// end = std::chrono::high_resolution_clock::now();
-
-	// std::cout << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
 
 	Cumat::end();
 

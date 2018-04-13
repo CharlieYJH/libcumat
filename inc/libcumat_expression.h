@@ -17,6 +17,7 @@ class Expression
 	public:
 	operator const Expr&() const { return static_cast<const Expr &>(*this); }
 	const UnaryOpExpression<KernelOp::negative, Expr> operator-(void) const;
+	const TransposeExpression<Expr> operator~(void) const;
 	Matrix<double> eval(void) const;
 };
 
@@ -35,7 +36,7 @@ class BinaryOpExpression: public Expression<BinaryOpExpression<Op, Expr1, Expr2>
 	BinaryOpExpression(const Expr1 &u, const Expr2 &v) : u_(u), v_(v) {}
 	size_t rows(void) const;
 	size_t cols(void) const;
-	std::string buildKernel(std::string &params, int &num, std::vector<void *> &args) const;
+	std::string buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const;
 };
 
 template<class Op, typename Expr1, typename Expr2>
@@ -51,9 +52,9 @@ size_t BinaryOpExpression<Op, Expr1, Expr2>::cols(void) const
 }
 
 template<class Op, typename Expr1, typename Expr2>
-std::string BinaryOpExpression<Op, Expr1, Expr2>::buildKernel(std::string &params, int &num, std::vector<void *> &args) const
+std::string BinaryOpExpression<Op, Expr1, Expr2>::buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const
 {
-	return op_(u_, v_, params, num, args);
+	return op_(u_, v_, params, num, args, transpose);
 }
 
 // -------------- Addition Overloads --------------
@@ -221,7 +222,7 @@ class UnaryOpExpression: public Expression<UnaryOpExpression<Op, Expr>>
 	UnaryOpExpression(const Expr &u, const Op op) : u_(u), op_(op) {}
 	size_t rows(void) const;
 	size_t cols(void) const;
-	std::string buildKernel(std::string &params, int &num, std::vector<void *> &args) const;
+	std::string buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const;
 };
 
 template<class Op, typename Expr>
@@ -237,9 +238,9 @@ size_t UnaryOpExpression<Op, Expr>::cols(void) const
 }
 
 template<class Op, typename Expr>
-std::string UnaryOpExpression<Op, Expr>::buildKernel(std::string &params, int &num, std::vector<void *> &args) const
+std::string UnaryOpExpression<Op, Expr>::buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const
 {
-	return op_(u_, params, num, args);
+	return op_(u_, params, num, args, transpose);
 }
 
 // -------------- Negation Overload --------------
@@ -247,8 +248,7 @@ std::string UnaryOpExpression<Op, Expr>::buildKernel(std::string &params, int &n
 template<typename Expr>
 const UnaryOpExpression<KernelOp::negative, Expr> Expression<Expr>::operator-(void) const
 {
-	const Expr &u = *this;
-	return UnaryOpExpression<KernelOp::negative, Expr>(u);
+	return UnaryOpExpression<KernelOp::negative, Expr>(*this);
 }
 
 // -------------- Absolute Value --------------

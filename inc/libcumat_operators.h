@@ -8,570 +8,334 @@ namespace Cumat
 namespace KernelOp
 {
 
-struct vectorSum
+class BinaryVectorOp
 {
+	const std::string preop_;
+	const std::string midop_;
+	
+	public:
+	BinaryVectorOp(const std::string &preop, const std::string &midop) : preop_(preop), midop_(midop) {}
 	template<typename Expr1, typename Expr2>
-	std::string operator()(const Expr1 &u, const Expr2 &v, std::string &params, int &num, std::vector<void *> &args) const
+	std::string operator()(const Expr1 &u, const Expr2 &v, std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const
 	{
-		std::string lhs = u.buildKernel(params, num, args);
-		std::string rhs = v.buildKernel(params, num, args);
-		return "(" + lhs + "+" + rhs + ")";
+		std::string lhs = u.buildKernel(params, num, args, transpose);
+		std::string rhs = v.buildKernel(params, num, args, transpose);
+		return preop_ + "(" + lhs + midop_ + rhs + ")";
 	}
 };
 
 template<typename T>
-struct scalarSum
+class BinaryScalarOpRight
 {
+	const std::string preop_;
+	const std::string midop_;
 	static const std::string type_;
+
+	public:
+	BinaryScalarOpRight(const std::string &preop, const std::string &midop) : preop_(preop), midop_(midop) {}
 	template<typename Expr>
-	std::string operator()(const Expr &u, const T &n, std::string &params, int &num, std::vector<void *> &args) const
+	std::string operator()(const Expr &u, const T &n, std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const
 	{
-		std::string lhs = u.buildKernel(params, num, args);
+		std::string lhs = u.buildKernel(params, num, args, transpose);
 
 		std::string id_num = std::to_string(num++);
 		std::string rhs = "s" + id_num;
 		params += ", " + type_ + " s" + id_num;
 		args.push_back((void *)&n);
 
-		return "(" + lhs + "+" + rhs + ")";
+		return preop_ + "(" + lhs + midop_ + rhs + ")";
 	}
 };
-template<> const std::string scalarSum<double>::type_ = "double";
-template<> const std::string scalarSum<float>::type_ = "float";
-
-struct vectorSub
-{
-	template<typename Expr1, typename Expr2>
-	std::string operator()(const Expr1 &u, const Expr2 &v, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string lhs = u.buildKernel(params, num, args);
-		std::string rhs = v.buildKernel(params, num, args);
-		return "(" + lhs + "-" + rhs + ")";
-	}
-};
+template<> const std::string BinaryScalarOpRight<double>::type_ = "double";
+template<> const std::string BinaryScalarOpRight<float>::type_ = "float";
 
 template<typename T>
-struct scalarSubRight
+class BinaryScalarOpLeft
 {
+	const std::string preop_;
+	const std::string midop_;
 	static const std::string type_;
+
+	public:
+	BinaryScalarOpLeft(const std::string &preop, const std::string &midop) : preop_(preop), midop_(midop) {}
 	template<typename Expr>
-	std::string operator()(const Expr &u, const T &n, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string lhs = u.buildKernel(params, num, args);
-
-		std::string id_num = std::to_string(num++);
-		std::string rhs = "s" + id_num;
-		params += ", " + type_ + " s" + id_num;
-		args.push_back((void *)&n);
-
-		return "(" + lhs + "-" + rhs + ")";
-	}
-};
-template<> const std::string scalarSubRight<double>::type_ = "double";
-template<> const std::string scalarSubRight<float>::type_ = "float";
-
-template<typename T>
-struct scalarSubLeft
-{
-	static const std::string type_;
-	template<typename Expr>
-	std::string operator()(const Expr &u, const T &n, std::string &params, int &num, std::vector<void *> &args) const
+	std::string operator()(const Expr &u, const T &n, std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const
 	{
 		std::string id_num = std::to_string(num++);
 		std::string lhs = "s" + id_num;
 		params += ", " + type_ + " s" + id_num;
 		args.push_back((void *)&n);
 
-		std::string rhs = u.buildKernel(params, num, args);
+		std::string rhs = u.buildKernel(params, num, args, transpose);
 
-		return "(" + lhs + "-" + rhs + ")";
+		return preop_ + "(" + lhs + midop_ + rhs + ")";
 	}
 };
-template<> const std::string scalarSubLeft<double>::type_ = "double";
-template<> const std::string scalarSubLeft<float>::type_ = "float";
+template<> const std::string BinaryScalarOpLeft<double>::type_ = "double";
+template<> const std::string BinaryScalarOpLeft<float>::type_ = "float";
 
-struct vectorMul
+struct vectorSum : public BinaryVectorOp
 {
-	template<typename Expr1, typename Expr2>
-	std::string operator()(const Expr1 &u, const Expr2 &v, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string lhs = u.buildKernel(params, num, args);
-		std::string rhs = v.buildKernel(params, num, args);
-		return "(" + lhs + "*" + rhs + ")";
-	}
+	vectorSum(void) : BinaryVectorOp("", "+") {}
 };
 
 template<typename T>
-struct scalarMul
+struct scalarSum : public BinaryScalarOpRight<T>
 {
-	static const std::string type_;
-	template<typename Expr>
-	std::string operator()(const Expr &u, const T &n, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string lhs = u.buildKernel(params, num, args);
-
-		std::string id_num = std::to_string(num++);
-		std::string rhs = "s" + id_num;
-		params += ", " + type_ + " s" + id_num;
-		args.push_back((void *)&n);
-
-		return "(" + lhs + "*" + rhs + ")";
-	}
+	scalarSum(void) : BinaryScalarOpRight("", "+") {}
 };
-template<> const std::string scalarMul<double>::type_ = "double";
-template<> const std::string scalarMul<float>::type_ = "float";
 
-struct vectorDiv
+struct vectorSub : public BinaryVectorOp
 {
-	template<typename Expr1, typename Expr2>
-	std::string operator()(const Expr1 &u, const Expr2 &v, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string lhs = u.buildKernel(params, num, args);
-		std::string rhs = v.buildKernel(params, num, args);
-		return "(" + lhs + "/" + rhs + ")";
-	}
+	vectorSub(void) : BinaryVectorOp("", "-") {}
 };
 
 template<typename T>
-struct scalarDivRight
+struct scalarSubRight : public BinaryScalarOpRight<T>
 {
-	static const std::string type_;
-	template<typename Expr>
-	std::string operator()(const Expr &u, const T &n, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string lhs = u.buildKernel(params, num, args);
-
-		std::string id_num = std::to_string(num++);
-		std::string rhs = "s" + id_num;
-		params += ", " + type_ + " s" + id_num;
-		args.push_back((void *)&n);
-
-		return "(" + lhs + "/" + rhs + ")";
-	}
-};
-template<> const std::string scalarDivRight<double>::type_ = "double";
-template<> const std::string scalarDivRight<float>::type_ = "float";
-
-template<typename T>
-struct scalarDivLeft
-{
-	static const std::string type_;
-	template<typename Expr>
-	std::string operator()(const Expr &u, const T &n, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string id_num = std::to_string(num++);
-		std::string lhs = "s" + id_num;
-		params += ", " + type_ + " s" + id_num;
-		args.push_back((void *)&n);
-
-		std::string rhs = u.buildKernel(params, num, args);
-
-		return "(" + lhs + "/" + rhs + ")";
-	}
-};
-template<> const std::string scalarDivLeft<double>::type_ = "double";
-template<> const std::string scalarDivLeft<float>::type_ = "float";
-
-struct vectorPow
-{
-	template<typename Expr1, typename Expr2>
-	std::string operator()(const Expr1 &u, const Expr2 &v, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string base = u.buildKernel(params, num, args);
-		std::string exponent = v.buildKernel(params, num, args);
-		return "pow((double)(" + base + "),(double)(" + exponent + "))";
-	}
+	scalarSubRight(void) : BinaryScalarOpRight("", "-") {}
 };
 
 template<typename T>
-struct scalarExpPow
+struct scalarSubLeft : public BinaryScalarOpLeft<T>
 {
-	static const std::string type_;
-	template<typename Expr>
-	std::string operator()(const Expr &u, const T &n, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string base = u.buildKernel(params, num, args);
-
-		std::string id_num = std::to_string(num++);
-		std::string exponent = "s" + id_num;
-		params += ", " + type_ + " s" + id_num;
-		args.push_back((void *)&n);
-
-		return "pow((double)(" + base + "),(double)(" + exponent + "))";
-	}
+	scalarSubLeft(void) : BinaryScalarOpLeft("", "-") {}
 };
-template<> const std::string scalarExpPow<double>::type_ = "double";
-template<> const std::string scalarExpPow<float>::type_ = "float";
 
-template<typename T>
-struct scalarBasePow
+struct vectorMul : public BinaryVectorOp
 {
-	static const std::string type_;
-	template<typename Expr>
-	std::string operator()(const Expr &u, const T &n, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string id_num = std::to_string(num++);
-		std::string base = "s" + id_num;
-		params += ", " + type_ + " s" + id_num;
-		args.push_back((void *)&n);
-
-		std::string exponent = u.buildKernel(params, num, args);
-
-		return "pow((double)(" + base + "),(double)(" + exponent + "))";
-	}
-};
-template<> const std::string scalarBasePow<double>::type_ = "double";
-template<> const std::string scalarBasePow<float>::type_ = "float";
-
-struct vectorAtan2
-{
-	template<typename Expr1, typename Expr2>
-	std::string operator()(const Expr1 &u, const Expr2 &v, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string y = u.buildKernel(params, num, args);
-		std::string x = v.buildKernel(params, num, args);
-		return "atan2(" + y + "," + x + ")";
-	}
+	vectorMul(void) : BinaryVectorOp("", "*") {}
 };
 
 template<typename T>
-struct scalarAtan2Right
+struct scalarMul : public BinaryScalarOpRight<T>
 {
-	static const std::string type_;
-	template<typename Expr>
-	std::string operator()(const Expr &u, const T &n, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string y = u.buildKernel(params, num, args);
-
-		std::string id_num = std::to_string(num++);
-		std::string x = "s" + id_num;
-		params += ", " + type_ + " s" + id_num;
-		args.push_back((void *)&n);
-
-		return "atan2(" + y + "," + x + ")";
-	}
+	scalarMul(void) : BinaryScalarOpRight("", "*") {}
 };
-template<> const std::string scalarAtan2Right<double>::type_ = "double";
-template<> const std::string scalarAtan2Right<float>::type_ = "float";
+
+struct vectorDiv : public BinaryVectorOp
+{
+	vectorDiv(void) : BinaryVectorOp("", "/") {}
+};
 
 template<typename T>
-struct scalarAtan2Left
+struct scalarDivRight : public BinaryScalarOpRight<T>
 {
-	static const std::string type_;
-	template<typename Expr>
-	std::string operator()(const Expr &u, const T &n, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string id_num = std::to_string(num++);
-		std::string y = "s" + id_num;
-		params += ", " + type_ + " s" + id_num;
-		args.push_back((void *)&n);
-
-		std::string x = u.buildKernel(params, num, args);
-
-		return "atan2(" + y + "," + x + ")";
-	}
-};
-template<> const std::string scalarAtan2Left<double>::type_ = "double";
-template<> const std::string scalarAtan2Left<float>::type_ = "float";
-
-struct negative
-{
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "-(" + var + ")";
-	}
+	scalarDivRight(void) : BinaryScalarOpRight("", "/") {}
 };
 
-struct abs
+template<typename T>
+struct scalarDivLeft : public BinaryScalarOpLeft<T>
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "abs(" + var + ")";
-	}
+	scalarDivLeft(void) : BinaryScalarOpLeft("", "/") {}
 };
 
-struct exp
+struct vectorPow : public BinaryVectorOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "exp(" + var + ")";
-	}
+	vectorPow(void) : BinaryVectorOp("pow", ",") {}
 };
 
-struct exp10
+template<typename T>
+struct scalarExpPow : public BinaryScalarOpRight<T>
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "exp10(" + var + ")";
-	}
+	scalarExpPow(void) : BinaryScalarOpRight("pow", ",") {}
 };
 
-struct exp2
+template<typename T>
+struct scalarBasePow : public BinaryScalarOpLeft<T>
 {
+	scalarBasePow(void) : BinaryScalarOpLeft("pow", ",") {}
+};
+
+struct vectorAtan2 : public BinaryVectorOp
+{
+	vectorAtan2(void) : BinaryVectorOp("atan2", ",") {}
+};
+
+template<typename T>
+struct scalarAtan2Right : public BinaryScalarOpRight<T>
+{
+	scalarAtan2Right(void) : BinaryScalarOpRight("atan2", ",") {}
+};
+
+template<typename T>
+struct scalarAtan2Left : public BinaryScalarOpLeft<T>
+{
+	scalarAtan2Left(void) : BinaryScalarOpLeft("atan2", ",") {}
+};
+
+class UnaryOp
+{
+	const std::string op_;
+	
+	public:
+	UnaryOp(const std::string &op) : op_(op) {}
 	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
+	std::string operator ()(const Expr &u, std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const
 	{
-		std::string var = u.buildKernel(params, num, args);
-		return "exp2(" + var + ")";
+		std::string var = u.buildKernel(params, num, args, transpose);
+		return op_ + "(" + var + ")";
 	}
 };
 
-struct log
+struct negative : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "log(" + var + ")";
-	}
+	negative(void) : UnaryOp("-") {}
 };
 
-struct log1p
+struct abs : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "log1p(" + var + ")";
-	}
+	abs(void) : UnaryOp("abs") {}
 };
 
-struct log10
+struct exp : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "log10(" + var + ")";
-	}
+	exp(void) : UnaryOp("exp") {}
 };
 
-struct log2
+struct exp10 : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "log2(" + var + ")";
-	}
+	exp10(void) : UnaryOp("exp10") {}
+};
+
+struct exp2 : public UnaryOp
+{
+	exp2(void) : UnaryOp("exp2") {}
+};
+
+struct log : public UnaryOp
+{
+	log(void) : UnaryOp("log") {}
+};
+
+struct log1p : public UnaryOp
+{
+	log1p(void) : UnaryOp("log1p") {}
+};
+
+struct log10 : public UnaryOp
+{
+	log10(void) : UnaryOp("log10") {}
+};
+
+struct log2 : public UnaryOp
+{
+	log2(void) : UnaryOp("log2") {}
 };
 
 struct square
 {
 	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
+	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const
 	{
-		std::string var = u.buildKernel(params, num, args);
+		std::string var = u.buildKernel(params, num, args, transpose);
 		return "(" + var + "*" + var + ")";
 	}
 };
 
-struct sqrt
+struct sqrt : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "sqrt(" + var + ")";
-	}
+	sqrt(void) : UnaryOp("sqrt") {}
 };
 
-struct rsqrt
+struct rsqrt : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "rsqrt(" + var + ")";
-	}
+	rsqrt(void) : UnaryOp("rsqrt") {}
 };
 
 struct cube
 {
 	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
+	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const
 	{
-		std::string var = u.buildKernel(params, num, args);
+		std::string var = u.buildKernel(params, num, args, transpose);
 		return "(" + var + "*" + var + "*" + var + ")";
 	}
 };
 
-struct cbrt
+struct cbrt : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "cbrt(" + var + ")";
-	}
+	cbrt(void) : UnaryOp("cbrt") {}
 };
 
-struct rcbrt
+struct rcbrt : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "rcbrt(" + var + ")";
-	}
+	rcbrt(void) : UnaryOp("rcbrt") {}
 };
 
-struct sin
+struct sin : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "sin(" + var + ")";
-	}
+	sin(void) : UnaryOp("sin") {}
 };
 
-struct asin
+struct asin : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "asin(" + var + ")";
-	}
+	asin(void) : UnaryOp("asin") {}
 };
 
-struct sinh
+struct sinh : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "sinh(" + var + ")";
-	}
+	sinh(void) : UnaryOp("sinh") {}
 };
 
-struct asinh
+struct asinh : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "asinh(" + var + ")";
-	}
+	asinh(void) : UnaryOp("asinh") {}
 };
 
-struct cos
+struct cos : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "cos(" + var + ")";
-	}
+	cos(void) : UnaryOp("cos") {}
 };
 
-struct acos
+struct acos : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "acos(" + var + ")";
-	}
+	acos(void) : UnaryOp("acos") {}
 };
 
-struct cosh
+struct cosh : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "cosh(" + var + ")";
-	}
+	cosh(void) : UnaryOp("cosh") {}
 };
 
-struct acosh
+struct acosh : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "acosh(" + var + ")";
-	}
+	acosh(void) : UnaryOp("acosh") {}
 };
 
-struct tan
+struct tan : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "tan(" + var + ")";
-	}
+	tan(void) : UnaryOp("tan") {}
 };
 
-struct atan
+struct atan : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "atan(" + var + ")";
-	}
+	atan(void) : UnaryOp("atan") {}
 };
 
-struct tanh
+struct tanh : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "tanh(" + var + ")";
-	}
+	tanh(void) : UnaryOp("tanh") {}
 };
 
-struct atanh
+struct atanh : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "atanh(" + var + ")";
-	}
+	atanh(void) : UnaryOp("atanh") {}
 };
 
-struct ceil
+struct ceil : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "ceil(" + var + ")";
-	}
+	ceil(void) : UnaryOp("ceil") {}
 };
 
-struct floor
+struct floor : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "floor(" + var + ")";
-	}
+	floor(void) : UnaryOp("floor") {}
 };
 
-struct round
+struct round : public UnaryOp
 {
-	template<typename Expr>
-	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args) const
-	{
-		std::string var = u.buildKernel(params, num, args);
-		return "round(" + var + ")";
-	}
+	round(void) : UnaryOp("round") {}
 };
 
 }

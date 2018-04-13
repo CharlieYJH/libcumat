@@ -140,7 +140,6 @@ Matrix<T>::Matrix(size_t rows, size_t cols):
 		cols_ = 0;
 	}
 
-	// data_.resize(rows * cols);
 	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
 }
 
@@ -155,12 +154,12 @@ Matrix<T>::Matrix(void):
 }
 
 template<typename T>
-std::string Matrix<T>::buildKernel(std::string &params, int &num, std::vector<void *> &args) const
+std::string Matrix<T>::buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const
 {
 	std::string id_num = std::to_string(num++);
 	params += (", " + this->type() + " *" + id_ + id_num);
 	args.push_back((void *)&data_ptr_);
-	return id_ + id_num + "[idx]";
+	return id_ + id_num + ((transpose) ? "[x * rows + y]" : "[y * cols + x]");
 }
 
 template<typename T>
@@ -454,13 +453,14 @@ Matrix<T> Matrix<T>::rsqrt(void)
 	return mat;
 }
 
-// template<typename T>
-// Matrix<T> Matrix<T>::square(void)
-// {
-	// if (rows_ == 0 || cols_ == 0)
-		// return *this;
-	// return (*this) * (*this);
-// }
+template<typename T>
+Matrix<T> Matrix<T>::square(void)
+{
+	if (rows_ == 0 || cols_ == 0)
+		return *this;
+
+	return (*this * *this).eval();
+}
 
 template<typename T>
 Matrix<T> Matrix<T>::cube(void)
@@ -741,21 +741,6 @@ T Matrix<T>::operator()(const size_t idx) const
 {
 	assert(idx < rows_ * cols_);
 	return data_[idx];
-}
-
-// -------------- Negation --------------
-// template<typename T>
-// Matrix<T> Matrix<T>::operator-(void)
-// {
-	// Matrix<T> m = *this;
-	// return (*this *= -1);
-// }
-
-// -------------- Transpose --------------
-template<typename T>
-Matrix<T> Matrix<T>::operator~(void)
-{
-	return (*this).transpose();
 }
 
 // -------------- Matrix Multiplication --------------
