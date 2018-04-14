@@ -1,6 +1,7 @@
 #ifndef LIBCUMAT_H_
 #define LIBCUMAT_H_
 
+#include <thrust/execution_policy.h>
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
 #include <thrust/functional.h>
@@ -19,6 +20,7 @@
 #include <assert.h>
 #include <cstdlib>
 #include <unordered_map>
+#include <chrono>
 
 #include "libcumat_expression.h"
 #include "libcumat_transpose.h"
@@ -65,8 +67,8 @@ namespace Cumat
 		std::string id_;
 
 		template<class F>
-		void elementMathOp(Matrix<T> &mat, F func);
-		std::string type(void) const;
+		void elementMathOp(Matrix<T> &src, Matrix<T> &dst, const F &func);
+		const std::string type(void) const;
 
 		//----------------------------------------------
 		// CUDA Library Wrappers
@@ -83,7 +85,8 @@ namespace Cumat
 
 		template<typename Expr>
 		Matrix(const Expression<Expr> &rhs);
-		Matrix(size_t rows, size_t cols);
+		Matrix(const size_t rows, const size_t cols);
+		Matrix(const size_t rows, const size_t cols, const T val);
 		Matrix(void);
 		
 		template<typename Expr>
@@ -105,11 +108,11 @@ namespace Cumat
 
 		static Matrix<T> random(const size_t rows, const size_t cols, const T min = -1.0, const T max = 1.0);
 
-		Matrix<T> transpose(void);
+		void transpose(void);
 		Matrix<T>& transpose(Matrix<T> &mat);
 
 		Matrix<T> mmul(const Matrix<T> &mat);
-		Matrix<T>& mmul(const Matrix<T> &mat, Matrix<T> &outmat);
+		Matrix<T>& mmul(const Matrix<T> &lhs, const Matrix<T> &rhs, const T beta);
 
 		T sum(void);
 		T norm(void);
@@ -120,63 +123,87 @@ namespace Cumat
 
 		//----------------------------------------------
 		// Element-Wise Math Operations
+		// *this = op(mat)
 		//----------------------------------------------
 
-		Matrix<T> abs(void);
-		Matrix<T> inverse(void);
-		Matrix<T> clip(const T min, const T max);
+		Matrix<T>& abs(Matrix<T> &mat);
+		Matrix<T>& inverse(Matrix<T> &mat);
+		Matrix<T>& clip(Matrix<T> &mat, const T min, const T max);
 
-		Matrix<T> exp(void);
-		Matrix<T> log(void);
-		Matrix<T> log1p(void);
-		Matrix<T> log10(void);
-		Matrix<T> pow(const T n);
-		Matrix<T> sqrt(void);
-		Matrix<T> rsqrt(void);
-		Matrix<T> square(void);
-		Matrix<T> cube(void);
+		Matrix<T>& exp(Matrix<T> &mat);
+		Matrix<T>& exp10(Matrix<T> &mat);
+		Matrix<T>& exp2(Matrix<T> &mat);
+		Matrix<T>& log(Matrix<T> &mat);
+		Matrix<T>& log1p(Matrix<T> &mat);
+		Matrix<T>& log10(Matrix<T> &mat);
+		Matrix<T>& log2(Matrix<T> &mat);
+		Matrix<T>& pow(Matrix<T> &mat, const T n);
+		Matrix<T>& square(Matrix<T> &mat);
+		Matrix<T>& sqrt(Matrix<T> &mat);
+		Matrix<T>& rsqrt(Matrix<T> &mat);
+		Matrix<T>& cube(Matrix<T> &mat);
+		Matrix<T>& cbrt(Matrix<T> &mat);
+		Matrix<T>& rcbrt(Matrix<T> &mat);
 
-		Matrix<T> sin(void);
-		Matrix<T> cos(void);
-		Matrix<T> tan(void);
-		Matrix<T> asin(void);
-		Matrix<T> acos(void);
-		Matrix<T> atan(void);
-		Matrix<T> sinh(void);
-		Matrix<T> cosh(void);
-		Matrix<T> tanh(void);
+		Matrix<T>& sin(Matrix<T> &mat);
+		Matrix<T>& cos(Matrix<T> &mat);
+		Matrix<T>& tan(Matrix<T> &mat);
+		Matrix<T>& asin(Matrix<T> &mat);
+		Matrix<T>& acos(Matrix<T> &mat);
+		Matrix<T>& atan(Matrix<T> &mat);
+		Matrix<T>& sinh(Matrix<T> &mat);
+		Matrix<T>& cosh(Matrix<T> &mat);
+		Matrix<T>& tanh(Matrix<T> &mat);
+		Matrix<T>& asinh(Matrix<T> &mat);
+		Matrix<T>& acosh(Matrix<T> &mat);
+		Matrix<T>& atanh(Matrix<T> &mat);
 
-		Matrix<T> sigmoid(void);
+		Matrix<T>& sigmoid(Matrix<T> &mat);
+		Matrix<T>& ceil(Matrix<T> &mat);
+		Matrix<T>& floor(Matrix<T> &mat);
+		Matrix<T>& round(Matrix<T> &mat);
 
 		//----------------------------------------------
 		// In-Place Element-Wise Math Operations
+		// *this = op(*this)
 		//----------------------------------------------
 
-		Matrix<T>& iabs(void);
-		Matrix<T>& iinverse(void);
-		Matrix<T>& iclip(const T min, const T max);
+		Matrix<T>& abs(void);
+		Matrix<T>& inverse(void);
+		Matrix<T>& clip(const T min, const T max);
 
-		Matrix<T>& iexp(void);
-		Matrix<T>& ilog(void);
-		Matrix<T>& ilog1p(void);
-		Matrix<T>& ilog10(void);
-		Matrix<T>& ipow(const T n);
-		Matrix<T>& isqrt(void);
-		Matrix<T>& irsqrt(void);
-		Matrix<T>& isquare(void);
-		Matrix<T>& icube(void);
+		Matrix<T>& exp(void);
+		Matrix<T>& exp10(void);
+		Matrix<T>& exp2(void);
+		Matrix<T>& log(void);
+		Matrix<T>& log1p(void);
+		Matrix<T>& log10(void);
+		Matrix<T>& log2(void);
+		Matrix<T>& pow(const T n);
+		Matrix<T>& square(void);
+		Matrix<T>& sqrt(void);
+		Matrix<T>& rsqrt(void);
+		Matrix<T>& cube(void);
+		Matrix<T>& cbrt(void);
+		Matrix<T>& rcbrt(void);
 
-		Matrix<T>& isin(void);
-		Matrix<T>& icos(void);
-		Matrix<T>& itan(void);
-		Matrix<T>& iasin(void);
-		Matrix<T>& iacos(void);
-		Matrix<T>& iatan(void);
-		Matrix<T>& isinh(void);
-		Matrix<T>& icosh(void);
-		Matrix<T>& itanh(void);
+		Matrix<T>& sin(void);
+		Matrix<T>& cos(void);
+		Matrix<T>& tan(void);
+		Matrix<T>& asin(void);
+		Matrix<T>& acos(void);
+		Matrix<T>& atan(void);
+		Matrix<T>& sinh(void);
+		Matrix<T>& cosh(void);
+		Matrix<T>& tanh(void);
+		Matrix<T>& asinh(void);
+		Matrix<T>& acosh(void);
+		Matrix<T>& atanh(void);
 
-		Matrix<T>& isigmoid(void);
+		Matrix<T>& sigmoid(void);
+		Matrix<T>& ceil(void);
+		Matrix<T>& floor(void);
+		Matrix<T>& round(void);
 
 		//----------------------------------------------
 		// Operator Overloads
@@ -192,7 +219,7 @@ namespace Cumat
 		T operator()(const size_t idx) const;
 
 		// -------------- Matrix Multiplication --------------
-		Matrix<T> operator^(const Matrix<T> &rhs);
+		// Matrix<T> operator^(const Matrix<T> &rhs);
 
 		// -------------- Scalar Addition --------------
 		Matrix<T>& operator+=(const T val);
@@ -244,9 +271,10 @@ namespace Cumat
 
 	template<typename T>
 	template<typename Expr>
-	Matrix<T>::Matrix(const Expression<Expr> &rhs) :
+	Matrix<T>::Matrix(const Expression<Expr> &rhs):
 		rows_(0),
-		cols_(0)
+		cols_(0),
+		id_("v")
 	{
 		data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
 		Matrix<T>::assign(*this, rhs);

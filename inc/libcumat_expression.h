@@ -16,6 +16,8 @@ class Expression
 {
 	public:
 	operator const Expr&() const { return static_cast<const Expr &>(*this); }
+	size_t rows(void) const { return static_cast<const Expr &>(*this).rows(); }
+	size_t cols(void) const { return static_cast<const Expr &>(*this).cols(); };
 	const UnaryOpExpression<KernelOp::negative, Expr> operator-(void) const;
 	const TransposeExpression<Expr> operator~(void) const;
 	Matrix<double> eval(void) const;
