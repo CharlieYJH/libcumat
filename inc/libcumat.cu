@@ -8,7 +8,7 @@ namespace Cumat
 {
 
 cublasHandle_t cublas_handle;
-std::unordered_map<std::string, char *> kernel_cache;
+std::unordered_map<std::string, CUmodule> module_cache;
 
 void init(void)
 {
@@ -18,8 +18,8 @@ void init(void)
 void end(void)
 {
 	checkCudaErrors(cublasDestroy(Cumat::cublas_handle));
-	for(std::pair<std::string, char *> iter : kernel_cache)
-		delete iter.second;
+	for(std::pair<std::string, CUmodule> iter : module_cache)
+		cuModuleUnload(iter.second);
 }
 
 //----------------------------------------------
@@ -132,8 +132,7 @@ template<typename T>
 Matrix<T>::Matrix(const size_t rows, const size_t cols):
 	rows_(rows),
 	cols_(cols),
-	data_(rows_ * cols_),
-	id_("v")
+	data_(rows_ * cols_)
 {
 	if (rows == 0 || cols == 0) {
 		rows_ = 0;
@@ -147,8 +146,7 @@ template<typename T>
 Matrix<T>::Matrix(const size_t rows, const size_t cols, const T val):
 	rows_(rows),
 	cols_(cols),
-	data_(rows_ * cols_, val),
-	id_("v")
+	data_(rows_ * cols_, val)
 {
 	if (rows == 0 || cols == 0) {
 		rows_ = 0;
@@ -162,8 +160,7 @@ template<typename T>
 Matrix<T>::Matrix(void):
 	rows_(0),
 	cols_(0),
-	data_(rows_ * cols_),
-	id_("v")
+	data_(rows_ * cols_)
 {
 	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
 }
@@ -174,7 +171,7 @@ std::string Matrix<T>::buildKernel(std::string &params, int &num, std::vector<vo
 	std::string id_num = std::to_string(num++);
 	params += (", " + this->type() + " *v" + id_num);
 	args.push_back((void *)&data_ptr_);
-	return id_ + id_num + ((transpose) ? "[x * rows + y]" : "[y * cols + x]");
+	return "v" + id_num + ((transpose) ? "[x * rows + y]" : "[y * cols + x]");
 }
 
 template<typename T>

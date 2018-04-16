@@ -50,7 +50,7 @@
 
 namespace Cumat
 {
-	extern std::unordered_map<std::string, char *> kernel_cache;
+	extern std::unordered_map<std::string, CUmodule> module_cache;
 	extern cublasHandle_t cublas_handle;
 	void init(void);
 	void end(void);
@@ -64,7 +64,6 @@ namespace Cumat
 		size_t cols_;
 		thrust::device_vector<T> data_;
 		CUdeviceptr data_ptr_;
-		std::string id_;
 
 		template<class F>
 		void elementMathOp(Matrix<T> &src, Matrix<T> &dst, const F &func);
@@ -287,8 +286,7 @@ namespace Cumat
 	template<typename Expr>
 	Matrix<T>::Matrix(const Expression<Expr> &rhs):
 		rows_(0),
-		cols_(0),
-		id_("v")
+		cols_(0)
 	{
 		data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
 		Matrix<T>::assign(*this, rhs);
@@ -345,10 +343,14 @@ namespace Cumat
 
 		char *ptx;
 
-		if (kernel_cache.find(kernel_code) != kernel_cache.end()) {
+		CUmodule module;
+		CUfunction kernel;
+
+		// if (kernel_cache.find(kernel_code) != kernel_cache.end()) {
+		if (module_cache.find(kernel_code) != module_cache.end()) {
 
 			// If this code was used before, load it from the cache to prevent recompiling
-			ptx = kernel_cache[kernel_code];
+			module = module_cache[kernel_code];
 
 		} else {
 
@@ -375,21 +377,20 @@ namespace Cumat
 			// Destroy the program.
 			NVRTC_SAFE_CALL(nvrtcDestroyProgram(&prog));
 
-			// Cache the ptx
-			kernel_cache[kernel_code] = ptx;
+			// Cache the module
+			CUDA_SAFE_CALL(cuModuleLoadData(&module, ptx));
+			module_cache[kernel_code] = module;
+
+			delete[] ptx;
 		}
 
-		CUmodule module;
-		CUfunction kernel;
-
 		// Calculated necessary number of blocks needed
-		const size_t num_threads_x = 32;
-		const size_t num_threads_y = 32;
+		const size_t num_threads_x = 16;
+		const size_t num_threads_y = 16;
 		size_t num_blocks_x = (cols + num_threads_x - 1) / (num_threads_x);
 		size_t num_blocks_y = (rows + num_threads_y - 1) / (num_threads_y);
 
 		// Call the kernel from the ptx
-		CUDA_SAFE_CALL(cuModuleLoadDataEx(&module, ptx, 0, 0, 0));
 		CUDA_SAFE_CALL(cuModuleGetFunction(&kernel, module, "cumat_kernel"));
 		CUDA_SAFE_CALL(cuLaunchKernel(kernel, num_blocks_x, num_blocks_y, 1, num_threads_x, num_threads_y, 1, 0, NULL, args.data(), 0));
 	}
