@@ -227,11 +227,19 @@ namespace Cumat
 		// -------------- Matrix Addition --------------
 		Matrix<T>& operator+=(const Matrix<T> &rhs);
 
+		// -------------- Expression Addition --------------
+		template<typename Expr>
+		Matrix<T>& operator+=(const Expression<Expr> &rhs);
+
 		// -------------- Scalar Subtraction --------------
 		Matrix<T>& operator-=(const T val);
 
 		// -------------- Matrix Subtraction --------------
 		Matrix<T>& operator-=(const Matrix<T> &rhs);
+
+		// -------------- Expression Subtraction --------------
+		template<typename Expr>
+		Matrix<T>& operator-=(const Expression<Expr> &rhs);
 
 		// -------------- Scalar Multiplication --------------
 		Matrix<T>& operator*=(const T val);
@@ -239,13 +247,19 @@ namespace Cumat
 		// -------------- Matrix Multiplication (element-wise) --------------
 		Matrix<T>& operator*=(const Matrix<T> &rhs);
 
+		// -------------- Expression Multiplication (element-wise) --------------
+		template<typename Expr>
+		Matrix<T>& operator*=(const Expression<Expr> &rhs);
+
 		// -------------- Scalar Division (element-wise) --------------
 		Matrix<T>& operator/=(const T val);
-		// Matrix<T> operator/(const T val);
 
 		// -------------- Matrix Division (element-wise) --------------
 		Matrix<T>& operator/=(const Matrix<T> &rhs);
-		// Matrix<T> operator/(const Matrix<T> &rhs);
+
+		// -------------- Expression Division (element-wise) --------------
+		template<typename Expr>
+		Matrix<T>& operator/=(const Expression<Expr> &rhs);
 
 		// -------------- Output Stream Operator --------------
 		friend std::ostream& operator<<(std::ostream &os, const Matrix &mat)
@@ -279,6 +293,10 @@ namespace Cumat
 		data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
 		Matrix<T>::assign(*this, rhs);
 	}
+
+	//----------------------------------------------
+	// Expression Assignment Method
+	//----------------------------------------------
 
 	template<typename T>
 	template<typename Expr>
@@ -335,9 +353,9 @@ namespace Cumat
 		} else {
 
 			nvrtcProgram prog;
-			const char *opts[] = {"--gpu-architecture=compute_30", "--fmad=false"};
+			const char *opts[] = {"--gpu-architecture=compute_30"};
 			NVRTC_SAFE_CALL(nvrtcCreateProgram(&prog, kernel_code.c_str(), "cumat_kernel.cu", 0, NULL, NULL));
-			nvrtcResult compileResult = nvrtcCompileProgram(prog, 2, opts);
+			nvrtcResult compileResult = nvrtcCompileProgram(prog, 1, opts);
 
 			// Obtain compilation log from the program.
 			size_t logSize;
@@ -376,6 +394,10 @@ namespace Cumat
 		CUDA_SAFE_CALL(cuLaunchKernel(kernel, num_blocks_x, num_blocks_y, 1, num_threads_x, num_threads_y, 1, 0, NULL, args.data(), 0));
 	}
 
+	//----------------------------------------------
+	// Expression-related Operator Overloads
+	//----------------------------------------------
+	
 	template<typename T>
 	template<typename Expr>
 	Matrix<T>& Matrix<T>::operator=(const Expression<Expr> &rhs)
@@ -383,6 +405,42 @@ namespace Cumat
 		Matrix<T>::assign(*this, rhs);
 		return *this;
 	}
+
+	template<typename T>
+	template<typename Expr>
+	Matrix<T> &Matrix<T>::operator+=(const Expression<Expr> &rhs)
+	{
+		*this = *this + rhs;
+		return *this;
+	}
+
+	template<typename T>
+	template<typename Expr>
+	Matrix<T> &Matrix<T>::operator-=(const Expression<Expr> &rhs)
+	{
+		*this = *this - rhs;
+		return *this;
+	}
+
+	template<typename T>
+	template<typename Expr>
+	Matrix<T> &Matrix<T>::operator*=(const Expression<Expr> &rhs)
+	{
+		*this = *this * rhs;
+		return *this;
+	}
+
+	template<typename T>
+	template<typename Expr>
+	Matrix<T> &Matrix<T>::operator/=(const Expression<Expr> &rhs)
+	{
+		*this = *this / rhs;
+		return *this;
+	}
+
+	//----------------------------------------------
+	// Expression Evaluation
+	//----------------------------------------------
 
 	template<typename Expr>
 	Matrix<double> Expression<Expr>::eval(void) const

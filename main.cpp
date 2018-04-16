@@ -5,24 +5,28 @@
 int main(int argc, char const* argv[])
 {
 	Cumat::init();
-	Cumat::Matrixd mat(std::move(Cumat::Matrixd::random(1024, 1024)));
-	Cumat::Matrixd mat2(std::move(Cumat::Matrixd::random(1024, 1024)));
-	Cumat::Matrixd result(1024, 1024);
+	Cumat::Matrixf mat(std::move(Cumat::Matrixf::random(5, 6)));
+	Cumat::Matrixf mat2(std::move(Cumat::Matrixf::random(5, 6)));
+	Cumat::Matrixf result(5, 6);
 	// Cumat::Matrixd result2(2000, 2000);
 	// Cumat::Matrixd tmp(5, 6);
 	// Cumat::Matrixd tmp5(5, 6);
 
 	// std::cout << "A = " << std::endl << mat << std::endl << std::endl;
 	// std::cout << "B = " << std::endl << mat2 << std::endl << std::endl;
+	
+	mat.fill(1);
+	mat2.fill(2.02);
 
-	// (mat + mat).eval();
+	mat += mat + mat2 + 2.0f;
+	cudaDeviceSynchronize();
 	auto start = std::chrono::high_resolution_clock::now();
-	for (int i = 0; i < 1000; i++) {
-		result.mmul(mat, mat2, 0);
-	}
+	mat /= mat2;
 	cudaDeviceSynchronize();
 	// result2.mmul(~mat2, ~mat, 1);
 	auto end = std::chrono::high_resolution_clock::now();
+
+	std::cout << "mat = " << std::endl << mat << std::endl << std::endl;
 
 	// std::cout << "A x B = " << std::endl << result << std::endl << std::endl;
 	// std::cout << "tmp = " << std::endl << mat.minElement() << std::endl << std::endl;
