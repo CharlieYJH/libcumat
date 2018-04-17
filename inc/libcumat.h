@@ -444,10 +444,11 @@ namespace Cumat
 	//----------------------------------------------
 
 	template<typename Expr>
-	Matrix<double> Expression<Expr>::eval(void) const
+	template<typename T>
+	Matrix<T> Expression<Expr>::eval(void) const
 	{
-		Matrix<double> mat;
-		Matrix<double>::assign(mat, *this);
+		Matrix<T> mat;
+		Matrix<T>::assign(mat, *this);
 		return mat;
 	}
 

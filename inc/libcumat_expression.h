@@ -1,6 +1,8 @@
 #ifndef LIBCUMAT_EXPR_H_
 #define LIBCUMAT_EXPR_H_
 
+#include <type_traits>
+
 #include "libcumat_forwarddeclarations.h"
 #include "libcumat_operators.h"
 
@@ -20,7 +22,8 @@ class Expression
 	size_t cols(void) const { return static_cast<const Expr &>(*this).cols(); };
 	const UnaryOpExpression<KernelOp::negative, Expr> operator-(void) const;
 	const TransposeExpression<Expr> operator~(void) const;
-	Matrix<double> eval(void) const;
+	template<typename T = double>
+	Matrix<T> eval(void) const;
 };
 
 //----------------------------------------------
@@ -70,18 +73,16 @@ const BinaryOpExpression<KernelOp::vectorSum, Expr1, Expr2> operator+(const Expr
 	return BinaryOpExpression<KernelOp::vectorSum, Expr1, Expr2>(u, v);
 }
 
-template<typename Expr>
-const BinaryOpExpression<KernelOp::scalarSum<double>, Expr, double> operator+(const Expression<Expr> &lhs, const double &n)
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarSum<T>, Expr, T> operator+(const Expression<Expr> &lhs, const T &n)
 {
-	const Expr &u = lhs;
-	return BinaryOpExpression<KernelOp::scalarSum<double>, Expr, double>(u, n);
+	return BinaryOpExpression<KernelOp::scalarSum<T>, Expr, T>(lhs, n);
 }
 
-template<typename Expr>
-const BinaryOpExpression<KernelOp::scalarSum<double>, Expr, double> operator+(const double &n, const Expression<Expr> &rhs)
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarSum<T>, Expr, T> operator+(const T &n, const Expression<Expr> &rhs)
 {
-	const Expr &u = rhs;
-	return BinaryOpExpression<KernelOp::scalarSum<double>, Expr, double>(u, n);
+	return BinaryOpExpression<KernelOp::scalarSum<T>, Expr, T>(rhs, n);
 }
 
 // -------------- Subtraction Overloads --------------
@@ -95,18 +96,18 @@ const BinaryOpExpression<KernelOp::vectorSub, Expr1, Expr2> operator-(const Expr
 	return BinaryOpExpression<KernelOp::vectorSub, Expr1, Expr2>(u, v);
 }
 
-template<typename Expr>
-const BinaryOpExpression<KernelOp::scalarSubRight<double>, Expr, double> operator-(const Expression<Expr> &lhs, const double &n)
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarSubRight<T>, Expr, T> operator-(const Expression<Expr> &lhs, const T &n)
 {
 	const Expr &u = lhs;
-	return BinaryOpExpression<KernelOp::scalarSubRight<double>, Expr, double>(u, n); 
+	return BinaryOpExpression<KernelOp::scalarSubRight<T>, Expr, T>(u, n); 
 }
 
-template<typename Expr>
-const BinaryOpExpression<KernelOp::scalarSubLeft<double>, Expr, double> operator-(const double &n, const Expression<Expr> &rhs)
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarSubLeft<T>, Expr, T> operator-(const T &n, const Expression<Expr> &rhs)
 {
 	const Expr &u = rhs;
-	return BinaryOpExpression<KernelOp::scalarSubLeft<double>, Expr, double>(u, n); 
+	return BinaryOpExpression<KernelOp::scalarSubLeft<T>, Expr, T>(u, n); 
 }
 
 // -------------- Multiplication Overloads --------------
@@ -120,18 +121,18 @@ const BinaryOpExpression<KernelOp::vectorMul, Expr1, Expr2> operator*(const Expr
 	return BinaryOpExpression<KernelOp::vectorMul, Expr1, Expr2>(u, v);
 }
 
-template<typename Expr>
-const BinaryOpExpression<KernelOp::scalarMul<double>, Expr, double> operator*(const Expression<Expr> &lhs, const double &n)
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarMul<T>, Expr, T> operator*(const Expression<Expr> &lhs, const T &n)
 {
 	const Expr &u = lhs;
-	return BinaryOpExpression<KernelOp::scalarMul<double>, Expr, double>(u, n);
+	return BinaryOpExpression<KernelOp::scalarMul<T>, Expr, T>(u, n);
 }
 
-template<typename Expr>
-const BinaryOpExpression<KernelOp::scalarMul<double>, Expr, double> operator*(const double &n, const Expression<Expr> &rhs)
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarMul<T>, Expr, T> operator*(const T &n, const Expression<Expr> &rhs)
 {
 	const Expr &u = rhs;
-	return BinaryOpExpression<KernelOp::scalarMul<double>, Expr, double>(u, n);
+	return BinaryOpExpression<KernelOp::scalarMul<T>, Expr, T>(u, n);
 }
 
 // -------------- Division Overloads --------------
@@ -145,18 +146,18 @@ const BinaryOpExpression<KernelOp::vectorDiv, Expr1, Expr2> operator/(const Expr
 	return BinaryOpExpression<KernelOp::vectorDiv, Expr1, Expr2>(u, v);
 }
 
-template<typename Expr>
-const BinaryOpExpression<KernelOp::scalarDivRight<double>, Expr, double> operator/(const Expression<Expr> &lhs, const double &n)
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarDivRight<T>, Expr, T> operator/(const Expression<Expr> &lhs, const T &n)
 {
 	const Expr &u = lhs;
-	return BinaryOpExpression<KernelOp::scalarDivRight<double>, Expr, double>(u, n);
+	return BinaryOpExpression<KernelOp::scalarDivRight<T>, Expr, T>(u, n);
 }
 
-template<typename Expr>
-const BinaryOpExpression<KernelOp::scalarDivLeft<double>, Expr, double> operator/(const double &n, const Expression<Expr> &rhs)
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarDivLeft<T>, Expr, T> operator/(const T &n, const Expression<Expr> &rhs)
 {
 	const Expr &u = rhs;
-	return BinaryOpExpression<KernelOp::scalarDivLeft<double>, Expr, double>(u, n);
+	return BinaryOpExpression<KernelOp::scalarDivLeft<T>, Expr, T>(u, n);
 }
 
 // -------------- Powers --------------
@@ -170,18 +171,41 @@ const BinaryOpExpression<KernelOp::vectorPow, Expr1, Expr2> pow(const Expression
 	return BinaryOpExpression<KernelOp::vectorPow, Expr1, Expr2>(u, v);
 }
 
-template<typename Expr>
-const BinaryOpExpression<KernelOp::scalarExpPow<double>, Expr, double> pow(const Expression<Expr> &base, const double &exponent)
+template<typename Expr1, typename Expr2>
+const BinaryOpExpression<KernelOp::vectorPowf, Expr1, Expr2> powf(const Expression<Expr1> &base, const Expression<Expr2> &exponent)
 {
-	const Expr &u = base;
-	return BinaryOpExpression<KernelOp::scalarExpPow<double>, Expr, double>(u, exponent);
+	const Expr1 &u = base;
+	const Expr2 &v = exponent;
+	assert(u.rows() == v.rows() && u.cols() == v.cols());
+	return BinaryOpExpression<KernelOp::vectorPowf, Expr1, Expr2>(u, v);
 }
 
-template<typename Expr>
-const BinaryOpExpression<KernelOp::scalarBasePow<double>, Expr, double> pow(const double &base, const Expression<Expr> &exponent)
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarExpPow<T>, Expr, T> pow(const Expression<Expr> &base, const T &exponent)
+{
+	const Expr &u = base;
+	return BinaryOpExpression<KernelOp::scalarExpPow<T>, Expr, T>(u, exponent);
+}
+
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarExpPowf<T>, Expr, T> powf(const Expression<Expr> &base, const T &exponent)
+{
+	const Expr &u = base;
+	return BinaryOpExpression<KernelOp::scalarExpPowf<T>, Expr, T>(u, exponent);
+}
+
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarBasePow<T>, Expr, T> pow(const T &base, const Expression<Expr> &exponent)
 {
 	const Expr &u = exponent;
-	return BinaryOpExpression<KernelOp::scalarBasePow<double>, Expr, double>(u, base);
+	return BinaryOpExpression<KernelOp::scalarBasePow<T>, Expr, T>(u, base);
+}
+
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarBasePowf<T>, Expr, T> powf(const T &base, const Expression<Expr> &exponent)
+{
+	const Expr &u = exponent;
+	return BinaryOpExpression<KernelOp::scalarBasePowf<T>, Expr, T>(u, base);
 }
 
 // -------------- Atan2 --------------
@@ -195,18 +219,41 @@ const BinaryOpExpression<KernelOp::vectorAtan2, Expr1, Expr2> atan2(const Expres
 	return BinaryOpExpression<KernelOp::vectorAtan2, Expr1, Expr2>(u, v);
 }
 
-template<typename Expr>
-const BinaryOpExpression<KernelOp::scalarAtan2Right<double>, Expr, double> atan2(const Expression<Expr> &y, const double &n)
+template<typename Expr1, typename Expr2>
+const BinaryOpExpression<KernelOp::vectorAtan2f, Expr1, Expr2> atan2f(const Expression<Expr1> &y, const Expression<Expr2> &x)
 {
-	const Expr &u = y;
-	return BinaryOpExpression<KernelOp::scalarAtan2Right<double>, Expr, double>(u, n);
+	const Expr1 &u = y;
+	const Expr2 &v = x;
+	assert(u.rows() == v.rows() && u.cols() == v.cols());
+	return BinaryOpExpression<KernelOp::vectorAtan2f, Expr1, Expr2>(u, v);
 }
 
-template<typename Expr>
-const BinaryOpExpression<KernelOp::scalarAtan2Left<double>, Expr, double> atan2(const double &n, const Expression<Expr> &x)
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarAtan2Right<T>, Expr, T> atan2(const Expression<Expr> &y, const T &n)
+{
+	const Expr &u = y;
+	return BinaryOpExpression<KernelOp::scalarAtan2Right<T>, Expr, T>(u, n);
+}
+
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarAtan2Rightf<T>, Expr, T> atan2f(const Expression<Expr> &y, const T &n)
+{
+	const Expr &u = y;
+	return BinaryOpExpression<KernelOp::scalarAtan2Rightf<T>, Expr, T>(u, n);
+}
+
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarAtan2Left<T>, Expr, T> atan2(const T &n, const Expression<Expr> &x)
 {
 	const Expr &u = x;
-	return BinaryOpExpression<KernelOp::scalarAtan2Left<double>, Expr, double>(u, n);
+	return BinaryOpExpression<KernelOp::scalarAtan2Left<T>, Expr, T>(u, n);
+}
+
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarAtan2Leftf<T>, Expr, T> atan2f(const T &n, const Expression<Expr> &x)
+{
+	const Expr &u = x;
+	return BinaryOpExpression<KernelOp::scalarAtan2Leftf<T>, Expr, T>(u, n);
 }
 
 //----------------------------------------------

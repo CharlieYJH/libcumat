@@ -12,27 +12,43 @@ class BinaryVectorOp
 {
 	const std::string preop_;
 	const std::string midop_;
+	const std::string cast_;
 	
 	public:
-	BinaryVectorOp(const std::string &preop, const std::string &midop) : preop_(preop), midop_(midop) {}
+	BinaryVectorOp(const std::string &preop, const std::string &midop) : preop_(preop), midop_(midop), cast_("") {}
+	BinaryVectorOp(const std::string &preop, const std::string &midop, const std::string &cast) : preop_(preop), midop_(midop), cast_("(" + cast + ")") {}
 	template<typename Expr1, typename Expr2>
 	std::string operator()(const Expr1 &u, const Expr2 &v, std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const
 	{
 		std::string lhs = u.buildKernel(params, num, args, transpose);
 		std::string rhs = v.buildKernel(params, num, args, transpose);
-		return preop_ + "(" + lhs + midop_ + rhs + ")";
+		return preop_ + "(" + cast_ + lhs + midop_ + cast_ + rhs + ")";
 	}
 };
 
 template<typename T>
-class BinaryScalarOpRight
+class BinaryScalarOp
 {
+	protected:
 	const std::string preop_;
 	const std::string midop_;
+	const std::string cast_;
 	static const std::string type_;
 
 	public:
-	BinaryScalarOpRight(const std::string &preop, const std::string &midop) : preop_(preop), midop_(midop) {}
+	BinaryScalarOp(const std::string &preop, const std::string &midop, const std::string &cast) : preop_(preop), midop_(midop), cast_(cast) {}
+};
+
+template<> const std::string BinaryScalarOp<double>::type_ = "double";
+template<> const std::string BinaryScalarOp<float>::type_ = "float";
+template<> const std::string BinaryScalarOp<int>::type_ = "int";
+
+template<typename T>
+class BinaryScalarOpRight : public BinaryScalarOp<T>
+{
+	public:
+	BinaryScalarOpRight(const std::string &preop, const std::string &midop) : BinaryScalarOp(preop, midop, "") {}
+	BinaryScalarOpRight(const std::string &preop, const std::string &midop, const std::string &cast) : BinaryScalarOp(preop, midop, "(" + cast + ")") {}
 	template<typename Expr>
 	std::string operator()(const Expr &u, const T &n, std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const
 	{
@@ -43,21 +59,16 @@ class BinaryScalarOpRight
 		params += ", " + type_ + " s" + id_num;
 		args.push_back((void *)&n);
 
-		return preop_ + "(" + lhs + midop_ + rhs + ")";
+		return preop_ + "(" + cast_ + lhs + midop_ + cast_ + rhs + ")";
 	}
 };
-template<> const std::string BinaryScalarOpRight<double>::type_ = "double";
-template<> const std::string BinaryScalarOpRight<float>::type_ = "float";
 
 template<typename T>
-class BinaryScalarOpLeft
+class BinaryScalarOpLeft : public BinaryScalarOp<T>
 {
-	const std::string preop_;
-	const std::string midop_;
-	static const std::string type_;
-
 	public:
-	BinaryScalarOpLeft(const std::string &preop, const std::string &midop) : preop_(preop), midop_(midop) {}
+	BinaryScalarOpLeft(const std::string &preop, const std::string &midop) : BinaryScalarOp(preop, midop, "") {}
+	BinaryScalarOpLeft(const std::string &preop, const std::string &midop, const std::string &cast) : BinaryScalarOp(preop, midop, "(" + cast + ")") {}
 	template<typename Expr>
 	std::string operator()(const Expr &u, const T &n, std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const
 	{
@@ -68,11 +79,9 @@ class BinaryScalarOpLeft
 
 		std::string rhs = u.buildKernel(params, num, args, transpose);
 
-		return preop_ + "(" + lhs + midop_ + rhs + ")";
+		return preop_ + "(" + cast_ + lhs + midop_ + cast_ + rhs + ")";
 	}
 };
-template<> const std::string BinaryScalarOpLeft<double>::type_ = "double";
-template<> const std::string BinaryScalarOpLeft<float>::type_ = "float";
 
 struct vectorSum : public BinaryVectorOp
 {
@@ -132,36 +141,70 @@ struct scalarDivLeft : public BinaryScalarOpLeft<T>
 
 struct vectorPow : public BinaryVectorOp
 {
-	vectorPow(void) : BinaryVectorOp("pow", ",") {}
+	vectorPow(void) : BinaryVectorOp("pow", ",", "double") {}
+};
+
+struct vectorPowf : public BinaryVectorOp
+{
+	vectorPowf(void) : BinaryVectorOp("powf", ",", "float") {}
 };
 
 template<typename T>
 struct scalarExpPow : public BinaryScalarOpRight<T>
 {
-	scalarExpPow(void) : BinaryScalarOpRight("pow", ",") {}
+	scalarExpPow(void) : BinaryScalarOpRight("pow", ",", "double") {}
+};
+
+template<typename T>
+struct scalarExpPowf : public BinaryScalarOpRight<T>
+{
+	scalarExpPowf(void) : BinaryScalarOpRight("powf", ",", "float") {}
 };
 
 template<typename T>
 struct scalarBasePow : public BinaryScalarOpLeft<T>
 {
-	scalarBasePow(void) : BinaryScalarOpLeft("pow", ",") {}
+	scalarBasePow(void) : BinaryScalarOpLeft("pow", ",", "double") {}
+};
+
+template<typename T>
+struct scalarBasePowf : public BinaryScalarOpLeft<T>
+{
+	scalarBasePowf(void) : BinaryScalarOpLeft("powf", ",", "float") {}
 };
 
 struct vectorAtan2 : public BinaryVectorOp
 {
-	vectorAtan2(void) : BinaryVectorOp("atan2", ",") {}
+	vectorAtan2(void) : BinaryVectorOp("atan2", ",", "double") {}
+};
+
+struct vectorAtan2f : public BinaryVectorOp
+{
+	vectorAtan2f(void) : BinaryVectorOp("atan2f", ",", "float") {}
 };
 
 template<typename T>
 struct scalarAtan2Right : public BinaryScalarOpRight<T>
 {
-	scalarAtan2Right(void) : BinaryScalarOpRight("atan2", ",") {}
+	scalarAtan2Right(void) : BinaryScalarOpRight("atan2", ",", "double") {}
+};
+
+template<typename T>
+struct scalarAtan2Rightf : public BinaryScalarOpRight<T>
+{
+	scalarAtan2Rightf(void) : BinaryScalarOpRight("atan2f", ",", "float") {}
 };
 
 template<typename T>
 struct scalarAtan2Left : public BinaryScalarOpLeft<T>
 {
-	scalarAtan2Left(void) : BinaryScalarOpLeft("atan2", ",") {}
+	scalarAtan2Left(void) : BinaryScalarOpLeft("atan2", ",", "double") {}
+};
+
+template<typename T>
+struct scalarAtan2Leftf : public BinaryScalarOpLeft<T>
+{
+	scalarAtan2Leftf(void) : BinaryScalarOpLeft("atan2f", ",", "float") {}
 };
 
 class UnaryOp
@@ -335,7 +378,7 @@ struct floor : public UnaryOp
 
 struct round : public UnaryOp
 {
-	round(void) : UnaryOp("round") {}
+	round(void) : UnaryOp("rint") {}
 };
 
 }
