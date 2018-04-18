@@ -73,6 +73,7 @@ const BinaryOpExpression<KernelOp::vectorSum, Expr1, Expr2> operator+(const Expr
 	return BinaryOpExpression<KernelOp::vectorSum, Expr1, Expr2>(u, v);
 }
 
+// Compile time check for whether type T is a numeric type (prevents ambiguous overloads)
 template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
 const BinaryOpExpression<KernelOp::scalarSum<T>, Expr, T> operator+(const Expression<Expr> &lhs, const T &n)
 {

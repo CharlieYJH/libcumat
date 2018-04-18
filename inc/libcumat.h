@@ -20,10 +20,10 @@
 #include <assert.h>
 #include <cstdlib>
 #include <unordered_map>
-#include <chrono>
 
 #include "libcumat_expression.h"
 #include "libcumat_transpose.h"
+#include "libcumat_matrixproduct.h"
 #include "libcumat_math.h"
 
 #define NVRTC_SAFE_CALL(x)                                        \
@@ -111,7 +111,7 @@ namespace Cumat
 		Matrix<T>& transpose(Matrix<T> &mat);
 
 		Matrix<T> mmul(const Matrix<T> &mat);
-		Matrix<T>& mmul(const Matrix<T> &lhs, const Matrix<T> &rhs, const T beta);
+		Matrix<T>& mmul(const Matrix<T> &lhs, const Matrix<T> &rhs, const T beta = 0);
 
 		T sum(void);
 		T norm(void);
@@ -341,12 +341,9 @@ namespace Cumat
 			  }                                                             \n\
 			}                                                               \n";
 
-		char *ptx;
-
 		CUmodule module;
 		CUfunction kernel;
 
-		// if (kernel_cache.find(kernel_code) != kernel_cache.end()) {
 		if (module_cache.find(kernel_code) != module_cache.end()) {
 
 			// If this code was used before, load it from the cache to prevent recompiling
@@ -372,12 +369,12 @@ namespace Cumat
 			// Obtain PTX from the program.
 			size_t ptxSize;
 			NVRTC_SAFE_CALL(nvrtcGetPTXSize(prog, &ptxSize));
-			ptx = new char[ptxSize];
+			char *ptx = new char[ptxSize];
 			NVRTC_SAFE_CALL(nvrtcGetPTX(prog, ptx));
 			// Destroy the program.
 			NVRTC_SAFE_CALL(nvrtcDestroyProgram(&prog));
 
-			// Cache the module
+			// Load and cache the module
 			CUDA_SAFE_CALL(cuModuleLoadData(&module, ptx));
 			module_cache[kernel_code] = module;
 
