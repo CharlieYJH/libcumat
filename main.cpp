@@ -15,17 +15,17 @@ int main(int argc, char const* argv[])
 			if (i == j)
 				result.set(i, j, 1);
 
-	std::cout << mat << std::endl;
-	std::cout << mmul(mat, result / 2.0).eval<float>() << std::endl;;
+	std::cout << mat << std::endl << std::endl;
+	std::cout << mmuld(mat, result / 2.0).eval<float>() << std::endl << std::endl;
 	cudaDeviceSynchronize();
 
-	(mat2 + mat2).eval<float>();
+	(mat2 + mat2).eval();
 
 	std::cout << "A = " << std::endl << mat << std::endl << std::endl;
 	std::cout << "B = " << std::endl << mat2 << std::endl << std::endl;
 
 	auto start = std::chrono::high_resolution_clock::now();
-	mat = mmul(mat + mat, result + result);
+	mat = mmuld(mat + mat, result + result);
 	cudaDeviceSynchronize();
 	auto end = std::chrono::high_resolution_clock::now();
 

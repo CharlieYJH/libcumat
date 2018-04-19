@@ -40,13 +40,19 @@ std::string MatrixProductExpression<Expr1, Expr2, T>::buildKernel(std::string &p
 	return result_.buildKernel(params, num, args, transpose);
 }
 
-template<typename Expr1, typename Expr2>
-MatrixProductExpression<Expr1, Expr2, float> mmul(const Expression<Expr1> &lhs, const Expression<Expr2> &rhs)
+template<typename T = float, typename Expr1, typename Expr2>
+const MatrixProductExpression<Expr1, Expr2, T> mmul(const Expression<Expr1> &lhs, const Expression<Expr2> &rhs)
 {
 	const Expr1 &u = lhs;
 	const Expr2 &v = rhs;
 	assert(u.cols() == v.rows());
-	return MatrixProductExpression<Expr1, Expr2, float>(u, v);
+	return MatrixProductExpression<Expr1, Expr2, T>(u, v);
+}
+
+template<typename Expr1, typename Expr2>
+const MatrixProductExpression<Expr1, Expr2, double> mmuld(const Expression<Expr1> &lhs, const Expression<Expr2> &rhs)
+{
+	return mmul<double>(lhs, rhs);
 }
 
 }

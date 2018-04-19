@@ -9,7 +9,7 @@ template<typename Expr> class Expression;
 template<class Op, typename Expr1, typename Expr2> class BinaryOpExpression;
 template<class Op, typename Expr> class UnaryOpExpression;
 template<typename Expr> class TransposeExpression;
-template<typename Expr1, typename Expr2, typename T = float> class MatrixProductExpression;
+template<typename Expr1, typename Expr2, typename T> class MatrixProductExpression;
 
 }
 
