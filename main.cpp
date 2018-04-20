@@ -1,7 +1,7 @@
 #include <iostream>
 #include <chrono>
 #include <typeinfo>
-#include "inc/libcumat.h"
+#include "Core"
 
 int main(int argc, char const* argv[])
 {

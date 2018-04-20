@@ -12,7 +12,7 @@ class MatrixProductExpression : public Expression<MatrixProductExpression<Expr1,
 {
 	const Expr1 &u_;
 	const Expr2 &v_;
-	mutable Matrix<T> result_;
+	mutable Matrix<T> result_; // Need mutable here due to lazy evaluation of matrix multiplication
 
 	public:
 	MatrixProductExpression(const Expr1 &u, const Expr2 &v) : u_(u), v_(v) {}
