@@ -15,7 +15,7 @@ class TransposeExpression : public Expression<TransposeExpression<Expr>>
 	TransposeExpression(const Expr &u) : u_(u) {}
 	size_t rows(void) const;
 	size_t cols(void) const;
-	std::string buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const;
+	std::string buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose, bool &has_transpose_expr) const;
 };
 
 template<typename Expr>
@@ -31,9 +31,11 @@ size_t TransposeExpression<Expr>::cols(void) const
 }
 
 template<typename Expr>
-std::string TransposeExpression<Expr>::buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const
+std::string TransposeExpression<Expr>::buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose, bool &has_transpose_expr) const
 {
-	return u_.buildKernel(params, num, args, true);
+	has_transpose_expr = true;
+	// XOR here accounts for double transposes
+	return u_.buildKernel(params, num, args, true ^ transpose, has_transpose_expr);
 }
 
 template<typename Expr>

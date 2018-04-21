@@ -18,7 +18,7 @@ class MatrixProductExpression : public Expression<MatrixProductExpression<Expr1,
 	MatrixProductExpression(const Expr1 &u, const Expr2 &v) : u_(u), v_(v) {}
 	size_t rows(void) const;
 	size_t cols(void) const;
-	std::string buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const;
+	std::string buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose, bool &has_transpose_expr) const;
 };
 
 template<typename Expr1, typename Expr2, typename T>
@@ -34,10 +34,10 @@ size_t MatrixProductExpression<Expr1, Expr2, T>::cols(void) const
 }
 
 template<typename Expr1, typename Expr2, typename T>
-std::string MatrixProductExpression<Expr1, Expr2, T>::buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const
+std::string MatrixProductExpression<Expr1, Expr2, T>::buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose, bool &has_transpose_expr) const
 {
 	result_.mmul(u_, v_, 0);
-	return result_.buildKernel(params, num, args, transpose);
+	return result_.buildKernel(params, num, args, transpose, has_transpose_expr);
 }
 
 template<typename T = float, typename Expr1, typename Expr2>

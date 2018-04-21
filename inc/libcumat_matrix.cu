@@ -166,7 +166,7 @@ Matrix<T>::Matrix(void):
 }
 
 template<typename T>
-std::string Matrix<T>::buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const
+std::string Matrix<T>::buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose, bool &has_transpose_expr) const
 {
 	std::string id_num = std::to_string(num++);
 	params += (", " + this->type() + " *v" + id_num);

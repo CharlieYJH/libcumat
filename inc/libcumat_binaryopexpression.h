@@ -1,8 +1,10 @@
 #ifndef LIBCUMAT_BINARYOPEXPRESSION_H_
 #define LIBCUMAT_BINARYOPEXPRESSION_H_
 
+#include <type_traits>
+
 #include "libcumat_expression.h"
-#include "libcumat_operators.h"
+#include "libcumat_binaryop.h"
 
 namespace Cumat
 {
@@ -18,7 +20,7 @@ class BinaryOpExpression: public Expression<BinaryOpExpression<Op, Expr1, Expr2>
 	BinaryOpExpression(const Expr1 &u, const Expr2 &v) : u_(u), v_(v) {}
 	size_t rows(void) const;
 	size_t cols(void) const;
-	std::string buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const;
+	std::string buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose, bool &has_transpose_expr) const;
 };
 
 template<class Op, typename Expr1, typename Expr2>
@@ -34,9 +36,9 @@ size_t BinaryOpExpression<Op, Expr1, Expr2>::cols(void) const
 }
 
 template<class Op, typename Expr1, typename Expr2>
-std::string BinaryOpExpression<Op, Expr1, Expr2>::buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const
+std::string BinaryOpExpression<Op, Expr1, Expr2>::buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose, bool &has_transpose_expr) const
 {
-	return op_(u_, v_, params, num, args, transpose);
+	return op_(u_, v_, params, num, args, transpose, has_transpose_expr);
 }
 
 // -------------- Addition Overloads --------------

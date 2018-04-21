@@ -80,39 +80,67 @@ namespace Cumat
 
 		public:
 
+		// Class constructors
 		template<typename Expr>
 		Matrix(const Expression<Expr> &rhs);
 		Matrix(const size_t rows, const size_t cols);
 		Matrix(const size_t rows, const size_t cols, const T val);
 		Matrix(void);
 		
+		// Expression assignment
 		template<typename Expr>
 		static void assign(Matrix<T> &mat, const Expression<Expr> &rhs);
-		std::string buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const;
+
+		// Builds the parameters for the kernel code used for lazy evaluation
+		std::string buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose, bool &has_transpose_expr) const;
+
+		// Returns a const reference to the matrix object
 		const Matrix<T>& eval(void) const;
 
+		// Methods for getting and modifying matrix size information
 		size_t rows(void) const;
 		size_t cols(void) const;
 		size_t size(void) const;
 		void resize(size_t rows, size_t cols);
 
+		// Sets matrix elements
 		void set(const size_t row, const size_t col, const T val);
 		void set(const size_t idx, const T val);
+
+		// Swaps matrix contents with another
 		void swap(Matrix<T> &mat);
+
+		// Fills matrix with a value
 		void fill(const T val);
+
+		// Fills matrix with 0
 		void zero(void);
+
+		// Fills matrix with random numbers between min and max
 		void rand(const T min = -1.0, const T max = 1.0);
 
+		// Returns a matrix initiated with random values
 		static Matrix<T> random(const size_t rows, const size_t cols, const T min = -1.0, const T max = 1.0);
 
+		// Performs in-place transpose of current matrix
 		void transpose(void);
+
+		// Transposes mat and places the result in this matrix
 		Matrix<T>& transpose(Matrix<T> &mat);
 
+		// Performs matrix multiplication with mat and returns a new matrix
 		Matrix<T> mmul(const Matrix<T> &mat);
+
+		// Performs the following matrix multiplication: *this = lhs * rhs + beta * (*this)
 		Matrix<T>& mmul(const Matrix<T> &lhs, const Matrix<T> &rhs, const T beta = 0);
 
+		// Gives the sum of all elements in the matrix
 		T sum(void);
+
+		// Gives the 2-norm of the matrix (Frobenius norm)
 		T norm(void);
+
+		// Methods for returning max/min elements in the matrix or their index positions
 		T maxElement(void);
 		int maxIndex(void);
 		T minElement(void);
@@ -304,7 +332,7 @@ namespace Cumat
 
 		size_t rows = expr.rows();
 		size_t cols = expr.cols();
-		// size_t vec_size = rows * cols;
+		size_t vec_size = rows * cols;
 
 		// Resize result matrix if necessary
 		if (mat.rows_ != rows || mat.cols_ != cols)
@@ -313,21 +341,28 @@ namespace Cumat
 		// Push output pointer to argument array
 		args.push_back(&mat.data_ptr_);
 
-		bool has_transpose_expr = true;
+		// Stores whether the current expression has any transpose sub-expressions
+		bool has_transpose_expr = false;
 
 		// Build the parameter list and the evaluation line for the kernel code
 		std::string params_line = "(" + mat.type() + " *out";
-		std::string eval_line = expr.buildKernel(params_line, start_num, args, false);
+		std::string eval_line = expr.buildKernel(params_line, start_num, args, false, has_transpose_expr);
 
-		// Push the vector size onto the argument array
-		args.push_back(&rows);
-		args.push_back(&cols);
+		if (has_transpose_expr) {
+			// If there's a transpose somewhere, we can't use a 1D grid to access everything
+			args.push_back(&rows);
+			args.push_back(&cols);
+			params_line += ", size_t rows, size_t cols)";
+		} else {
+			// Use a 1D grid if there's no transpose for faster performance
+			args.push_back(&vec_size);
+			params_line += ", size_t vec_size)";
+		}
 
-		params_line += ", size_t rows, size_t cols)";
 		eval_line += ";";
 
-		// std::cout << params_line << std::endl;
-		// std::cout << eval_line << std::endl;
+		std::cout << params_line << std::endl;
+		std::cout << eval_line << std::endl;
 
 		// Build the kernel code
 		const std::string kernel_code = "                                   \n\
@@ -391,13 +426,16 @@ namespace Cumat
 			delete[] ptx;
 		}
 
-		// Calculated necessary number of blocks needed
-		const size_t num_threads_x = 16;
-		const size_t num_threads_y = 16;
-		size_t num_blocks_x = (cols + num_threads_x - 1) / (num_threads_x);
-		size_t num_blocks_y = (rows + num_threads_y - 1) / (num_threads_y);
+		// Calculated necessary number of threads and blocks needed
+		const size_t total_threads = 256;
 
-		// Call the kernel from the ptx
+		const size_t num_threads_x = (has_transpose_expr) ? total_threads / 16 : total_threads;
+		const size_t num_threads_y = total_threads / num_threads_x;
+
+		const size_t num_blocks_x = (cols + num_threads_x - 1) / (num_threads_x);
+		const size_t num_blocks_y = (has_transpose_expr) ? (rows + num_threads_y - 1) / (num_threads_y) : 1;
+
+		// Call the kernel from the module
 		CUDA_SAFE_CALL(cuModuleGetFunction(&kernel, module, "cumat_kernel"));
 		CUDA_SAFE_CALL(cuLaunchKernel(kernel, num_blocks_x, num_blocks_y, 1, num_threads_x, num_threads_y, 1, 0, NULL, args.data(), 0));
 	}

@@ -2,7 +2,7 @@
 #define LIBCUMAT_UNARYOPEXPRESSION_H_
 
 #include "libcumat_expression.h"
-#include "libcumat_operators.h"
+#include "libcumat_unaryop.h"
 
 namespace Cumat
 {
@@ -18,7 +18,7 @@ class UnaryOpExpression: public Expression<UnaryOpExpression<Op, Expr>>
 	UnaryOpExpression(const Expr &u, const Op op) : u_(u), op_(op) {}
 	size_t rows(void) const;
 	size_t cols(void) const;
-	std::string buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const;
+	std::string buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose, bool &has_transpose_expr) const;
 };
 
 template<class Op, typename Expr>
@@ -34,9 +34,9 @@ size_t UnaryOpExpression<Op, Expr>::cols(void) const
 }
 
 template<class Op, typename Expr>
-std::string UnaryOpExpression<Op, Expr>::buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose) const
+std::string UnaryOpExpression<Op, Expr>::buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose, bool &has_transpose_expr) const
 {
-	return op_(u_, params, num, args, transpose);
+	return op_(u_, params, num, args, transpose, has_transpose_expr);
 }
 
 // -------------- Negation Overload --------------

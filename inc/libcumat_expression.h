@@ -1,10 +1,7 @@
 #ifndef LIBCUMAT_EXPR_H_
 #define LIBCUMAT_EXPR_H_
 
-#include <type_traits>
-
 #include "libcumat_forwarddeclarations.h"
-#include "libcumat_operators.h"
 
 namespace Cumat
 {

@@ -1,36 +1,46 @@
 #include <iostream>
 #include <chrono>
-#include <typeinfo>
 #include "Core"
 
 int main(int argc, char const* argv[])
 {
 	Cumat::init();
-	Cumat::Matrixf mat(std::move(Cumat::Matrixf::random(5, 6)));
-	Cumat::Matrixf mat2(std::move(Cumat::Matrixf::random(5, 6)));
-	Cumat::Matrixf result(6, 6);
+	Cumat::Matrixf mat(std::move(Cumat::Matrixf::random(5, 5)));
+	Cumat::Matrixf mat2(std::move(Cumat::Matrixf::random(5, 5)));
+	Cumat::Matrixf result(5, 5);
 
 	for (int i = 0; i < result.rows(); i++)
 		for (int j = 0; j < result.cols(); j++)
 			if (i == j)
 				result.set(i, j, 1);
 
-	std::cout << mat << std::endl << std::endl;
-	std::cout << mmuld(mat, result / 2.0).eval<float>() << std::endl << std::endl;
+	std::cout << (~(~pow(~mat, mat) + mat)).eval() << std::endl << std::endl;
+	std::cout << mmul(mat, result / 2.0).eval<float>() << std::endl << std::endl;
 	cudaDeviceSynchronize();
 
-	(mat2 + mat2).eval();
+	(mat2 + mat2).eval<float>();
 
 	std::cout << "A = " << std::endl << mat << std::endl << std::endl;
 	std::cout << "B = " << std::endl << mat2 << std::endl << std::endl;
 
 	auto start = std::chrono::high_resolution_clock::now();
-	mat = mmuld(mat + mat, result + result);
+	mat = mmul(mat + mat, result + result);
 	cudaDeviceSynchronize();
 	auto end = std::chrono::high_resolution_clock::now();
 
 	std::cout << "Result = " << std::endl << mat << std::endl << std::endl;
 
+	std::cout << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
+
+	Cumat::Matrixf large1(std::move(Cumat::Matrixf::random(4096, 4096)));
+	Cumat::Matrixf large2(std::move(Cumat::Matrixf::random(4096, 4096)));
+
+	large1 = large1 + large2;
+	cudaDeviceSynchronize();
+	start = std::chrono::high_resolution_clock::now();
+	large1 = large1 + large2;
+	cudaDeviceSynchronize();
+	end = std::chrono::high_resolution_clock::now();
 	std::cout << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
 
 	Cumat::end();
