@@ -1,5 +1,6 @@
 #include <iostream>
 #include <chrono>
+#include <typeinfo>
 #include "Core"
 
 int main(int argc, char const* argv[])
@@ -15,7 +16,7 @@ int main(int argc, char const* argv[])
 				result.set(i, j, 1);
 
 	std::cout << (~(~pow(~mat, mat) + mat)).eval() << std::endl << std::endl;
-	std::cout << mmul(mat, result / 2.0).eval<float>() << std::endl << std::endl;
+	std::cout << mmul(mat, result / 2.0f).eval<float>() << std::endl << std::endl;
 	cudaDeviceSynchronize();
 
 	(mat2 + mat2).eval<float>();

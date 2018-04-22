@@ -23,6 +23,7 @@
 
 #include "libcumat_expression.h"
 #include "libcumat_math.h"
+#include "libcumat_typestring.h"
 
 #define NVRTC_SAFE_CALL(x)                                        \
   do {                                                            \
@@ -65,7 +66,6 @@ namespace Cumat
 
 		template<class F>
 		void elementMathOp(Matrix<T> &src, Matrix<T> &dst, const F &func);
-		const std::string type(void) const;
 
 		//----------------------------------------------
 		// CUDA Library Wrappers
@@ -345,7 +345,7 @@ namespace Cumat
 		bool has_transpose_expr = false;
 
 		// Build the parameter list and the evaluation line for the kernel code
-		std::string params_line = "(" + mat.type() + " *out";
+		std::string params_line = "(" + Cumat::TypeString<T>::type + " *out";
 		std::string eval_line = expr.buildKernel(params_line, start_num, args, false, has_transpose_expr);
 
 		if (has_transpose_expr) {
@@ -500,5 +500,7 @@ namespace Cumat
 	typedef Matrix<double> Matrixd;
 	typedef Matrix<float> Matrixf;
 };
+
+#include "libcumat_matrix.cu"
 
 #endif

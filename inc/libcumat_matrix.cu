@@ -36,18 +36,6 @@ void Matrix<T>::elementMathOp(Matrix<T> &src, Matrix<T> &dst, const F &func)
 	thrust::transform(src.data_.begin(), src.data_.end(), dst.data_.begin(), func);
 }
 
-template<>
-const std::string Matrix<float>::type(void) const
-{
-	return "float";
-}
-
-template<>
-const std::string Matrix<double>::type(void) const
-{
-	return "double";
-}
-
 //----------------------------------------------
 // CUDA Library Wrappers
 //----------------------------------------------
@@ -169,7 +157,7 @@ template<typename T>
 std::string Matrix<T>::buildKernel(std::string &params, int &num, std::vector<void *> &args, const bool &transpose, bool &has_transpose_expr) const
 {
 	std::string id_num = std::to_string(num++);
-	params += (", " + this->type() + " *v" + id_num);
+	params += (", " + Cumat::TypeString<T>::type + " *v" + id_num);
 	args.push_back((void *)&data_ptr_);
 	return "v" + id_num + ((transpose) ? "[x * rows + y]" : "[y * cols + x]");
 }
@@ -999,7 +987,3 @@ Matrix<T>& Matrix<T>::operator/=(const Matrix<T> &rhs)
 	return *this;
 }
 };
-
-// Template explicit instantiation
-template class Cumat::Matrix<float>;
-template class Cumat::Matrix<double>;

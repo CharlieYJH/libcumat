@@ -1,6 +1,9 @@
 #ifndef LIBCUMAT_BINARYOP_H_
 #define LIBCUMAT_BINARYOP_H_
 
+#include <vector>
+#include "libcumat_typestring.h"
+
 namespace Cumat
 {
 namespace KernelOp
@@ -31,15 +34,15 @@ class BinaryScalarOp
 	const std::string preop_;
 	const std::string midop_;
 	const std::string cast_;
-	static const std::string type_;
+	// static const std::string type_;
 
 	public:
 	BinaryScalarOp(const std::string &preop, const std::string &midop, const std::string &cast) : preop_(preop), midop_(midop), cast_(cast) {}
 };
 
-template<> const std::string BinaryScalarOp<double>::type_ = "double";
-template<> const std::string BinaryScalarOp<float>::type_ = "float";
-template<> const std::string BinaryScalarOp<int>::type_ = "int";
+// template<> const std::string BinaryScalarOp<double>::type_ = "double";
+// template<> const std::string BinaryScalarOp<float>::type_ = "float";
+// template<> const std::string BinaryScalarOp<int>::type_ = "int";
 
 template<typename T>
 class BinaryScalarOpRight : public BinaryScalarOp<T>
@@ -54,7 +57,7 @@ class BinaryScalarOpRight : public BinaryScalarOp<T>
 
 		std::string id_num = std::to_string(num++);
 		std::string rhs = "s" + id_num;
-		params += ", " + type_ + " s" + id_num;
+		params += ", " + Cumat::TypeString<T>::type + " s" + id_num;
 		args.push_back((void *)&n);
 
 		return preop_ + "(" + cast_ + lhs + midop_ + cast_ + rhs + ")";
@@ -72,7 +75,7 @@ class BinaryScalarOpLeft : public BinaryScalarOp<T>
 	{
 		std::string id_num = std::to_string(num++);
 		std::string lhs = "s" + id_num;
-		params += ", " + type_ + " s" + id_num;
+		params += ", " + Cumat::TypeString<T>::type + " s" + id_num;
 		args.push_back((void *)&n);
 
 		std::string rhs = u.buildKernel(params, num, args, transpose, has_transpose_expr);
