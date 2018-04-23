@@ -1,9 +1,5 @@
 #include "libcumat_matrix.h"
 
-#define CURAND_CALL(x) do { if((x) != CURAND_STATUS_SUCCESS) { \
-    printf("Error at %s:%d\n" , __FILE__ , __LINE__);		 \
-    exit(EXIT_FAILURE);}} while(0)
-
 namespace Cumat
 {
 
@@ -43,13 +39,13 @@ void Matrix<T>::elementMathOp(Matrix<T> &src, Matrix<T> &dst, const F &func)
 template<>
 void Matrix<float>::curandGenerateRandom(curandGenerator_t &generator, float *output, size_t size)
 {
-	CURAND_CALL(curandGenerateUniform(generator, output, size));
+	CURAND_SAFE_CALL(curandGenerateUniform(generator, output, size));
 }
 
 template<>
 void Matrix<double>::curandGenerateRandom(curandGenerator_t &generator, double *output, size_t size)
 {
-	CURAND_CALL(curandGenerateUniformDouble(generator, output, size));
+	CURAND_SAFE_CALL(curandGenerateUniformDouble(generator, output, size));
 }
 
 template<>
@@ -117,6 +113,17 @@ void Matrix<double>::cublasNorm(cublasHandle_t &handle, int size, const double *
 //----------------------------------------------
 
 template<typename T>
+template<typename Expr>
+Matrix<T>::Matrix(const Expression<Expr> &rhs):
+	rows_(rhs.rows()),
+	cols_(rhs.cols()),
+	data_(rows_ * cols_)
+{
+	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
+	Matrix<T>::assign(*this, rhs);
+}
+
+template<typename T>
 Matrix<T>::Matrix(const size_t rows, const size_t cols):
 	rows_(rows),
 	cols_(cols),
@@ -151,6 +158,128 @@ Matrix<T>::Matrix(void):
 	data_(rows_ * cols_)
 {
 	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
+}
+
+template<typename T>
+template<typename Expr>
+void Matrix<T>::assign(Matrix<T> &mat, const Expression<Expr> &rhs)
+{
+	const Expr &expr = rhs;
+	int start_num = 0;
+	std::vector<void *> args;
+
+	size_t rows = expr.rows();
+	size_t cols = expr.cols();
+	size_t vec_size = rows * cols;
+
+	// Resize result matrix if necessary
+	if (mat.rows_ != rows || mat.cols_ != cols)
+		mat.resize(rows, cols);
+
+	// Push output pointer to argument array
+	args.push_back(&mat.data_ptr_);
+
+	// Stores whether the current expression has any transpose sub-expressions
+	bool has_transpose_expr = false;
+
+	// Build the parameter list and the evaluation line for the kernel code
+	std::string params_line = "(" + TypeString<T>::type + " *out";
+	std::string eval_line = expr.buildKernel(params_line, start_num, args, false, has_transpose_expr);
+
+	if (has_transpose_expr) {
+		// If there's a transpose somewhere, we can't use a 1D grid to access everything
+		args.push_back(&rows);
+		args.push_back(&cols);
+		params_line += ", size_t rows, size_t cols)";
+	} else {
+		// Use a 1D grid if there's no transpose for faster performance
+		args.push_back(&vec_size);
+		params_line += ", size_t vec_size)";
+	}
+
+	eval_line += ";";
+
+	// std::cout << params_line << std::endl;
+	// std::cout << eval_line << std::endl;
+
+	// Build the kernel code
+	const std::string kernel_code = "                                   \n\
+		extern \"C\" __global__                                         \n\
+		void cumat_kernel" + params_line + "							\n\
+		{                                                               \n\
+		  size_t x = blockIdx.x * blockDim.x + threadIdx.x;           	\n" +
+
+	((has_transpose_expr)
+	// Make use of 2D grid if there's a transpose somewhere in the expression
+	?	 "size_t y = blockIdx.y * blockDim.y + threadIdx.y;           	\n\
+		  if (x < cols && y < rows) {                               	\n"
+
+	// Otherwise use 1D grid for faster performance
+	:	 "const size_t y = 0;											\n\
+		  const size_t cols = 0;										\n\
+		  if (x < vec_size) {											\n"
+	) +
+
+			"out[y * cols + x] = " + eval_line + "                   	\n\
+		  }                                                             \n\
+		}                                                               \n";
+
+	CUmodule module;
+	CUfunction kernel;
+
+	if (module_cache.find(kernel_code) != module_cache.end()) {
+
+		// If this code was used before, load it from the cache to prevent recompiling
+		module = module_cache[kernel_code];
+
+	} else {
+
+		nvrtcProgram prog;
+		const char *opts[] = {"--gpu-architecture=compute_30"};
+		NVRTC_SAFE_CALL(nvrtcCreateProgram(&prog, kernel_code.c_str(), "cumat_kernel.cu", 0, NULL, NULL));
+		nvrtcResult compileResult = nvrtcCompileProgram(prog, 1, opts);
+
+		// Obtain compilation log from the program.
+		size_t logSize;
+		NVRTC_SAFE_CALL(nvrtcGetProgramLogSize(prog, &logSize));
+		char *log = new char[logSize];
+		NVRTC_SAFE_CALL(nvrtcGetProgramLog(prog, log));
+
+		if (compileResult != NVRTC_SUCCESS) {
+			std::cout << log << '\n';
+			delete[] log;
+			exit(1);
+		}
+
+		delete[] log;
+
+		// Obtain PTX from the program.
+		size_t ptxSize;
+		NVRTC_SAFE_CALL(nvrtcGetPTXSize(prog, &ptxSize));
+		char *ptx = new char[ptxSize];
+		NVRTC_SAFE_CALL(nvrtcGetPTX(prog, ptx));
+		// Destroy the program.
+		NVRTC_SAFE_CALL(nvrtcDestroyProgram(&prog));
+
+		// Load and cache the module
+		CUDA_SAFE_CALL(cuModuleLoadData(&module, ptx));
+		module_cache[kernel_code] = module;
+
+		delete[] ptx;
+	}
+
+	// Calculated necessary number of threads and blocks needed
+	const size_t total_threads = 256;
+
+	const size_t num_threads_x = (has_transpose_expr) ? total_threads / 16 : total_threads;
+	const size_t num_threads_y = total_threads / num_threads_x;
+
+	const size_t num_blocks_x = (cols + num_threads_x - 1) / (num_threads_x);
+	const size_t num_blocks_y = (has_transpose_expr) ? (rows + num_threads_y - 1) / (num_threads_y) : 1;
+
+	// Call the kernel from the module
+	CUDA_SAFE_CALL(cuModuleGetFunction(&kernel, module, "cumat_kernel"));
+	CUDA_SAFE_CALL(cuLaunchKernel(kernel, num_blocks_x, num_blocks_y, 1, num_threads_x, num_threads_y, 1, 0, NULL, args.data(), 0));
 }
 
 template<typename T>
@@ -859,6 +988,15 @@ Matrix<T>& Matrix<T>::round(void)
 //----------------------------------------------
 
 // -------------- Assignment --------------
+
+template<typename T>
+template<typename Expr>
+Matrix<T>& Matrix<T>::operator=(const Expression<Expr> &rhs)
+{
+	Matrix<T>::assign(*this, rhs);
+	return *this;
+}
+
 template<typename T>
 Matrix<T>& Matrix<T>::operator=(const Matrix<T> &rhs)
 {
@@ -874,6 +1012,7 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T> &rhs)
 }
 
 // -------------- Accessor --------------
+
 template<typename T>
 T Matrix<T>::operator()(const size_t row, const size_t col) const
 {
@@ -888,14 +1027,8 @@ T Matrix<T>::operator()(const size_t idx) const
 	return data_[idx];
 }
 
-// -------------- Matrix Multiplication --------------
-// template<typename T>
-// Matrix<T> Matrix<T>::operator^(const Matrix<T> &rhs)
-// {
-	// return (*this).mmul(rhs);
-// }
-
 // -------------- Scalar Addition --------------
+
 template<typename T>
 Matrix<T>& Matrix<T>::operator+=(const T val)
 {
@@ -914,6 +1047,7 @@ Matrix<T>& Matrix<T>::operator+=(const T val)
 }
 
 // -------------- Matrix Addition --------------
+
 template<typename T>
 Matrix<T>& Matrix<T>::operator+=(const Matrix<T> &rhs)
 {
@@ -925,6 +1059,16 @@ Matrix<T>& Matrix<T>::operator+=(const Matrix<T> &rhs)
 	// use cuBLAS saxpy to do y = alpha * x + y where alpha = 1, x = rhs, and y = data_
 	Matrix<T>::cublasAxpy(Cumat::cublas_handle, rows_ * cols_, 1.0, X, 1, Y, 1);
 
+	return *this;
+}
+
+// -------------- Expression Addition --------------
+
+template<typename T>
+template<typename Expr>
+Matrix<T> &Matrix<T>::operator+=(const Expression<Expr> &rhs)
+{
+	*this = *this + rhs;
 	return *this;
 }
 
@@ -951,6 +1095,16 @@ Matrix<T>& Matrix<T>::operator-=(const Matrix<T> &rhs)
 	return *this;
 }
 
+// -------------- Expression Subtraction --------------
+
+template<typename T>
+template<typename Expr>
+Matrix<T> &Matrix<T>::operator-=(const Expression<Expr> &rhs)
+{
+	*this = *this - rhs;
+	return *this;
+}
+
 // -------------- Scalar Multiplication --------------
 template<typename T>
 Matrix<T>& Matrix<T>::operator*=(const T val)
@@ -962,6 +1116,7 @@ Matrix<T>& Matrix<T>::operator*=(const T val)
 }
 
 // -------------- Matrix Multiplication (element-wise) --------------
+
 template<typename T>
 Matrix<T>& Matrix<T>::operator*=(const Matrix<T> &rhs)
 {
@@ -970,7 +1125,18 @@ Matrix<T>& Matrix<T>::operator*=(const Matrix<T> &rhs)
 	return *this;
 }
 
+// -------------- Expression Multiplication (element-wise) --------------
+
+template<typename T>
+template<typename Expr>
+Matrix<T> &Matrix<T>::operator*=(const Expression<Expr> &rhs)
+{
+	*this = *this * rhs;
+	return *this;
+}
+
 // -------------- Scalar Division (element-wise) --------------
+
 template<typename T>
 Matrix<T>& Matrix<T>::operator/=(const T val)
 {
@@ -979,6 +1145,7 @@ Matrix<T>& Matrix<T>::operator/=(const T val)
 }
 
 // -------------- Matrix Division (element-wise) --------------
+
 template<typename T>
 Matrix<T>& Matrix<T>::operator/=(const Matrix<T> &rhs)
 {
@@ -986,4 +1153,15 @@ Matrix<T>& Matrix<T>::operator/=(const Matrix<T> &rhs)
 	thrust::transform(data_.begin(), data_.end(), rhs.data_.begin(), data_.begin(), thrust::divides<T>());
 	return *this;
 }
+
+// -------------- Expression Division (element-wise) --------------
+
+template<typename T>
+template<typename Expr>
+Matrix<T> &Matrix<T>::operator/=(const Expression<Expr> &rhs)
+{
+	*this = *this / rhs;
+	return *this;
+}
+
 };

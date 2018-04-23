@@ -1,6 +1,8 @@
 #ifndef LIBCUMAT_TRANSPOSE_H_
 #define LIBCUMAT_TRANSPOSE_H_
 
+#include <vector>
+
 #include "libcumat_expression.h"
 
 namespace Cumat

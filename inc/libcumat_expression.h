@@ -26,6 +26,15 @@ class Expression
 	Matrix<T> eval(void) const;
 };
 
+template<typename Expr>
+template<typename T>
+Matrix<T> Expression<Expr>::eval(void) const
+{
+	Matrix<T> mat;
+	Matrix<T>::assign(mat, *this);
+	return mat;
+}
+
 }
 
 #endif

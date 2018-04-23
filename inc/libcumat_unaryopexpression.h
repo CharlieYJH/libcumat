@@ -1,6 +1,8 @@
 #ifndef LIBCUMAT_UNARYOPEXPRESSION_H_
 #define LIBCUMAT_UNARYOPEXPRESSION_H_
 
+#include <vector>
+
 #include "libcumat_expression.h"
 #include "libcumat_unaryop.h"
 

@@ -9,7 +9,6 @@
 #include <thrust/extrema.h>
 #include <thrust/fill.h>
 #include <cublas_v2.h>
-#include <helper_cuda.h>
 #include <curand.h>
 #include <nvrtc.h>
 #include <cuda.h>
@@ -20,32 +19,42 @@
 #include <assert.h>
 #include <cstdlib>
 #include <unordered_map>
+#include <vector>
 
+#include "util/helper_cuda.h"
 #include "libcumat_expression.h"
 #include "libcumat_math.h"
 #include "libcumat_typestring.h"
 
 #define NVRTC_SAFE_CALL(x)                                        \
-  do {                                                            \
-    nvrtcResult result = x;                                       \
-    if (result != NVRTC_SUCCESS) {                                \
-      std::cerr << "\nerror: " #x " failed with error "           \
-                << nvrtcGetErrorString(result) << '\n';           \
-      exit(EXIT_FAILURE);                                         \
-    }                                                             \
-  } while(0)
+	do {                                                          \
+		nvrtcResult result = x;                                   \
+		if (result != NVRTC_SUCCESS) {                            \
+			std::cerr << "\nerror: " #x " failed with error "     \
+			<< nvrtcGetErrorString(result) << '\n';           	  \
+			exit(EXIT_FAILURE);                                   \
+		}                                                         \
+	} while(0)
 
 #define CUDA_SAFE_CALL(x)                                         \
-  do {                                                            \
-    CUresult result = x;                                          \
-    if (result != CUDA_SUCCESS) {                                 \
-      const char *msg;                                            \
-      cuGetErrorName(result, &msg);                               \
-      std::cerr << "\nerror: " #x " failed with error "           \
-                << msg << '\n';                                   \
-      exit(EXIT_FAILURE);                                         \
-    }                                                             \
-  } while(0)
+	do {                                                          \
+		CUresult result = x;                                      \
+		if (result != CUDA_SUCCESS) {                             \
+			const char *msg;                                      \
+			cuGetErrorName(result, &msg);                         \
+			std::cerr << "\nerror: " #x " failed with error "     \
+			<< msg << '\n';                                   	  \
+			exit(EXIT_FAILURE);                                   \
+		}                                                         \
+	} while(0)
+
+#define CURAND_SAFE_CALL(x)										  \
+	do {														  \
+		if((x) != CURAND_STATUS_SUCCESS) { 						  \
+			printf("Error at %s:%d\n" , __FILE__ , __LINE__);	  \
+			exit(EXIT_FAILURE);									  \
+		}														  \
+	} while(0)
 
 namespace Cumat
 {
@@ -243,9 +252,6 @@ namespace Cumat
 		T operator()(const size_t row, const size_t col) const;
 		T operator()(const size_t idx) const;
 
-		// -------------- Matrix Multiplication --------------
-		// Matrix<T> operator^(const Matrix<T> &rhs);
-
 		// -------------- Scalar Addition --------------
 		Matrix<T>& operator+=(const T val);
 
@@ -307,195 +313,6 @@ namespace Cumat
 			return os;
 		}
 	};
-
-	template<typename T>
-	template<typename Expr>
-	Matrix<T>::Matrix(const Expression<Expr> &rhs):
-		rows_(0),
-		cols_(0)
-	{
-		data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
-		Matrix<T>::assign(*this, rhs);
-	}
-
-	//----------------------------------------------
-	// Expression Assignment Method
-	//----------------------------------------------
-
-	template<typename T>
-	template<typename Expr>
-	void Matrix<T>::assign(Matrix<T> &mat, const Expression<Expr> &rhs)
-	{
-		const Expr &expr = rhs;
-		int start_num = 0;
-		std::vector<void *> args;
-
-		size_t rows = expr.rows();
-		size_t cols = expr.cols();
-		size_t vec_size = rows * cols;
-
-		// Resize result matrix if necessary
-		if (mat.rows_ != rows || mat.cols_ != cols)
-			mat.resize(rows, cols);
-
-		// Push output pointer to argument array
-		args.push_back(&mat.data_ptr_);
-
-		// Stores whether the current expression has any transpose sub-expressions
-		bool has_transpose_expr = false;
-
-		// Build the parameter list and the evaluation line for the kernel code
-		std::string params_line = "(" + Cumat::TypeString<T>::type + " *out";
-		std::string eval_line = expr.buildKernel(params_line, start_num, args, false, has_transpose_expr);
-
-		if (has_transpose_expr) {
-			// If there's a transpose somewhere, we can't use a 1D grid to access everything
-			args.push_back(&rows);
-			args.push_back(&cols);
-			params_line += ", size_t rows, size_t cols)";
-		} else {
-			// Use a 1D grid if there's no transpose for faster performance
-			args.push_back(&vec_size);
-			params_line += ", size_t vec_size)";
-		}
-
-		eval_line += ";";
-
-		std::cout << params_line << std::endl;
-		std::cout << eval_line << std::endl;
-
-		// Build the kernel code
-		const std::string kernel_code = "                                   \n\
-			extern \"C\" __global__                                         \n\
-			void cumat_kernel" + params_line + "							\n\
-			{                                                               \n\
-			  size_t x = blockIdx.x * blockDim.x + threadIdx.x;           	\n" +
-
-		((has_transpose_expr)
-		// Make use of 2D grid if there's a transpose somewhere in the expression
-		?	 "size_t y = blockIdx.y * blockDim.y + threadIdx.y;           	\n\
-			  if (x < cols && y < rows) {                               	\n"
-
-		// Otherwise use 1D grid for faster performance
-		:	 "const size_t y = 0;											\n\
-			  const size_t cols = 0;										\n\
-			  if (x < vec_size) {											\n"
-		) +
-
-				"out[y * cols + x] = " + eval_line + "                   	\n\
-			  }                                                             \n\
-			}                                                               \n";
-
-		CUmodule module;
-		CUfunction kernel;
-
-		if (module_cache.find(kernel_code) != module_cache.end()) {
-
-			// If this code was used before, load it from the cache to prevent recompiling
-			module = module_cache[kernel_code];
-
-		} else {
-
-			nvrtcProgram prog;
-			const char *opts[] = {"--gpu-architecture=compute_30"};
-			NVRTC_SAFE_CALL(nvrtcCreateProgram(&prog, kernel_code.c_str(), "cumat_kernel.cu", 0, NULL, NULL));
-			nvrtcResult compileResult = nvrtcCompileProgram(prog, 1, opts);
-
-			// Obtain compilation log from the program.
-			size_t logSize;
-			NVRTC_SAFE_CALL(nvrtcGetProgramLogSize(prog, &logSize));
-			char *log = new char[logSize];
-			NVRTC_SAFE_CALL(nvrtcGetProgramLog(prog, log));
-			// std::cout << log << '\n';
-			delete[] log;
-			if (compileResult != NVRTC_SUCCESS)
-				exit(1);
-
-			// Obtain PTX from the program.
-			size_t ptxSize;
-			NVRTC_SAFE_CALL(nvrtcGetPTXSize(prog, &ptxSize));
-			char *ptx = new char[ptxSize];
-			NVRTC_SAFE_CALL(nvrtcGetPTX(prog, ptx));
-			// Destroy the program.
-			NVRTC_SAFE_CALL(nvrtcDestroyProgram(&prog));
-
-			// Load and cache the module
-			CUDA_SAFE_CALL(cuModuleLoadData(&module, ptx));
-			module_cache[kernel_code] = module;
-
-			delete[] ptx;
-		}
-
-		// Calculated necessary number of threads and blocks needed
-		const size_t total_threads = 256;
-
-		const size_t num_threads_x = (has_transpose_expr) ? total_threads / 16 : total_threads;
-		const size_t num_threads_y = total_threads / num_threads_x;
-
-		const size_t num_blocks_x = (cols + num_threads_x - 1) / (num_threads_x);
-		const size_t num_blocks_y = (has_transpose_expr) ? (rows + num_threads_y - 1) / (num_threads_y) : 1;
-
-		// Call the kernel from the module
-		CUDA_SAFE_CALL(cuModuleGetFunction(&kernel, module, "cumat_kernel"));
-		CUDA_SAFE_CALL(cuLaunchKernel(kernel, num_blocks_x, num_blocks_y, 1, num_threads_x, num_threads_y, 1, 0, NULL, args.data(), 0));
-	}
-
-	//----------------------------------------------
-	// Expression-related Operator Overloads
-	//----------------------------------------------
-	
-	template<typename T>
-	template<typename Expr>
-	Matrix<T>& Matrix<T>::operator=(const Expression<Expr> &rhs)
-	{
-		Matrix<T>::assign(*this, rhs);
-		return *this;
-	}
-
-	template<typename T>
-	template<typename Expr>
-	Matrix<T> &Matrix<T>::operator+=(const Expression<Expr> &rhs)
-	{
-		*this = *this + rhs;
-		return *this;
-	}
-
-	template<typename T>
-	template<typename Expr>
-	Matrix<T> &Matrix<T>::operator-=(const Expression<Expr> &rhs)
-	{
-		*this = *this - rhs;
-		return *this;
-	}
-
-	template<typename T>
-	template<typename Expr>
-	Matrix<T> &Matrix<T>::operator*=(const Expression<Expr> &rhs)
-	{
-		*this = *this * rhs;
-		return *this;
-	}
-
-	template<typename T>
-	template<typename Expr>
-	Matrix<T> &Matrix<T>::operator/=(const Expression<Expr> &rhs)
-	{
-		*this = *this / rhs;
-		return *this;
-	}
-
-	//----------------------------------------------
-	// Expression Evaluation
-	//----------------------------------------------
-
-	template<typename Expr>
-	template<typename T>
-	Matrix<T> Expression<Expr>::eval(void) const
-	{
-		Matrix<T> mat;
-		Matrix<T>::assign(mat, *this);
-		return mat;
-	}
 
 	typedef Matrix<double> Matrixd;
 	typedef Matrix<float> Matrixf;

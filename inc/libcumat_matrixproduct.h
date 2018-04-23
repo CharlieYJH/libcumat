@@ -1,6 +1,8 @@
 #ifndef LIBCUMAT_MATRIXPRODUCT_H_
 #define LIBCUMAT_MATRIXPRODUCT_H_
 
+#include <vector>
+
 #include "libcumat_forwarddeclarations.h"
 #include "libcumat_expression.h"
 

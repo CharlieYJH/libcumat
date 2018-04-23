@@ -1,6 +1,8 @@
 #ifndef LIBCUMAT_UNARYOP_H_
 #define LIBCUMAT_UNARYOP_H_
 
+#include <vector>
+
 namespace Cumat
 {
 namespace KernelOp

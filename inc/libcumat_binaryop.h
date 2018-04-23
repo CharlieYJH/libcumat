@@ -2,6 +2,7 @@
 #define LIBCUMAT_BINARYOP_H_
 
 #include <vector>
+
 #include "libcumat_typestring.h"
 
 namespace Cumat
@@ -57,7 +58,7 @@ class BinaryScalarOpRight : public BinaryScalarOp<T>
 
 		std::string id_num = std::to_string(num++);
 		std::string rhs = "s" + id_num;
-		params += ", " + Cumat::TypeString<T>::type + " s" + id_num;
+		params += ", " + TypeString<T>::type + " s" + id_num;
 		args.push_back((void *)&n);
 
 		return preop_ + "(" + cast_ + lhs + midop_ + cast_ + rhs + ")";
@@ -75,7 +76,7 @@ class BinaryScalarOpLeft : public BinaryScalarOp<T>
 	{
 		std::string id_num = std::to_string(num++);
 		std::string lhs = "s" + id_num;
-		params += ", " + Cumat::TypeString<T>::type + " s" + id_num;
+		params += ", " + TypeString<T>::type + " s" + id_num;
 		args.push_back((void *)&n);
 
 		std::string rhs = u.buildKernel(params, num, args, transpose, has_transpose_expr);

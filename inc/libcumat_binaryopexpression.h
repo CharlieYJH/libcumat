@@ -1,6 +1,7 @@
 #ifndef LIBCUMAT_BINARYOPEXPRESSION_H_
 #define LIBCUMAT_BINARYOPEXPRESSION_H_
 
+#include <vector>
 #include <type_traits>
 
 #include "libcumat_expression.h"
