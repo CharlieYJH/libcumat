@@ -61,30 +61,6 @@ void Matrix<double>::cublasTranspose(cublasHandle_t &handle, const int rows, con
 }
 
 template<>
-void Matrix<float>::cublasAxpy(cublasHandle_t &handle, const int size, const float alpha, const float *x, const int incx, float *y, const int incy)
-{
-	checkCudaErrors(cublasSaxpy(handle, size, &alpha, x, incx, y, incy));
-}
-
-template<>
-void Matrix<double>::cublasAxpy(cublasHandle_t &handle, const int size, const double alpha, const double *x, const int incx, double *y, const int incy)
-{
-	checkCudaErrors(cublasDaxpy(handle, size, &alpha, x, incx, y, incy));
-}
-
-template<>
-void Matrix<float>::cublasScal(cublasHandle_t &handle, const int size, const float alpha, float *x, int incx)
-{
-	checkCudaErrors(cublasSscal(handle, size, &alpha, x, incx));
-}
-
-template<>
-void Matrix<double>::cublasScal(cublasHandle_t &handle, const int size, const double alpha, double *x, int incx)
-{
-	checkCudaErrors(cublasDscal(handle, size, &alpha, x, incx));
-}
-
-template<>
 void Matrix<float>::cublasGemm(cublasHandle_t &handle, int m, int n, int k, const float alpha, const float *A, int lda, const float *B, int ldb, const float beta, float *C, int ldc)
 {
 	checkCudaErrors(cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, m, n, k, &alpha, A, lda, B, ldb, &beta, C, ldc));
@@ -94,18 +70,6 @@ template<>
 void Matrix<double>::cublasGemm(cublasHandle_t &handle, int m, int n, int k, const double alpha, const double *A, int lda, const double *B, int ldb, const double beta, double *C, int ldc)
 {
 	checkCudaErrors(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, m, n, k, &alpha, A, lda, B, ldb, &beta, C, ldc));
-}
-
-template<>
-void Matrix<float>::cublasNorm(cublasHandle_t &handle, int size, const float *x, int incx, float *result)
-{
-	checkCudaErrors(cublasSnrm2(handle, size, x, incx, result));
-}
-
-template<>
-void Matrix<double>::cublasNorm(cublasHandle_t &handle, int size, const double *x, int incx, double *result)
-{
-	checkCudaErrors(cublasDnrm2(handle, size, x, incx, result));
 }
 
 //----------------------------------------------
@@ -386,7 +350,7 @@ void Matrix<T>::rand(const T min, const T max)
 	curandSetPseudoRandomGeneratorSeed(prng, (unsigned long long)clock());
 	Matrix<T>::curandGenerateRandom(prng, thrust::raw_pointer_cast(data_.data()), rows_ * cols_);
 
-	(*this *= (max - min)) += min;
+	*this = (*this) * (max - min) + min;
 }
 
 template<typename T>
@@ -481,12 +445,7 @@ T Matrix<T>::sum(void)
 template<typename T>
 T Matrix<T>::norm(void)
 {
-	const T *X = thrust::raw_pointer_cast(data_.data());
-	T result;
-
-	Matrix<T>::cublasNorm(Cumat::cublas_handle, rows_ * cols_, X, 1, &result);
-
-	return result;
+	return std::sqrt(thrust::transform_reduce(data_.begin(), data_.end(), MathOp::square<T>(), 0.0f, thrust::plus<T>()));
 }
 
 template<typename T>
@@ -1004,32 +963,12 @@ Matrix<T>& Matrix<T>::operator=(const Expression<Expr> &rhs)
 }
 
 template<typename T>
-template<typename OtherT>
-Matrix<T>& Matrix<T>::operator=(const Matrix<OtherT> &rhs)
-{
-	const size_t rhs_rows = rhs.rows();
-	const size_t rhs_cols = rhs.cols();
-	const thrust::device_vector<OtherT> &rhs_data = rhs.thrustVector();
-
-	if (rows_ != rhs_rows || cols_ != rhs_cols)
-		this->resize(rhs_rows, rhs_cols);
-
-	thrust::copy(rhs_data.begin(), rhs_data.end(), data_.begin());
-
-	return *this;
-}
-
-template<typename T>
 Matrix<T>& Matrix<T>::operator=(const Matrix<T> &rhs)
 {
 	if (&rhs == this)
 		return *this;
 
-	if (rows_ != rhs.rows_ || cols_ != rhs.cols_)
-		this->resize(rhs.rows_, rhs.cols_);
-
-	thrust::copy(rhs.data_.begin(), rhs.data_.end(), data_.begin());
-
+	Matrix<T>::assign(*this, rhs);
 	return *this;
 }
 
@@ -1049,138 +988,41 @@ T Matrix<T>::operator()(const size_t idx) const
 	return data_[idx];
 }
 
-// -------------- Scalar Addition --------------
+// -------------- Addition --------------
 
 template<typename T>
-Matrix<T>& Matrix<T>::operator+=(const T val)
-{
-	T *scalar = nullptr;
-
-	// Create a temporary buffer on the device for the single scalar value
-	checkCudaErrors(cudaMalloc((void **)&scalar, sizeof(T)));
-	checkCudaErrors(cudaMemcpy(scalar, &val, sizeof(T), cudaMemcpyHostToDevice));
-
-	// use cuBLAS saxpy to do y = alpha * x + y where alpha = 1, x = val, and y = data_
-	Matrix<T>::cublasAxpy(Cumat::cublas_handle, rows_ * cols_, 1.0, scalar, 0, thrust::raw_pointer_cast(data_.data()), 1);
-
-	checkCudaErrors(cudaFree(scalar));
-
-	return *this;
-}
-
-// -------------- Matrix Addition --------------
-
-template<typename T>
-Matrix<T>& Matrix<T>::operator+=(const Matrix<T> &rhs)
-{
-	assert(rows_ == rhs.rows_ && cols_ == rhs.cols_);
-
-	const T *X = thrust::raw_pointer_cast(rhs.data_.data());
-	T *Y = raw_pointer_cast(data_.data());
-
-	// use cuBLAS saxpy to do y = alpha * x + y where alpha = 1, x = rhs, and y = data_
-	Matrix<T>::cublasAxpy(Cumat::cublas_handle, rows_ * cols_, 1.0, X, 1, Y, 1);
-
-	return *this;
-}
-
-// -------------- Expression Addition --------------
-
-template<typename T>
-template<typename Expr>
-Matrix<T> &Matrix<T>::operator+=(const Expression<Expr> &rhs)
+template<typename OtherT>
+Matrix<T>& Matrix<T>::operator+=(const OtherT &rhs)
 {
 	*this = *this + rhs;
 	return *this;
 }
 
-// -------------- Scalar Subtraction --------------
-template<typename T>
-Matrix<T>& Matrix<T>::operator-=(const T val)
-{
-	*this += -val;
-	return *this;
-}
-
-// -------------- Matrix Subtraction --------------
-template<typename T>
-Matrix<T>& Matrix<T>::operator-=(const Matrix<T> &rhs)
-{
-	assert(rows_ == rhs.rows_ && cols_ == rhs.cols_);
-
-	const T *X = thrust::raw_pointer_cast(rhs.data_.data());
-	T *Y = thrust::raw_pointer_cast(data_.data());
-
-	// use cuBLAS saxpy to do y = alpha * x + y where alpha = -1, x = rhs, and y = data_
-	Matrix<T>::cublasAxpy(Cumat::cublas_handle, rows_ * cols_, -1.0, X, 1, Y, 1);
-
-	return *this;
-}
-
-// -------------- Expression Subtraction --------------
+// -------------- Subtraction --------------
 
 template<typename T>
-template<typename Expr>
-Matrix<T> &Matrix<T>::operator-=(const Expression<Expr> &rhs)
+template<typename OtherT>
+Matrix<T>& Matrix<T>::operator-=(const OtherT &rhs)
 {
 	*this = *this - rhs;
 	return *this;
 }
 
-// -------------- Scalar Multiplication --------------
-template<typename T>
-Matrix<T>& Matrix<T>::operator*=(const T val)
-{
-	// Use cublas<t>scal to do x = alpha * x where alpha = val and x = data_
-	Matrix<T>::cublasScal(Cumat::cublas_handle, rows_ * cols_, val, thrust::raw_pointer_cast(data_.data()), 1);
-
-	return *this;
-}
-
-// -------------- Matrix Multiplication (element-wise) --------------
+// -------------- Multiplication (element-wise) --------------
 
 template<typename T>
-Matrix<T>& Matrix<T>::operator*=(const Matrix<T> &rhs)
-{
-	assert(rows_ == rhs.rows_ && cols_ == rhs.cols_);
-	thrust::transform(data_.begin(), data_.end(), rhs.data_.begin(), data_.begin(), thrust::multiplies<T>());
-	return *this;
-}
-
-// -------------- Expression Multiplication (element-wise) --------------
-
-template<typename T>
-template<typename Expr>
-Matrix<T> &Matrix<T>::operator*=(const Expression<Expr> &rhs)
+template<typename OtherT>
+Matrix<T>& Matrix<T>::operator*=(const OtherT &rhs)
 {
 	*this = *this * rhs;
 	return *this;
 }
 
-// -------------- Scalar Division (element-wise) --------------
+// -------------- Division (element-wise) --------------
 
 template<typename T>
-Matrix<T>& Matrix<T>::operator/=(const T val)
-{
-	*this *= (1.0 / val);
-	return *this;
-}
-
-// -------------- Matrix Division (element-wise) --------------
-
-template<typename T>
-Matrix<T>& Matrix<T>::operator/=(const Matrix<T> &rhs)
-{
-	assert(rows_ == rhs.rows_ && cols_ == rhs.cols_);
-	thrust::transform(data_.begin(), data_.end(), rhs.data_.begin(), data_.begin(), thrust::divides<T>());
-	return *this;
-}
-
-// -------------- Expression Division (element-wise) --------------
-
-template<typename T>
-template<typename Expr>
-Matrix<T> &Matrix<T>::operator/=(const Expression<Expr> &rhs)
+template<typename OtherT>
+Matrix<T>& Matrix<T>::operator/=(const OtherT &rhs)
 {
 	*this = *this / rhs;
 	return *this;

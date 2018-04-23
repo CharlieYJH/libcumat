@@ -30,19 +30,22 @@ int main(int argc, char const* argv[])
 	cudaDeviceSynchronize();
 	auto end = std::chrono::high_resolution_clock::now();
 
-	mat.transpose();
-
+	std::cout << "Result = " << std::endl << mat << std::endl << std::endl;
+	mat /= 2;
 	std::cout << "Result = " << std::endl << mat << std::endl << std::endl;
 
 	std::cout << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
 
 	Cumat::Matrixf large1(std::move(Cumat::Matrixf::random(4096, 4096)));
 	Cumat::Matrixf large2(std::move(Cumat::Matrixf::random(4096, 4096)));
+	Cumat::Matrixd large3(std::move(Cumat::Matrixd::random(4096, 4096)));
 
-	large1 = large1 + large2;
+	large1 = mmul(large2, large2);
+	large1 /= large3;
 	cudaDeviceSynchronize();
 	start = std::chrono::high_resolution_clock::now();
-	large1 = large1 + large2;
+	// large1 = mmul(large2, large2);
+	large3.rand();
 	cudaDeviceSynchronize();
 	end = std::chrono::high_resolution_clock::now();
 	std::cout << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;

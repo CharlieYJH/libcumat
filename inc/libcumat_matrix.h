@@ -6,6 +6,7 @@
 #include <thrust/host_vector.h>
 #include <thrust/functional.h>
 #include <thrust/transform.h>
+#include <thrust/transform_reduce.h>
 #include <thrust/extrema.h>
 #include <thrust/fill.h>
 #include <cublas_v2.h>
@@ -20,6 +21,7 @@
 #include <cstdlib>
 #include <unordered_map>
 #include <vector>
+#include <cmath>
 
 #include "util/helper_cuda.h"
 #include "libcumat_expression.h"
@@ -82,10 +84,7 @@ namespace Cumat
 
 		void curandGenerateRandom(curandGenerator_t &generator, T *output, size_t size);
 		void cublasTranspose(cublasHandle_t &handle, const int rows, const int cols, const T alpha, const T *in_mat, const T beta, T *out_mat);
-		void cublasAxpy(cublasHandle_t &handle, const int size, const T alpha, const T *x, const int incx, T *y, const int incy);
-		void cublasScal(cublasHandle_t &handle, const int size, const T alpha, T *x, const int incx);
 		void cublasGemm(cublasHandle_t &handle, int m, int n, int k, const T alpha, const T *A, int lda, const T *B, int ldb, const T beta, T *C, int ldc);
-		void cublasNorm(cublasHandle_t &handle, int size, const T *x, int incx, T *result);
 
 		public:
 
@@ -250,9 +249,6 @@ namespace Cumat
 		template<typename Expr>
 		Matrix<T>& operator=(const Expression<Expr> &rhs);
 
-		template<typename OtherT>
-		Matrix<T>& operator=(const Matrix<OtherT> &rhs);
-
 		Matrix<T>& operator=(const Matrix<T> &rhs);
 
 		// -------------- Accessor --------------
@@ -260,45 +256,21 @@ namespace Cumat
 
 		T operator()(const size_t idx) const;
 
-		// -------------- Scalar Addition --------------
-		Matrix<T>& operator+=(const T val);
+		// -------------- Addition --------------
+		template<typename OtherT>
+		Matrix<T>& operator+=(const OtherT &rhs);
 
-		// -------------- Matrix Addition --------------
-		Matrix<T>& operator+=(const Matrix<T> &rhs);
+		// -------------- Subtraction --------------
+		template<typename OtherT>
+		Matrix<T>& operator-=(const OtherT &rhs);
 
-		// -------------- Expression Addition --------------
-		template<typename Expr>
-		Matrix<T>& operator+=(const Expression<Expr> &rhs);
+		// -------------- Multiplication (element-wise) --------------
+		template<typename OtherT>
+		Matrix<T>& operator*=(const OtherT &rhs);
 
-		// -------------- Scalar Subtraction --------------
-		Matrix<T>& operator-=(const T val);
-
-		// -------------- Matrix Subtraction --------------
-		Matrix<T>& operator-=(const Matrix<T> &rhs);
-
-		// -------------- Expression Subtraction --------------
-		template<typename Expr>
-		Matrix<T>& operator-=(const Expression<Expr> &rhs);
-
-		// -------------- Scalar Multiplication --------------
-		Matrix<T>& operator*=(const T val);
-
-		// -------------- Matrix Multiplication (element-wise) --------------
-		Matrix<T>& operator*=(const Matrix<T> &rhs);
-
-		// -------------- Expression Multiplication (element-wise) --------------
-		template<typename Expr>
-		Matrix<T>& operator*=(const Expression<Expr> &rhs);
-
-		// -------------- Scalar Division (element-wise) --------------
-		Matrix<T>& operator/=(const T val);
-
-		// -------------- Matrix Division (element-wise) --------------
-		Matrix<T>& operator/=(const Matrix<T> &rhs);
-
-		// -------------- Expression Division (element-wise) --------------
-		template<typename Expr>
-		Matrix<T>& operator/=(const Expression<Expr> &rhs);
+		// -------------- Division (element-wise) --------------
+		template<typename OtherT>
+		Matrix<T>& operator/=(const OtherT &rhs);
 
 		// -------------- Output Stream Operator --------------
 		friend std::ostream& operator<<(std::ostream &os, const Matrix &mat)
