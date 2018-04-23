@@ -49,15 +49,15 @@ void Matrix<double>::curandGenerateRandom(curandGenerator_t &generator, double *
 }
 
 template<>
-void Matrix<float>::cublasTranspose(cublasHandle_t &handle, const int rows, const int cols, const float *alpha, const float *in_mat, const float *beta, float *out_mat)
+void Matrix<float>::cublasTranspose(cublasHandle_t &handle, const int rows, const int cols, const float alpha, const float *in_mat, const float beta, float *out_mat)
 {
-	checkCudaErrors(cublasSgeam(handle, CUBLAS_OP_T, CUBLAS_OP_T, rows, cols, alpha, in_mat, cols, beta, in_mat, cols, out_mat, rows));
+	checkCudaErrors(cublasSgeam(handle, CUBLAS_OP_T, CUBLAS_OP_T, rows, cols, &alpha, in_mat, cols, &beta, in_mat, cols, out_mat, rows));
 }
 
 template<>
-void Matrix<double>::cublasTranspose(cublasHandle_t &handle, const int rows, const int cols, const double *alpha, const double *in_mat, const double *beta, double *out_mat)
+void Matrix<double>::cublasTranspose(cublasHandle_t &handle, const int rows, const int cols, const double alpha, const double *in_mat, const double beta, double *out_mat)
 {
-	checkCudaErrors(cublasDgeam(handle, CUBLAS_OP_T, CUBLAS_OP_T, rows, cols, alpha, in_mat, cols, beta, in_mat, cols, out_mat, rows));
+	checkCudaErrors(cublasDgeam(handle, CUBLAS_OP_T, CUBLAS_OP_T, rows, cols, &alpha, in_mat, cols, &beta, in_mat, cols, out_mat, rows));
 }
 
 template<>
@@ -298,6 +298,12 @@ const Matrix<T>& Matrix<T>::eval(void) const
 }
 
 template<typename T>
+const thrust::device_vector<T>& Matrix<T>::thrustVector(void) const
+{
+	return data_;
+}
+
+template<typename T>
 size_t Matrix<T>::rows(void) const
 {
 	return rows_;
@@ -403,7 +409,7 @@ void Matrix<T>::transpose(void)
 	T *A = thrust::raw_pointer_cast(data_.data());
 	T *B = thrust::raw_pointer_cast(temp.data());
 
-	Matrix<T>::cublasTranspose(Cumat::cublas_handle, rows_, cols_, &alpha, A, &beta, B);
+	Matrix<T>::cublasTranspose(Cumat::cublas_handle, rows_, cols_, alpha, A, beta, B);
 
 	data_.swap(temp);
 	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
@@ -424,7 +430,7 @@ Matrix<T>& Matrix<T>::transpose(Matrix<T> &mat)
 	T *A = thrust::raw_pointer_cast(data_.data());
 	T *B = thrust::raw_pointer_cast(mat.data_.data());
 
-	Matrix<T>::cublasTranspose(Cumat::cublas_handle, rows_, cols_, &alpha, A, &beta, B);
+	Matrix<T>::cublasTranspose(Cumat::cublas_handle, rows_, cols_, alpha, A, beta, B);
 
 	return mat;
 }
@@ -994,6 +1000,22 @@ template<typename Expr>
 Matrix<T>& Matrix<T>::operator=(const Expression<Expr> &rhs)
 {
 	Matrix<T>::assign(*this, rhs);
+	return *this;
+}
+
+template<typename T>
+template<typename OtherT>
+Matrix<T>& Matrix<T>::operator=(const Matrix<OtherT> &rhs)
+{
+	const size_t rhs_rows = rhs.rows();
+	const size_t rhs_cols = rhs.cols();
+	const thrust::device_vector<OtherT> &rhs_data = rhs.thrustVector();
+
+	if (rows_ != rhs_rows || cols_ != rhs_cols)
+		this->resize(rhs_rows, rhs_cols);
+
+	thrust::copy(rhs_data.begin(), rhs_data.end(), data_.begin());
+
 	return *this;
 }
 

@@ -81,7 +81,7 @@ namespace Cumat
 		//----------------------------------------------
 
 		void curandGenerateRandom(curandGenerator_t &generator, T *output, size_t size);
-		void cublasTranspose(cublasHandle_t &handle, const int rows, const int cols, const T *alpha, const T *in_mat, const T *beta, T *out_mat);
+		void cublasTranspose(cublasHandle_t &handle, const int rows, const int cols, const T alpha, const T *in_mat, const T beta, T *out_mat);
 		void cublasAxpy(cublasHandle_t &handle, const int size, const T alpha, const T *x, const int incx, T *y, const int incy);
 		void cublasScal(cublasHandle_t &handle, const int size, const T alpha, T *x, const int incx);
 		void cublasGemm(cublasHandle_t &handle, int m, int n, int k, const T alpha, const T *A, int lda, const T *B, int ldb, const T beta, T *C, int ldc);
@@ -105,6 +105,9 @@ namespace Cumat
 
 		// Returns a const reference to the matrix object
 		const Matrix<T>& eval(void) const;
+
+		// Returns a const reference to the underlying device vector
+		const thrust::device_vector<T>& thrustVector(void) const;
 
 		// Methods for getting and modifying matrix size information
 		size_t rows(void) const;
@@ -246,10 +249,15 @@ namespace Cumat
 		// -------------- Assignment --------------
 		template<typename Expr>
 		Matrix<T>& operator=(const Expression<Expr> &rhs);
+
+		template<typename OtherT>
+		Matrix<T>& operator=(const Matrix<OtherT> &rhs);
+
 		Matrix<T>& operator=(const Matrix<T> &rhs);
 
 		// -------------- Accessor --------------
 		T operator()(const size_t row, const size_t col) const;
+
 		T operator()(const size_t idx) const;
 
 		// -------------- Scalar Addition --------------

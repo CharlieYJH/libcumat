@@ -8,6 +8,7 @@ int main(int argc, char const* argv[])
 	Cumat::init();
 	Cumat::Matrixf mat(std::move(Cumat::Matrixf::random(5, 5)));
 	Cumat::Matrixf mat2(std::move(Cumat::Matrixf::random(5, 5)));
+	Cumat::Matrixd dmat(5, 5, 1);
 	Cumat::Matrixf result(5, 5);
 
 	for (int i = 0; i < result.rows(); i++)
@@ -28,6 +29,8 @@ int main(int argc, char const* argv[])
 	mat = mmul(mat + mat, result + result);
 	cudaDeviceSynchronize();
 	auto end = std::chrono::high_resolution_clock::now();
+
+	mat.transpose();
 
 	std::cout << "Result = " << std::endl << mat << std::endl << std::endl;
 
