@@ -46,6 +46,7 @@ int main(int argc, char const* argv[])
 	cudaDeviceSynchronize();
 	start = std::chrono::high_resolution_clock::now();
 	large1 = pow(large1 + large2, 2.0);
+	// large1 = mmul(large2, large2);
 	cudaDeviceSynchronize();
 	end = std::chrono::high_resolution_clock::now();
 	std::cout << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;

@@ -209,6 +209,74 @@ struct scalarAtan2Leftf : public BinaryScalarOpLeft<T>
 	scalarAtan2Leftf(void) : BinaryScalarOpLeft("atan2f", ",", "float") {}
 };
 
+struct vectorMax : public BinaryVectorOp
+{
+	vectorMax(void) : BinaryVectorOp("fmax", ",", "double") {}
+};
+
+struct vectorMaxf : public BinaryVectorOp
+{
+	vectorMaxf(void) : BinaryVectorOp("fmaxf", ",", "float") {}
+};
+
+template<typename T>
+struct scalarMaxRight : public BinaryScalarOpRight<T>
+{
+	scalarMaxRight(void) : BinaryScalarOpRight("fmax", ",", "double") {}
+};
+
+template<typename T>
+struct scalarMaxRightf : public BinaryScalarOpRight<T>
+{
+	scalarMaxRightf(void) : BinaryScalarOpRight("fmaxf", ",", "float") {}
+};
+
+template<typename T>
+struct scalarMaxLeft : public BinaryScalarOpLeft<T>
+{
+	scalarMaxLeft(void) : BinaryScalarOpLeft("fmax", ",", "double") {}
+};
+
+template<typename T>
+struct scalarMaxLeftf : public BinaryScalarOpLeft<T>
+{
+	scalarMaxLeftf(void) : BinaryScalarOpLeft("fmaxf", ",", "float") {}
+};
+
+struct vectorMin : public BinaryVectorOp
+{
+	vectorMin(void) : BinaryVectorOp("fmin", ",", "double") {}
+};
+
+struct vectorMinf : public BinaryVectorOp
+{
+	vectorMinf(void) : BinaryVectorOp("fminf", ",", "float") {}
+};
+
+template<typename T>
+struct scalarMinRight : public BinaryScalarOpRight<T>
+{
+	scalarMinRight(void) : BinaryScalarOpRight("fmin", ",", "double") {}
+};
+
+template<typename T>
+struct scalarMinRightf : public BinaryScalarOpRight<T>
+{
+	scalarMinRightf(void) : BinaryScalarOpRight("fminf", ",", "float") {}
+};
+
+template<typename T>
+struct scalarMinLeft : public BinaryScalarOpLeft<T>
+{
+	scalarMinLeft(void) : BinaryScalarOpLeft("fmin", ",", "double") {}
+};
+
+template<typename T>
+struct scalarMinLeftf : public BinaryScalarOpLeft<T>
+{
+	scalarMinLeftf(void) : BinaryScalarOpLeft("fminf", ",", "float") {}
+};
+
 }
 }
 

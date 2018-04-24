@@ -237,6 +237,103 @@ const BinaryOpExpression<KernelOp::scalarAtan2Leftf<T>, Expr, T> atan2f(const T 
 	return BinaryOpExpression<KernelOp::scalarAtan2Leftf<T>, Expr, T>(u, n);
 }
 
+// -------------- Max --------------
+
+template<typename Expr1, typename Expr2>
+const BinaryOpExpression<KernelOp::vectorMax, Expr1, Expr2> max(const Expression<Expr1> &lhs, const Expression<Expr2> &rhs)
+{
+	const Expr1 &u = lhs;
+	const Expr2 &v = rhs;
+	assert(u.rows() == v.rows() && u.cols() == v.cols());
+	return BinaryOpExpression<KernelOp::vectorMax, Expr1, Expr2>(u, v);
+}
+
+template<typename Expr1, typename Expr2>
+const BinaryOpExpression<KernelOp::vectorMaxf, Expr1, Expr2> maxf(const Expression<Expr1> &lhs, const Expression<Expr2> &rhs)
+{
+	const Expr1 &u = lhs;
+	const Expr2 &v = rhs;
+	assert(u.rows() == v.rows() && u.cols() == v.cols());
+	return BinaryOpExpression<KernelOp::vectorMaxf, Expr1, Expr2>(u, v);
+}
+
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarMaxRight<T>, Expr, T> max(const Expression<Expr> &lhs, const T &n)
+{
+	const Expr &u = lhs;
+	return BinaryOpExpression<KernelOp::scalarMaxRight<T>, Expr, T>(u, n);
+}
+
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarMaxRightf<T>, Expr, T> maxf(const Expression<Expr> &lhs, const T &n)
+{
+	const Expr &u = lhs;
+	return BinaryOpExpression<KernelOp::scalarMaxRightf<T>, Expr, T>(u, n);
+}
+
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarMaxLeft<T>, Expr, T> max(const T &n, const Expression<Expr> &rhs)
+{
+	const Expr &u = rhs;
+	return BinaryOpExpression<KernelOp::scalarMaxLeft<T>, Expr, T>(u, n);
+}
+
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarMaxLeftf<T>, Expr, T> maxf(const T &n, const Expression<Expr> &rhs)
+{
+	const Expr &u = rhs;
+	return BinaryOpExpression<KernelOp::scalarMaxLeftf<T>, Expr, T>(u, n);
+}
+
+// -------------- Min --------------
+
+template<typename Expr1, typename Expr2>
+const BinaryOpExpression<KernelOp::vectorMin, Expr1, Expr2> min(const Expression<Expr1> &lhs, const Expression<Expr2> &rhs)
+{
+	const Expr1 &u = lhs;
+	const Expr2 &v = rhs;
+	assert(u.rows() == v.rows() && u.cols() == v.cols());
+	return BinaryOpExpression<KernelOp::vectorMin, Expr1, Expr2>(u, v);
+}
+
+template<typename Expr1, typename Expr2>
+const BinaryOpExpression<KernelOp::vectorMinf, Expr1, Expr2> minf(const Expression<Expr1> &lhs, const Expression<Expr2> &rhs)
+{
+	const Expr1 &u = lhs;
+	const Expr2 &v = rhs;
+	assert(u.rows() == v.rows() && u.cols() == v.cols());
+	return BinaryOpExpression<KernelOp::vectorMinf, Expr1, Expr2>(u, v);
+}
+
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarMinRight<T>, Expr, T> min(const Expression<Expr> &lhs, const T &n)
+{
+	const Expr &u = lhs;
+	return BinaryOpExpression<KernelOp::scalarMinRight<T>, Expr, T>(u, n);
+}
+
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarMinRightf<T>, Expr, T> minf(const Expression<Expr> &lhs, const T &n)
+{
+	const Expr &u = lhs;
+	return BinaryOpExpression<KernelOp::scalarMinRightf<T>, Expr, T>(u, n);
+}
+
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarMinLeft<T>, Expr, T> min(const T &n, const Expression<Expr> &rhs)
+{
+	const Expr &u = rhs;
+	return BinaryOpExpression<KernelOp::scalarMinLeft<T>, Expr, T>(u, n);
+}
+
+template<typename Expr, typename T, typename = typename std::enable_if<std::is_integral<T>::value || std::is_floating_point<T>::value, void>::type>
+const BinaryOpExpression<KernelOp::scalarMinLeftf<T>, Expr, T> minf(const T &n, const Expression<Expr> &rhs)
+{
+	const Expr &u = rhs;
+	return BinaryOpExpression<KernelOp::scalarMinLeftf<T>, Expr, T>(u, n);
+}
+
+
 }
 
 #endif
