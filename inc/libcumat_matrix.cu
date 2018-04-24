@@ -1,21 +1,21 @@
-#include "libcumat_matrix.h"
+#ifndef LIBCUMAT_MATRIX_H_
+#error "Don't include libcumat_matrix.cu directly. Include libcumat_matrix.h"
+#endif
+
+#ifndef LIBCUMAT_MATRIX_CU_
+#define LIBCUMAT_MATRIX_CU_
 
 namespace Cumat
 {
 
-cublasHandle_t cublas_handle;
-std::unordered_map<std::string, CUmodule> module_cache;
-
 void init(void)
 {
-	checkCudaErrors(cublasCreate(&Cumat::cublas_handle));
+	CudaHandler::init();
 }
 
 void end(void)
 {
-	checkCudaErrors(cublasDestroy(Cumat::cublas_handle));
-	for(std::pair<std::string, CUmodule> iter : module_cache)
-		cuModuleUnload(iter.second);
+	CudaHandler::end();
 }
 
 //----------------------------------------------
@@ -33,52 +33,22 @@ void Matrix<T>::elementMathOp(Matrix<T> &src, Matrix<T> &dst, const F &func)
 }
 
 //----------------------------------------------
-// CUDA Library Wrappers
-//----------------------------------------------
-
-template<>
-void Matrix<float>::curandGenerateRandom(curandGenerator_t &generator, float *output, size_t size)
-{
-	CURAND_SAFE_CALL(curandGenerateUniform(generator, output, size));
-}
-
-template<>
-void Matrix<double>::curandGenerateRandom(curandGenerator_t &generator, double *output, size_t size)
-{
-	CURAND_SAFE_CALL(curandGenerateUniformDouble(generator, output, size));
-}
-
-template<>
-void Matrix<float>::cublasTranspose(cublasHandle_t &handle, const int rows, const int cols, const float alpha, const float *in_mat, const float beta, float *out_mat)
-{
-	checkCudaErrors(cublasSgeam(handle, CUBLAS_OP_T, CUBLAS_OP_T, rows, cols, &alpha, in_mat, cols, &beta, in_mat, cols, out_mat, rows));
-}
-
-template<>
-void Matrix<double>::cublasTranspose(cublasHandle_t &handle, const int rows, const int cols, const double alpha, const double *in_mat, const double beta, double *out_mat)
-{
-	checkCudaErrors(cublasDgeam(handle, CUBLAS_OP_T, CUBLAS_OP_T, rows, cols, &alpha, in_mat, cols, &beta, in_mat, cols, out_mat, rows));
-}
-
-template<>
-void Matrix<float>::cublasGemm(cublasHandle_t &handle, int m, int n, int k, const float alpha, const float *A, int lda, const float *B, int ldb, const float beta, float *C, int ldc)
-{
-	checkCudaErrors(cublasSgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, m, n, k, &alpha, A, lda, B, ldb, &beta, C, ldc));
-}
-
-template<>
-void Matrix<double>::cublasGemm(cublasHandle_t &handle, int m, int n, int k, const double alpha, const double *A, int lda, const double *B, int ldb, const double beta, double *C, int ldc)
-{
-	checkCudaErrors(cublasDgemm(handle, CUBLAS_OP_N, CUBLAS_OP_N, m, n, k, &alpha, A, lda, B, ldb, &beta, C, ldc));
-}
-
-//----------------------------------------------
 // Public methods
 //----------------------------------------------
 
 template<typename T>
 template<typename Expr>
 Matrix<T>::Matrix(const Expression<Expr> &rhs):
+	rows_(rhs.rows()),
+	cols_(rhs.cols()),
+	data_(rows_ * cols_)
+{
+	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
+	Matrix<T>::assign(*this, rhs);
+}
+
+template<typename T>
+Matrix<T>::Matrix(const Matrix<T> &rhs):
 	rows_(rhs.rows()),
 	cols_(rhs.cols()),
 	data_(rows_ * cols_)
@@ -191,10 +161,10 @@ void Matrix<T>::assign(Matrix<T> &mat, const Expression<Expr> &rhs)
 	CUmodule module;
 	CUfunction kernel;
 
-	if (module_cache.find(kernel_code) != module_cache.end()) {
+	if (CudaHandler::module_cache.find(kernel_code) != CudaHandler::module_cache.end()) {
 
 		// If this code was used before, load it from the cache to prevent recompiling
-		module = module_cache[kernel_code];
+		module = CudaHandler::module_cache[kernel_code];
 
 	} else {
 
@@ -227,7 +197,7 @@ void Matrix<T>::assign(Matrix<T> &mat, const Expression<Expr> &rhs)
 
 		// Load and cache the module
 		CUDA_SAFE_CALL(cuModuleLoadData(&module, ptx));
-		module_cache[kernel_code] = module;
+		CudaHandler::module_cache[kernel_code] = module;
 
 		delete[] ptx;
 	}
@@ -344,12 +314,7 @@ template<typename T>
 void Matrix<T>::rand(const T min, const T max)
 {
 	assert(max > min);
-
-	curandGenerator_t prng;
-	curandCreateGenerator(&prng, CURAND_RNG_PSEUDO_DEFAULT);
-	curandSetPseudoRandomGeneratorSeed(prng, (unsigned long long)clock());
-	Matrix<T>::curandGenerateRandom(prng, thrust::raw_pointer_cast(data_.data()), rows_ * cols_);
-
+	CudaHandler::curandGenerateRandom<T>(thrust::raw_pointer_cast(data_.data()), rows_ * cols_);
 	*this = (*this) * (max - min) + min;
 }
 
@@ -373,7 +338,7 @@ void Matrix<T>::transpose(void)
 	T *A = thrust::raw_pointer_cast(data_.data());
 	T *B = thrust::raw_pointer_cast(temp.data());
 
-	Matrix<T>::cublasTranspose(Cumat::cublas_handle, rows_, cols_, alpha, A, beta, B);
+	CudaHandler::cublasTranspose<T>(rows_, cols_, alpha, A, beta, B);
 
 	data_.swap(temp);
 	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
@@ -386,7 +351,7 @@ Matrix<T>& Matrix<T>::transpose(Matrix<T> &mat)
 	assert(&mat != this);
 
 	if (mat.rows_ != cols_ && mat.cols_ != rows_)
-		mat.resize(cols_, rows_);
+		this->resize(mat.cols_, mat.rows_);
 
 	T alpha = 1.0;
 	T beta = 0;
@@ -394,9 +359,9 @@ Matrix<T>& Matrix<T>::transpose(Matrix<T> &mat)
 	T *A = thrust::raw_pointer_cast(data_.data());
 	T *B = thrust::raw_pointer_cast(mat.data_.data());
 
-	Matrix<T>::cublasTranspose(Cumat::cublas_handle, rows_, cols_, alpha, A, beta, B);
+	CudaHandler::cublasTranspose<T>(rows_, cols_, alpha, B, beta, A);
 
-	return mat;
+	return *this;
 }
 
 template<typename T>
@@ -431,7 +396,7 @@ Matrix<T>& Matrix<T>::mmul(const Matrix<T> &lhs, const Matrix<T> &rhs, const T b
 	
 	// Use cublas<t>gemm() to perform C = alpha * A * B + beta * C
 	// where alpha = 1, A = data_, B = mat, beta = 0, and C = outmat
-	Matrix<T>::cublasGemm(Cumat::cublas_handle, rhs.cols_, lhs.rows_, lhs.cols_, 1.0, B, rhs.cols_, A, lhs.cols_, beta, C, rhs.cols_);
+	CudaHandler::cublasGemm<T>(rhs.cols_, lhs.rows_, lhs.cols_, 1.0, B, rhs.cols_, A, lhs.cols_, beta, C, rhs.cols_);
 
 	return *this;
 }
@@ -1029,3 +994,5 @@ Matrix<T>& Matrix<T>::operator/=(const OtherT &rhs)
 }
 
 };
+
+#endif

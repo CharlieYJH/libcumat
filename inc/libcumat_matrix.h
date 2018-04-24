@@ -19,54 +19,21 @@
 #include <algorithm>
 #include <assert.h>
 #include <cstdlib>
-#include <unordered_map>
 #include <vector>
 #include <cmath>
 
-#include "util/helper_cuda.h"
 #include "libcumat_expression.h"
 #include "libcumat_math.h"
 #include "libcumat_typestring.h"
-
-#define NVRTC_SAFE_CALL(x)                                        \
-	do {                                                          \
-		nvrtcResult result = x;                                   \
-		if (result != NVRTC_SUCCESS) {                            \
-			std::cerr << "\nerror: " #x " failed with error "     \
-			<< nvrtcGetErrorString(result) << '\n';           	  \
-			exit(EXIT_FAILURE);                                   \
-		}                                                         \
-	} while(0)
-
-#define CUDA_SAFE_CALL(x)                                         \
-	do {                                                          \
-		CUresult result = x;                                      \
-		if (result != CUDA_SUCCESS) {                             \
-			const char *msg;                                      \
-			cuGetErrorName(result, &msg);                         \
-			std::cerr << "\nerror: " #x " failed with error "     \
-			<< msg << '\n';                                   	  \
-			exit(EXIT_FAILURE);                                   \
-		}                                                         \
-	} while(0)
-
-#define CURAND_SAFE_CALL(x)										  \
-	do {														  \
-		if((x) != CURAND_STATUS_SUCCESS) { 						  \
-			printf("Error at %s:%d\n" , __FILE__ , __LINE__);	  \
-			exit(EXIT_FAILURE);									  \
-		}														  \
-	} while(0)
+#include "libcumat_cudahandler.h"
 
 namespace Cumat
 {
-	extern std::unordered_map<std::string, CUmodule> module_cache;
-	extern cublasHandle_t cublas_handle;
 	void init(void);
 	void end(void);
 
 	template<typename T>
-	class Matrix : public Expression<Matrix<T>>
+	class Matrix : public Expression<Matrix<T>>, public CudaHandler
 	{
 		private:
 
@@ -78,19 +45,12 @@ namespace Cumat
 		template<class F>
 		void elementMathOp(Matrix<T> &src, Matrix<T> &dst, const F &func);
 
-		//----------------------------------------------
-		// CUDA Library Wrappers
-		//----------------------------------------------
-
-		void curandGenerateRandom(curandGenerator_t &generator, T *output, size_t size);
-		void cublasTranspose(cublasHandle_t &handle, const int rows, const int cols, const T alpha, const T *in_mat, const T beta, T *out_mat);
-		void cublasGemm(cublasHandle_t &handle, int m, int n, int k, const T alpha, const T *A, int lda, const T *B, int ldb, const T beta, T *C, int ldc);
-
 		public:
 
 		// Class constructors
 		template<typename Expr>
 		Matrix(const Expression<Expr> &rhs);
+		Matrix(const Matrix<T> &rhs);
 		Matrix(const size_t rows, const size_t cols);
 		Matrix(const size_t rows, const size_t cols, const T val);
 		Matrix(void);

@@ -4,5 +4,4 @@
 *.bat
 new.txt
 *.vim
-test.cpp
-command.txt
+test.*
