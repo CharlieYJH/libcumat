@@ -35,15 +35,10 @@ class BinaryScalarOp
 	const std::string preop_;
 	const std::string midop_;
 	const std::string cast_;
-	// static const std::string type_;
 
 	public:
 	BinaryScalarOp(const std::string &preop, const std::string &midop, const std::string &cast) : preop_(preop), midop_(midop), cast_(cast) {}
 };
-
-// template<> const std::string BinaryScalarOp<double>::type_ = "double";
-// template<> const std::string BinaryScalarOp<float>::type_ = "float";
-// template<> const std::string BinaryScalarOp<int>::type_ = "int";
 
 template<typename T>
 class BinaryScalarOpRight : public BinaryScalarOp<T>

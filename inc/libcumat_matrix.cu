@@ -19,20 +19,6 @@ void end(void)
 }
 
 //----------------------------------------------
-// Private methods
-//----------------------------------------------
-
-template<typename T>
-template<class F>
-void Matrix<T>::elementMathOp(Matrix<T> &src, Matrix<T> &dst, const F &func)
-{
-	if (src.rows_ == 0 || src.cols_ == 0)
-		return;
-
-	thrust::transform(src.data_.begin(), src.data_.end(), dst.data_.begin(), func);
-}
-
-//----------------------------------------------
 // Public methods
 //----------------------------------------------
 
@@ -442,242 +428,6 @@ int Matrix<T>::minIndex(void)
 }
 
 //----------------------------------------------
-// Element-Wise Math Operations
-// *this = op(mat)
-//----------------------------------------------
-
-template<typename T>
-Matrix<T>& Matrix<T>::abs(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::abs<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::inverse(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::inverse<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::clip(Matrix<T> &mat, const T min, const T max)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::clip<T>(min, max));
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::exp(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::exp<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::exp10(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::exp10<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::exp2(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::exp2<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::log(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::log<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::log1p(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::log1p<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::log10(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::log10<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::log2(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::log2<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::pow(Matrix<T> &mat, const T n)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::pow<T>(n));
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::square(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::square<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::sqrt(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::sqrt<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::rsqrt(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::rsqrt<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::cube(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::cube<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::cbrt(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::cbrt<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::rcbrt(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::rcbrt<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::sin(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::sin<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::cos(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::cos<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::tan(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::tan<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::asin(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::asin<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::acos(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::acos<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::atan(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::atan<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::sinh(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::sinh<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::cosh(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::cosh<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::tanh(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::tanh<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::asinh(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::asinh<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::acosh(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::acosh<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::atanh(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::atanh<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::sigmoid(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::sigmoid<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::ceil(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::ceil<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::floor(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::floor<T>());
-	return *this;
-}
-
-template<typename T>
-Matrix<T>& Matrix<T>::round(Matrix<T> &mat)
-{
-	Matrix<T>::elementMathOp(mat, *this, MathOp::round<T>());
-	return *this;
-}
-
-//----------------------------------------------
 // In-Place Element-Wise Math Operations
 // *this = op(*this)
 //----------------------------------------------
@@ -685,231 +435,234 @@ Matrix<T>& Matrix<T>::round(Matrix<T> &mat)
 template<typename T>
 Matrix<T>& Matrix<T>::abs(void)
 {
-	this->abs(*this);
+	*this = Cumat::abs(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::inverse(void)
 {
-	this->inverse(*this);
+	*this = 1.0f / *this;
 	return *this;
 }
 
 template<typename T>
-Matrix<T>& Matrix<T>::clip(const T min, const T max)
+Matrix<T>& Matrix<T>::clip(T min, T max)
 {
-	this->clip(*this, min, max);
+	if (min > max)
+		std::swap(min, max);
+
+	*this = Cumat::max(Cumat::min(*this, max), min);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::exp(void)
 {
-	this->exp(*this);
+	*this = Cumat::exp(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::exp10(void)
 {
-	this->exp10(*this);
+	*this = Cumat::exp10(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::exp2(void)
 {
-	this->exp2(*this);
+	*this = Cumat::exp2(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::log(void)
 {
-	this->log(*this);
+	*this = Cumat::log(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::log1p(void)
 {
-	this->log1p(*this);
+	*this = Cumat::log1p(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::log10(void)
 {
-	this->log10(*this);
+	*this = Cumat::log10(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::log2(void)
 {
-	this->log2(*this);
+	*this = Cumat::log2(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::pow(const T n)
 {
-	this->pow(*this, n);
+	*this = Cumat::pow(*this, n);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::square(void)
 {
-	this->square(*this);
+	*this = (*this) * (*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::sqrt(void)
 {
-	this->sqrt(*this);
+	*this = Cumat::sqrt(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::rsqrt(void)
 {
-	this->rsqrt(*this);
+	*this = Cumat::rsqrt(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::cube(void)
 {
-	this->cube(*this);
+	*this = (*this) * (*this) * (*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::cbrt(void)
 {
-	this->cbrt(*this);
+	*this = Cumat::cbrt(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::rcbrt(void)
 {
-	this->rcbrt(*this);
+	*this = Cumat::rcbrt(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::sin(void)
 {
-	this->sin(*this);
+	*this = Cumat::sin(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::cos(void)
 {
-	this->cos(*this);
+	*this = Cumat::cos(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::tan(void)
 {
-	this->tan(*this);
+	*this = Cumat::tan(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::asin(void)
 {
-	this->asin(*this);
+	*this = Cumat::asin(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::acos(void)
 {
-	this->acos(*this);
+	*this = Cumat::acos(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::atan(void)
 {
-	this->atan(*this);
+	*this = Cumat::atan(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::sinh(void)
 {
-	this->sinh(*this);
+	*this = Cumat::sinh(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::cosh(void)
 {
-	this->cosh(*this);
+	*this = Cumat::cosh(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::tanh(void)
 {
-	this->tanh(*this);
+	*this = Cumat::tanh(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::asinh(void)
 {
-	this->asinh(*this);
+	*this = Cumat::asinh(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::acosh(void)
 {
-	this->acosh(*this);
+	*this = Cumat::acosh(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::atanh(void)
 {
-	this->atanh(*this);
+	*this = Cumat::atanh(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::sigmoid(void)
 {
-	this->sigmoid(*this);
+	*this = 1.0f / (1.0f + Cumat::exp(-*this));
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::ceil(void)
 {
-	this->ceil(*this);
+	*this = Cumat::ceil(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::floor(void)
 {
-	this->floor(*this);
+	*this = Cumat::floor(*this);
 	return *this;
 }
 
 template<typename T>
 Matrix<T>& Matrix<T>::round(void)
 {
-	this->round(*this);
+	*this = Cumat::round(*this);
 	return *this;
 }
 

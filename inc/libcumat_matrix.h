@@ -42,17 +42,22 @@ namespace Cumat
 		thrust::device_vector<T> data_;
 		CUdeviceptr data_ptr_;
 
-		template<class F>
-		void elementMathOp(Matrix<T> &src, Matrix<T> &dst, const F &func);
-
 		public:
 
-		// Class constructors
+		// Creates a matrix that is the result of the rhs expression
 		template<typename Expr>
 		Matrix(const Expression<Expr> &rhs);
+
+		// Creates a matrix that is a copy of the rhs matrix
 		Matrix(const Matrix<T> &rhs);
+
+		// Creates a rows x cols matrix with all elements initiated as 0
 		Matrix(const size_t rows, const size_t cols);
+
+		// Creates a rows x cols matrix with all elements initiated as val
 		Matrix(const size_t rows, const size_t cols, const T val);
+
+		// Creates a 0 x 0 matrix (no memory allocation is done)
 		Matrix(void);
 		
 		// Expression assignment
@@ -68,14 +73,22 @@ namespace Cumat
 		// Returns a const reference to the underlying device vector
 		const thrust::device_vector<T>& thrustVector(void) const;
 
-		// Methods for getting and modifying matrix size information
+		// Returns the number of rows
 		size_t rows(void) const;
+
+		// Retuns the number of columns
 		size_t cols(void) const;
+
+		// Returns the total size (rows * columns)
 		size_t size(void) const;
+
+		// Resizes the matrix
 		void resize(size_t rows, size_t cols);
 
-		// Sets matrix elements
+		// Sets matrix element indexed by row and col to the specified value
 		void set(const size_t row, const size_t col, const T val);
+
+		// Sets the matrix element indexed by the vector index to the specified value
 		void set(const size_t idx, const T val);
 
 		// Swaps matrix contents with another
@@ -90,7 +103,7 @@ namespace Cumat
 		// Fills matrix with random numbers between min and max
 		void rand(const T min = -1.0, const T max = 1.0);
 
-		// Returns a matrix initiated with random values
+		// Returns a matrix initiated with random values between min and max
 		static Matrix<T> random(const size_t rows, const size_t cols, const T min = -1.0, const T max = 1.0);
 
 		// Performs in-place transpose of current matrix
@@ -111,53 +124,17 @@ namespace Cumat
 		// Gives the 2-norm of the matrix (Frobenius norm)
 		T norm(void);
 
-		// Methods for returning max/min elements in the matrix or their index positions
+		// Returns the max element in the matrix
 		T maxElement(void);
+
+		// Returns the index of the max element of the matrix
 		int maxIndex(void);
+
+		// Returns the min element of the matrix
 		T minElement(void);
+
+		// Returns the index of the min element of the matrix
 		int minIndex(void);
-
-		//----------------------------------------------
-		// Element-Wise Math Operations
-		// *this = op(mat)
-		//----------------------------------------------
-
-		Matrix<T>& abs(Matrix<T> &mat);
-		Matrix<T>& inverse(Matrix<T> &mat);
-		Matrix<T>& clip(Matrix<T> &mat, const T min, const T max);
-
-		Matrix<T>& exp(Matrix<T> &mat);
-		Matrix<T>& exp10(Matrix<T> &mat);
-		Matrix<T>& exp2(Matrix<T> &mat);
-		Matrix<T>& log(Matrix<T> &mat);
-		Matrix<T>& log1p(Matrix<T> &mat);
-		Matrix<T>& log10(Matrix<T> &mat);
-		Matrix<T>& log2(Matrix<T> &mat);
-		Matrix<T>& pow(Matrix<T> &mat, const T n);
-		Matrix<T>& square(Matrix<T> &mat);
-		Matrix<T>& sqrt(Matrix<T> &mat);
-		Matrix<T>& rsqrt(Matrix<T> &mat);
-		Matrix<T>& cube(Matrix<T> &mat);
-		Matrix<T>& cbrt(Matrix<T> &mat);
-		Matrix<T>& rcbrt(Matrix<T> &mat);
-
-		Matrix<T>& sin(Matrix<T> &mat);
-		Matrix<T>& cos(Matrix<T> &mat);
-		Matrix<T>& tan(Matrix<T> &mat);
-		Matrix<T>& asin(Matrix<T> &mat);
-		Matrix<T>& acos(Matrix<T> &mat);
-		Matrix<T>& atan(Matrix<T> &mat);
-		Matrix<T>& sinh(Matrix<T> &mat);
-		Matrix<T>& cosh(Matrix<T> &mat);
-		Matrix<T>& tanh(Matrix<T> &mat);
-		Matrix<T>& asinh(Matrix<T> &mat);
-		Matrix<T>& acosh(Matrix<T> &mat);
-		Matrix<T>& atanh(Matrix<T> &mat);
-
-		Matrix<T>& sigmoid(Matrix<T> &mat);
-		Matrix<T>& ceil(Matrix<T> &mat);
-		Matrix<T>& floor(Matrix<T> &mat);
-		Matrix<T>& round(Matrix<T> &mat);
 
 		//----------------------------------------------
 		// In-Place Element-Wise Math Operations
@@ -165,40 +142,69 @@ namespace Cumat
 		//----------------------------------------------
 
 		Matrix<T>& abs(void);
+
 		Matrix<T>& inverse(void);
-		Matrix<T>& clip(const T min, const T max);
+
+		Matrix<T>& clip(T min, T max);
 
 		Matrix<T>& exp(void);
+
 		Matrix<T>& exp10(void);
+
 		Matrix<T>& exp2(void);
+
 		Matrix<T>& log(void);
+
 		Matrix<T>& log1p(void);
+
 		Matrix<T>& log10(void);
+
 		Matrix<T>& log2(void);
+
 		Matrix<T>& pow(const T n);
+
 		Matrix<T>& square(void);
+		
 		Matrix<T>& sqrt(void);
+
 		Matrix<T>& rsqrt(void);
+
 		Matrix<T>& cube(void);
+
 		Matrix<T>& cbrt(void);
+
 		Matrix<T>& rcbrt(void);
 
 		Matrix<T>& sin(void);
+
 		Matrix<T>& cos(void);
+
 		Matrix<T>& tan(void);
+
 		Matrix<T>& asin(void);
+
 		Matrix<T>& acos(void);
+
 		Matrix<T>& atan(void);
+
 		Matrix<T>& sinh(void);
+
 		Matrix<T>& cosh(void);
+
 		Matrix<T>& tanh(void);
+
 		Matrix<T>& asinh(void);
+
 		Matrix<T>& acosh(void);
+
 		Matrix<T>& atanh(void);
 
 		Matrix<T>& sigmoid(void);
+
 		Matrix<T>& ceil(void);
+
 		Matrix<T>& floor(void);
+
 		Matrix<T>& round(void);
 
 		//----------------------------------------------
