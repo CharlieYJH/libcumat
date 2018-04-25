@@ -194,12 +194,12 @@ void Matrix<T>::assign(Matrix<T> &mat, const Expression<Expr> &rhs)
 	const size_t num_threads_x = (has_transpose_expr) ? total_threads / 16 : total_threads;
 	const size_t num_threads_y = total_threads / num_threads_x;
 
-	const size_t num_blocks_x = (cols + num_threads_x - 1) / (num_threads_x);
+	const size_t num_blocks_x = (has_transpose_expr) ? (cols + num_threads_x - 1) / (num_threads_x) : (vec_size + num_threads_x - 1) / (num_threads_x);
 	const size_t num_blocks_y = (has_transpose_expr) ? (rows + num_threads_y - 1) / (num_threads_y) : 1;
 
 	// Call the kernel from the module
 	CUDA_SAFE_CALL(cuModuleGetFunction(&kernel, module, "cumat_kernel"));
-	CUDA_SAFE_CALL(cuLaunchKernel(kernel, num_blocks_x, num_blocks_y, 1, num_threads_x, num_threads_y, 1, 0, NULL, args.data(), 0));
+	CUDA_SAFE_CALL(cuLaunchKernel(kernel, num_blocks_x, num_blocks_y, 1, num_threads_x, num_threads_y, 1, 0, CudaHandler::curr_stream, args.data(), 0));
 }
 
 template<typename T>
@@ -287,7 +287,7 @@ void Matrix<T>::swap(Matrix<T> &mat)
 template<typename T>
 void Matrix<T>::fill(const T val)
 {
-	thrust::fill(data_.begin(), data_.end(), val);
+	thrust::fill(thrust::cuda::par.on(CudaHandler::curr_stream), data_.begin(), data_.end(), val);
 }
 
 template<typename T>
@@ -390,40 +390,40 @@ Matrix<T>& Matrix<T>::mmul(const Matrix<T> &lhs, const Matrix<T> &rhs, const T b
 template<typename T>
 T Matrix<T>::sum(void)
 {
-	return thrust::reduce(data_.begin(), data_.end());
+	return thrust::reduce(thrust::cuda::par.on(CudaHandler::curr_stream), data_.begin(), data_.end());
 }
 
 template<typename T>
 T Matrix<T>::norm(void)
 {
-	return std::sqrt(thrust::transform_reduce(data_.begin(), data_.end(), MathOp::square<T>(), 0.0f, thrust::plus<T>()));
+	return std::sqrt(thrust::transform_reduce(thrust::cuda::par.on(CudaHandler::curr_stream), data_.begin(), data_.end(), MathOp::square<T>(), 0.0f, thrust::plus<T>()));
 }
 
 template<typename T>
 T Matrix<T>::maxElement(void)
 {
-	typename thrust::device_vector<T>::iterator iter = thrust::max_element(data_.begin(), data_.end());
+	typename thrust::device_vector<T>::iterator iter = thrust::max_element(thrust::cuda::par.on(CudaHandler::curr_stream), data_.begin(), data_.end());
 	return *iter;
 }
 
 template<typename T>
 int Matrix<T>::maxIndex(void)
 {
-	typename thrust::device_vector<T>::iterator iter = thrust::max_element(data_.begin(), data_.end());
+	typename thrust::device_vector<T>::iterator iter = thrust::max_element(thrust::cuda::par.on(CudaHandler::curr_stream), data_.begin(), data_.end());
 	return iter - data_.begin();
 }
 
 template<typename T>
 T Matrix<T>::minElement(void)
 {
-	typename thrust::device_vector<T>::iterator iter = thrust::min_element(data_.begin(), data_.end());
+	typename thrust::device_vector<T>::iterator iter = thrust::min_element(thrust::cuda::par.on(CudaHandler::curr_stream), data_.begin(), data_.end());
 	return *iter;
 }
 
 template<typename T>
 int Matrix<T>::minIndex(void)
 {
-	typename thrust::device_vector<T>::iterator iter = thrust::min_element(data_.begin(), data_.end());
+	typename thrust::device_vector<T>::iterator iter = thrust::min_element(thrust::cuda::par.on(CudaHandler::curr_stream), data_.begin(), data_.end());
 	return iter - data_.begin();
 }
 

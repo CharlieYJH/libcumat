@@ -27,8 +27,8 @@ int main(int argc, char const* argv[])
 	std::cout << "B = " << std::endl << mat2 << std::endl << std::endl;
 
 	auto start = std::chrono::high_resolution_clock::now();
-	// mat = mmul(mat + mat, result + result);
-	mat = mmul(mat, mat2);
+	mat = mmul(mat + mat, result + result);
+	// mat = mmul(mat, mat2);
 	cudaDeviceSynchronize();
 	auto end = std::chrono::high_resolution_clock::now();
 
@@ -40,10 +40,10 @@ int main(int argc, char const* argv[])
 	Cumat::Matrixf large2(std::move(Cumat::Matrixf::random(4096, 4096)));
 	Cumat::Matrixd large3(std::move(Cumat::Matrixd::random(4096, 4096)));
 
-	large1 = mmul(large2, large2);
+	large1.mmul(large2, large2);
 	cudaDeviceSynchronize();
 	start = std::chrono::high_resolution_clock::now();
-	large1 = mmul(large2, large2);
+	large1.mmul(large2, large2);
 	cudaDeviceSynchronize();
 	end = std::chrono::high_resolution_clock::now();
 	std::cout << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;

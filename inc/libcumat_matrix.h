@@ -36,6 +36,14 @@ namespace Cumat
 	class Matrix : public Expression<Matrix<T>>, public CudaHandler
 	{
 		private:
+		template<class F>
+		void elementMathOp(Matrix<T> &src, Matrix<T> &dst, const F &func)
+		{
+			if (src.rows_ == 0 || src.cols_ == 0)
+				return;
+
+			thrust::transform(src.data_.begin(), src.data_.end(), dst.data_.begin(), func);
+		}
 
 		size_t rows_;
 		size_t cols_;
