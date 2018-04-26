@@ -261,6 +261,20 @@ void Matrix<T>::resize(size_t rows, size_t cols)
 }
 
 template<typename T>
+T Matrix<T>::get(const size_t row, const size_t col) const
+{
+	assert(row < rows_ && col < cols_);
+	return data_[row * cols_ + col];
+}
+
+template<typename T>
+T Matrix<T>::get(const size_t idx) const
+{
+	assert(idx < rows_ * cols_);
+	return data_[idx];
+}
+
+template<typename T>
 void Matrix<T>::set(const size_t row, const size_t col, const T val)
 {
 	assert(row < rows_ && col < cols_);
@@ -348,21 +362,6 @@ Matrix<T>& Matrix<T>::transpose(Matrix<T> &mat)
 	CudaHandler::cublasTranspose<T>(rows_, cols_, alpha, B, beta, A);
 
 	return *this;
-}
-
-template<typename T>
-Matrix<T> Matrix<T>::mmul(const Matrix<T> &mat)
-{
-	assert(cols_ == mat.rows_);
-
-	Matrix<T> outmat(rows_, mat.cols_);
-
-	if (outmat.rows_ == 0 || outmat.cols_ == 0)
-		return outmat;
-
-	outmat.mmul(*this, mat, 0);
-
-	return outmat;
 }
 
 template<typename T>
@@ -695,22 +694,6 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T> &rhs)
 
 	Matrix<T>::assign(*this, rhs);
 	return *this;
-}
-
-// -------------- Accessor --------------
-
-template<typename T>
-T Matrix<T>::operator()(const size_t row, const size_t col) const
-{
-	assert(row < rows_ && col < cols_);
-	return data_[row * cols_ + col];
-}
-
-template<typename T>
-T Matrix<T>::operator()(const size_t idx) const
-{
-	assert(idx < rows_ * cols_);
-	return data_[idx];
 }
 
 // -------------- Addition --------------

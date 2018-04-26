@@ -26,6 +26,7 @@
 #include "libcumat_math.h"
 #include "libcumat_typestring.h"
 #include "libcumat_cudahandler.h"
+#include "libcumat_reference.h"
 
 namespace Cumat
 {
@@ -85,6 +86,12 @@ namespace Cumat
 		// Resizes the matrix
 		void resize(size_t rows, size_t cols);
 
+		// Accesses an element by row and col
+		T get(const size_t row, const size_t col) const;
+
+		// Accesses an element by vector index
+		T get(const size_t idx) const;
+
 		// Sets matrix element indexed by row and col to the specified value
 		void set(const size_t row, const size_t col, const T val);
 
@@ -111,9 +118,6 @@ namespace Cumat
 
 		// Transposes mat and places the result in this matrix
 		Matrix<T>& transpose(Matrix<T> &mat);
-
-		// Performs matrix multiplication with mat and returns a new matrix
-		Matrix<T> mmul(const Matrix<T> &mat);
 
 		// Performs the following matrix multiplication: *this = lhs * rhs + beta * (*this)
 		Matrix<T>& mmul(const Matrix<T> &lhs, const Matrix<T> &rhs, const T beta = 0);
@@ -220,9 +224,7 @@ namespace Cumat
 		Matrix<T>& operator=(const Matrix<T> &rhs);
 
 		// -------------- Accessor --------------
-		T operator()(const size_t row, const size_t col) const;
-
-		T operator()(const size_t idx) const;
+		Reference<T> operator()(const size_t row, const size_t col) {return Reference<T>(data_, row * cols_ + col);}
 
 		// -------------- Addition --------------
 		template<typename OtherT>
@@ -252,7 +254,7 @@ namespace Cumat
 			for (int i = 0; i < rows; i++) {
 
 				for (int j = 0; j < cols; j++)
-					os << std::setw(10) << mat(i, j) << ' ';
+					os << std::setw(10) << mat.get(i, j) << ' ';
 
 				if (i < rows - 1)
 					os << "\r\n";
