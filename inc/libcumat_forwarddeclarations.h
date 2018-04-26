@@ -47,8 +47,9 @@ struct round;
 template<typename T> class BinaryScalarOp;
 template<typename T> class BinaryScalarOpRight;
 template<typename T> struct scalarExpPow;
-template<typename T> struct scalarMaxRight;
-template<typename T> struct scalarMinRight;
+template<typename T> struct scalarExpPowf;
+template<typename T> struct scalarMaxRightf;
+template<typename T> struct scalarMinRightf;
 
 } // End of KernelOp namespace
 
@@ -110,9 +111,11 @@ const UnaryOpExpression<KernelOp::round, Expr> round(const Expression<Expr> &u);
 template<typename Expr, typename T, typename>
 const BinaryOpExpression<KernelOp::scalarExpPow<T>, Expr, T> pow(const Expression<Expr> &base, const T &exponent);
 template<typename Expr, typename T, typename>
-const BinaryOpExpression<KernelOp::scalarMaxRight<T>, Expr, T> max(const Expression<Expr> &lhs, const T &n);
+const BinaryOpExpression<KernelOp::scalarExpPowf<T>, Expr, T> powf(const Expression<Expr> &base, const T &exponent);
 template<typename Expr, typename T, typename>
-const BinaryOpExpression<KernelOp::scalarMinRight<T>, Expr, T> min(const Expression<Expr> &lhs, const T &n);
+const BinaryOpExpression<KernelOp::scalarMaxRightf<T>, Expr, T> maxf(const Expression<Expr> &lhs, const T &n);
+template<typename Expr, typename T, typename>
+const BinaryOpExpression<KernelOp::scalarMinRightf<T>, Expr, T> minf(const Expression<Expr> &lhs, const T &n);
 
 }
 

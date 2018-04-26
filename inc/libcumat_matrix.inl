@@ -1,9 +1,9 @@
 #ifndef LIBCUMAT_MATRIX_H_
-#error "Don't include libcumat_matrix.cu directly. Include libcumat_matrix.h"
+#error "Don't include libcumat_matrix.inl directly. Include libcumat_matrix.h."
 #endif
 
-#ifndef LIBCUMAT_MATRIX_CU_
-#define LIBCUMAT_MATRIX_CU_
+#ifndef LIBCUMAT_MATRIX_INL_
+#define LIBCUMAT_MATRIX_INL_
 
 namespace Cumat
 {
@@ -452,7 +452,7 @@ Matrix<T>& Matrix<T>::clip(T min, T max)
 	if (min > max)
 		std::swap(min, max);
 
-	*this = Cumat::max(Cumat::min(*this, max), min);
+	*this = Cumat::maxf(Cumat::minf(*this, max), min);
 	return *this;
 }
 
@@ -509,6 +509,13 @@ template<typename T>
 Matrix<T>& Matrix<T>::pow(const T n)
 {
 	*this = Cumat::pow(*this, n);
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::powf(const T n)
+{
+	*this = Cumat::powf(*this, n);
 	return *this;
 }
 
