@@ -224,7 +224,7 @@ namespace Cumat
 		Matrix<T>& operator=(const Matrix<T> &rhs);
 
 		// -------------- Accessor --------------
-		Reference<T> operator()(const size_t row, const size_t col) {return Reference<T>(data_, row * cols_ + col);}
+		MatrixReference<T> operator()(const size_t row, const size_t col) {return MatrixReference<T>(data_, row * cols_ + col);}
 
 		// -------------- Addition --------------
 		template<typename OtherT>
