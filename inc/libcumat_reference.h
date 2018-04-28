@@ -12,7 +12,7 @@ class MatrixReference
 	private:
 	
 	thrust::device_vector<T> &data_;
-	size_t idx_;
+	const size_t idx_;
 	
 	template<typename OtherT>
 	friend class MatrixReference;

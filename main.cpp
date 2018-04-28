@@ -57,8 +57,8 @@ int main(int argc, char const* argv[])
 	// large1.mmul(large2, large2);
 	cudaDeviceSynchronize();
 	end = std::chrono::high_resolution_clock::now();
-	std::cout << large1(12, 13) << " " << large1(456, 132) << std::endl;
-	large1 += (float)large1(12, 13);
+	std::cout << large1(12, 13) << " " << large3(12, 13) << std::endl;
+	large1(12, 13) += large3(12, 13);
 	std::cout << large1(12, 13) << " " << large1(456, 132) << std::endl;
 	std::cout << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
 
