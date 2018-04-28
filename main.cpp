@@ -10,12 +10,21 @@ int main(int argc, char const* argv[])
 	Cumat::Matrixd dmat(5, 5, 1);
 	Cumat::Matrixf result(5, 5);
 
-	dmat.rand();
+	Cumat::Matrixf vec1(66, 1, 1);
+	Cumat::Matrixf vec2(66, 1, 1);
+	Cumat::Matrixf vec3(66, 1, 1);
+	Cumat::Matrixf vec4(66, 1, 1);
 
-	for (int i = 0; i < result.rows(); i++)
-		for (int j = 0; j < result.cols(); j++)
-			if (i == j)
-				result.set(i, j, 1);
+	Cumat::CudaHandler::setStream(1);
+	vec1 = vec1 + vec2;
+	Cumat::CudaHandler::setStream(2);
+	vec3 = vec2 + vec2;
+	Cumat::CudaHandler::setStream(3);
+	vec4 = vec2 + vec2;
+	Cumat::CudaHandler::setDefaultStream();
+	cudaDeviceSynchronize();
+
+	result.identity();
 
 	std::cout << (~(~pow(~mat, mat) + mat)).eval() << std::endl << std::endl;
 	std::cout << mmul(mat, result / 2.0f).eval<float>() << std::endl << std::endl;
@@ -49,7 +58,7 @@ int main(int argc, char const* argv[])
 	cudaDeviceSynchronize();
 	end = std::chrono::high_resolution_clock::now();
 	std::cout << large1(12, 13) << " " << large1(456, 132) << std::endl;
-	large1 += large1(12, 13).val();
+	large1 += (float)large1(12, 13);
 	std::cout << large1(12, 13) << " " << large1(456, 132) << std::endl;
 	std::cout << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
 

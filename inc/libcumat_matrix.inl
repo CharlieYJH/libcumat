@@ -125,22 +125,22 @@ void Matrix<T>::assign(Matrix<T> &mat, const Expression<Expr> &rhs)
 	// Build the kernel code
 	const std::string kernel_code = "                                   \n\
 		extern \"C\" __global__                                         \n\
-		void cumat_kernel" + params_line + "							\n\
+		void cumat_kernel" + params_line + "                            \n\
 		{                                                               \n\
-		  size_t x = blockIdx.x * blockDim.x + threadIdx.x;           	\n" +
+		  size_t x = blockIdx.x * blockDim.x + threadIdx.x;             \n" +
 
 	((has_transpose_expr)
 	// Make use of 2D grid if there's a transpose somewhere in the expression
-	?	 "size_t y = blockIdx.y * blockDim.y + threadIdx.y;           	\n\
-		  if (x < cols && y < rows) {                               	\n"
+	?	 "size_t y = blockIdx.y * blockDim.y + threadIdx.y;             \n\
+		  if (x < cols && y < rows) {                                   \n"
 
 	// Otherwise use 1D grid for faster performance
-	:	 "const size_t y = 0;											\n\
-		  const size_t cols = 0;										\n\
-		  if (x < vec_size) {											\n"
+	:	 "const size_t y = 0;                                           \n\
+		  const size_t cols = 0;                                        \n\
+		  if (x < vec_size) {                                           \n"
 	) +
 
-			"out[y * cols + x] = " + eval_line + "                   	\n\
+			"out[y * cols + x] = " + eval_line + "                      \n\
 		  }                                                             \n\
 		}                                                               \n";
 
@@ -324,6 +324,29 @@ Matrix<T> Matrix<T>::random(const size_t rows, const size_t cols, const T min, c
 	assert(max > min);
 	Matrix<T> mat(rows, cols);
 	mat.rand(min, max);
+	return mat;
+}
+
+template<typename T>
+void Matrix<T>::identity(void)
+{
+	const size_t total_threads = 256;
+	const size_t num_threads_x = 16;
+	const size_t num_threads_y = total_threads / num_threads_x;
+
+	const size_t num_blocks_x = (cols_ + num_threads_x - 1) / num_threads_x;
+	const size_t num_blocks_y = (rows_ + num_threads_y - 1) / num_threads_y;
+
+	dim3 blockDims(num_threads_x, num_threads_y);
+	dim3 gridDims(num_blocks_x, num_blocks_y);
+	CudaKernel::identityMatrix<T><<<gridDims, blockDims>>>(thrust::raw_pointer_cast(data_.data()), rows_, cols_);
+}
+
+template<typename T>
+Matrix<T> Matrix<T>::identity(const size_t rows, const size_t cols)
+{
+	Matrix<T> mat(rows, cols);
+	mat.identity();
 	return mat;
 }
 

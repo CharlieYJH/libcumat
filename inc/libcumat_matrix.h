@@ -27,6 +27,7 @@
 #include "libcumat_typestring.h"
 #include "libcumat_cudahandler.h"
 #include "libcumat_reference.h"
+#include "util/identity_matrix.h"
 
 namespace Cumat
 {
@@ -112,6 +113,12 @@ namespace Cumat
 
 		// Returns a matrix initiated with random values between min and max
 		static Matrix<T> random(const size_t rows, const size_t cols, const T min = -1.0, const T max = 1.0);
+
+		// Fills the matrix with the identity matrix
+		void identity(void);
+
+		// Returns an identity matrix of size rows x cols
+		static Matrix<T> identity(const size_t rows, const size_t cols);
 
 		// Performs in-place transpose of current matrix
 		void transpose(void);
