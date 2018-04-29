@@ -261,34 +261,6 @@ void Matrix<T>::resize(size_t rows, size_t cols)
 }
 
 template<typename T>
-T Matrix<T>::get(const size_t row, const size_t col) const
-{
-	assert(row < rows_ && col < cols_);
-	return data_[row * cols_ + col];
-}
-
-template<typename T>
-T Matrix<T>::get(const size_t idx) const
-{
-	assert(idx < rows_ * cols_);
-	return data_[idx];
-}
-
-template<typename T>
-void Matrix<T>::set(const size_t row, const size_t col, const T val)
-{
-	assert(row < rows_ && col < cols_);
-	data_[row * cols_ + col] = val;
-}
-
-template<typename T>
-void Matrix<T>::set(const size_t idx, const T val)
-{
-	assert(idx < rows_ * cols_);
-	data_[idx] = val;
-}
-
-template<typename T>
 void Matrix<T>::swap(Matrix<T> &mat)
 {
 	if (&mat == this) return;
@@ -717,6 +689,21 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T> &rhs)
 
 	Matrix<T>::assign(*this, rhs);
 	return *this;
+}
+
+// -------------- Accessor --------------
+template<typename T>
+MatrixReference<T> Matrix<T>::operator()(const size_t row, const size_t col)
+{
+	assert(row < rows_ && col < cols_);
+	return MatrixReference<T>(data_, row * cols_ + col);
+}
+
+template<typename T>
+MatrixReference<T> Matrix<T>::operator()(const size_t idx)
+{
+	assert(idx < rows_ * cols_);
+	return MatrixReference<T>(data_, idx);
 }
 
 // -------------- Addition --------------

@@ -87,18 +87,6 @@ namespace Cumat
 		// Resizes the matrix
 		void resize(size_t rows, size_t cols);
 
-		// Accesses an element by row and col
-		T get(const size_t row, const size_t col) const;
-
-		// Accesses an element by vector index
-		T get(const size_t idx) const;
-
-		// Sets matrix element indexed by row and col to the specified value
-		void set(const size_t row, const size_t col, const T val);
-
-		// Sets the matrix element indexed by the vector index to the specified value
-		void set(const size_t idx, const T val);
-
 		// Swaps matrix contents with another
 		void swap(Matrix<T> &mat);
 
@@ -231,7 +219,9 @@ namespace Cumat
 		Matrix<T>& operator=(const Matrix<T> &rhs);
 
 		// -------------- Accessor --------------
-		MatrixReference<T> operator()(const size_t row, const size_t col) {return MatrixReference<T>(data_, row * cols_ + col);}
+		MatrixReference<T> operator()(const size_t row, const size_t col);
+
+		MatrixReference<T> operator()(const size_t idx);
 
 		// -------------- Addition --------------
 		template<typename OtherT>
@@ -250,7 +240,7 @@ namespace Cumat
 		Matrix<T>& operator/=(const OtherT &rhs);
 
 		// -------------- Output Stream Operator --------------
-		friend std::ostream& operator<<(std::ostream &os, const Matrix &mat)
+		friend std::ostream& operator<<(std::ostream &os, Matrix &mat)
 		{
 			const size_t rows = mat.rows();
 			const size_t cols = mat.cols();
@@ -258,10 +248,10 @@ namespace Cumat
 			if (rows == 0 || cols == 0)
 				return os;
 
-			for (int i = 0; i < rows; i++) {
+			for (size_t i = 0; i < rows; i++) {
 
-				for (int j = 0; j < cols; j++)
-					os << std::setw(10) << mat.get(i, j) << ' ';
+				for (size_t j = 0; j < cols; j++)
+					os << std::setw(10) << mat(i, j) << ' ';
 
 				if (i < rows - 1)
 					os << "\r\n";

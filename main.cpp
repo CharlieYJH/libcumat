@@ -49,16 +49,14 @@ int main(int argc, char const* argv[])
 	Cumat::Matrixf large2(std::move(Cumat::Matrixf::random(4096, 4096)));
 	Cumat::Matrixd large3(std::move(Cumat::Matrixd::random(4096, 4096)));
 
-	// large1.mmul(large2, large2);
 	large1.transpose();
 	cudaDeviceSynchronize();
 	start = std::chrono::high_resolution_clock::now();
-	large1.transpose(large2);
-	// large1.mmul(large2, large2);
+	large1 = large1 + large2;
 	cudaDeviceSynchronize();
 	end = std::chrono::high_resolution_clock::now();
-	std::cout << large1(12, 13) << " " << large3(12, 13) << std::endl;
-	large1(12, 13) += large3(12, 13);
+	std::cout << large1(12, 13) << " " << large3(23140) << std::endl;
+	large1(12, 13) += large3(23140);
 	std::cout << large1(12, 13) << " " << large1(456, 132) << std::endl;
 	std::cout << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << std::endl;
 
