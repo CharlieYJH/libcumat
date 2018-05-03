@@ -54,13 +54,22 @@ void CudaHandler::end(void)
 	CURAND_SAFE_CALL(curandDestroyGenerator(curand_prng));
 
 	// Unload all NVRTC kernel modules
-	for (std::pair<std::string, CUmodule> it : module_cache)
-		CUDA_SAFE_CALL(cuModuleUnload(it.second));
+	std::unordered_map<std::string, CUmodule>::iterator kernel_it = module_cache.begin();
+	while (kernel_it != module_cache.end()) {
+		CUDA_SAFE_CALL(cuModuleUnload(kernel_it->second));
+		kernel_it = module_cache.erase(kernel_it);
+	}
 
 	// Destroys all created streams
-	for (std::pair<int, cudaStream_t> it : cuda_stream)
-		if (it.second != default_stream)
-			checkCudaErrors(cudaStreamDestroy(it.second));
+	std::unordered_map<int, cudaStream_t>::iterator stream_it = cuda_stream.begin();
+	while (stream_it != cuda_stream.end()) {
+		if (stream_it->second != default_stream) {
+			checkCudaErrors(cudaStreamDestroy(stream_it->second));
+			stream_it = cuda_stream.erase(stream_it);
+		} else {
+			++stream_it;
+		}
+	}
 }
 
 template<>

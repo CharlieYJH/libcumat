@@ -144,6 +144,8 @@ void Matrix<T>::assign(Matrix<T> &mat, const Expression<Expr> &rhs)
 		  }                                                             \n\
 		}                                                               \n";
 
+	// std::cout << kernel_code << std::endl;
+	
 	CUmodule module;
 	CUfunction kernel;
 
