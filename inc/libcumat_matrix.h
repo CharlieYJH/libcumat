@@ -72,6 +72,9 @@ namespace Cumat
 		// Returns a const reference to the matrix object
 		const Matrix<T>& eval(void) const;
 
+		// Returns a reference to the underlying device vector
+		thrust::device_vector<T>& thrustVector(void);
+
 		// Returns a const reference to the underlying device vector
 		const thrust::device_vector<T>& thrustVector(void) const;
 

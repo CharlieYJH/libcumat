@@ -1,5 +1,6 @@
 #include "catch.hpp"
 #include "util/CPUMatrix.hpp"
+#include "util/GPUCompare.hpp"
 #include "Core"
 
 TEST_CASE("Float matrix basic instantiation", "[basic][instantiation][float]")
@@ -67,9 +68,7 @@ TEST_CASE("Float matrix fill instantiation", "[fill][instantiation][float]")
 	REQUIRE(mat1.rows() == mat1_rows);
 	REQUIRE(mat1.cols() == mat1_cols);
 	REQUIRE(mat1.size() == mat1_size);
-
-	for (size_t i = 0; i < mat1.size(); ++i)
-		REQUIRE(mat1(i) == Approx(mat1_val));
+	REQUIRE(approxEqual(mat1, mat1_val));
 
 	Cumat::end();
 }
@@ -87,9 +86,7 @@ TEST_CASE("double matrix fill instantiation", "[fill][instantiation][double]")
 	REQUIRE(mat1.rows() == mat1_rows);
 	REQUIRE(mat1.cols() == mat1_cols);
 	REQUIRE(mat1.size() == mat1_size);
-
-	for (size_t i = 0; i < mat1.size(); ++i)
-		REQUIRE(mat1(i) == Approx(mat1_val));
+	REQUIRE(approxEqual(mat1, mat1_val));
 
 	Cumat::end();
 }
@@ -98,7 +95,7 @@ TEST_CASE("Float matrix expression instantiation", "[expression][instantiation][
 {
 	Cumat::init();
 
-	size_t mat1_rows = 450;
+	size_t mat1_rows = 1020;
 	size_t mat1_cols = 120;
 	size_t mat1_size = mat1_rows * mat1_cols;
 
@@ -119,9 +116,7 @@ TEST_CASE("Float matrix expression instantiation", "[expression][instantiation][
 	REQUIRE(mat3.rows() == mat1_rows);
 	REQUIRE(mat3.cols() == mat1_cols);
 	REQUIRE(mat3.size() == mat1_size);
-
-	for (size_t i = 0; i < mat3.size(); ++i)
-		REQUIRE(mat3(i) == Approx(2 * mat1(i).val() + mat2(i).val() * mat2(i).val()));
+	REQUIRE(approxEqual(mat3, (2 * mat1 + mat2 * mat2).eval()));
 
 	Cumat::end();
 }
@@ -151,9 +146,7 @@ TEST_CASE("Double matrix expression instantiation", "[expression][instantiation]
 	REQUIRE(mat3.rows() == mat1_rows);
 	REQUIRE(mat3.cols() == mat1_cols);
 	REQUIRE(mat3.size() == mat1_size);
-
-	for (size_t i = 0; i < mat3.size(); ++i)
-		REQUIRE(mat3(i) == Approx(2.0f * mat1(i).val() + mat2(i).val()));
+	REQUIRE(approxEqual(mat3, (2.0f * mat1 + mat2).eval<double>()));
 
 	Cumat::end();
 }

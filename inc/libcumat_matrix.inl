@@ -220,6 +220,12 @@ const Matrix<T>& Matrix<T>::eval(void) const
 }
 
 template<typename T>
+thrust::device_vector<T>& Matrix<T>::thrustVector(void)
+{
+	return data_;
+}
+
+template<typename T>
 const thrust::device_vector<T>& Matrix<T>::thrustVector(void) const
 {
 	return data_;

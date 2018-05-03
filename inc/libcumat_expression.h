@@ -22,7 +22,7 @@ class Expression
 	const UnaryOpExpression<KernelOp::negative, Expr> operator-(void) const;
 	const TransposeExpression<Expr> operator~(void) const;
 
-	template<typename T = double>
+	template<typename T = float>
 	Matrix<T> eval(void) const;
 };
 
