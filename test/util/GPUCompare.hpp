@@ -50,4 +50,19 @@ bool approxEqual(const Cumat::Matrix<T> &a, const T &n)
 	return result == vec_size;
 }
 
+template<typename T>
+bool approxEqual(const thrust::device_vector<T> &a, const thrust::device_vector<T> &b)
+{
+	if (a.size() != b.size())
+		return false;
+
+	size_t vec_size = a.size();
+	thrust::device_vector<bool> bool_vec(vec_size, false);
+
+	thrust::transform(a.begin(), a.end(), b.begin(), bool_vec.begin(), approx_vector_equals<T>());
+	size_t result = thrust::count(bool_vec.begin(), bool_vec.end(), true);
+
+	return result == vec_size;
+}
+
 #endif

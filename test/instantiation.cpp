@@ -1,5 +1,4 @@
 #include "catch.hpp"
-#include "util/CPUMatrix.hpp"
 #include "util/GPUCompare.hpp"
 #include "Core"
 
