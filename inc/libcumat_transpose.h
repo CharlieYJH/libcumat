@@ -41,6 +41,12 @@ std::string TransposeExpression<Expr>::buildKernel(std::string &params, int &num
 }
 
 template<typename Expr>
+const TransposeExpression<Expr> transpose(const Expression<Expr> &expr)
+{
+	return TransposeExpression<Expr>(expr);
+}
+
+template<typename Expr>
 const TransposeExpression<Expr> Expression<Expr>::operator~(void) const
 {
 	return TransposeExpression<Expr>(*this);

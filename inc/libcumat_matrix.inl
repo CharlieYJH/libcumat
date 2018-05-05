@@ -96,6 +96,10 @@ void Matrix<T>::assign(Matrix<T> &mat, const Expression<Expr> &rhs)
 	if (mat.rows_ != rows || mat.cols_ != cols)
 		mat.resize(rows, cols);
 
+	// No assignment necessary if expression had 0 length
+	if (vec_size == 0)
+		return;
+
 	// Push output pointer to argument array
 	args.push_back(&mat.data_ptr_);
 
@@ -333,6 +337,9 @@ Matrix<T> Matrix<T>::identity(const size_t rows, const size_t cols)
 template<typename T>
 void Matrix<T>::transpose(void)
 {
+	if (rows_ == 0 || cols_ == 0)
+		return;
+
 	thrust::device_vector<T> temp(cols_ * rows_);
 
 	T alpha = 1.0;
@@ -356,13 +363,16 @@ Matrix<T>& Matrix<T>::transpose(Matrix<T> &mat)
 	if (mat.rows_ != cols_ && mat.cols_ != rows_)
 		this->resize(mat.cols_, mat.rows_);
 
+	if (rows_ == 0 || cols_ == 0)
+		return *this;
+
 	T alpha = 1.0;
 	T beta = 0;
 
 	T *A = thrust::raw_pointer_cast(data_.data());
 	T *B = thrust::raw_pointer_cast(mat.data_.data());
 
-	CudaHandler::cublasTranspose<T>(rows_, cols_, alpha, B, beta, A);
+	CudaHandler::cublasTranspose<T>(mat.rows_, mat.cols_, alpha, B, beta, A);
 
 	return *this;
 }
