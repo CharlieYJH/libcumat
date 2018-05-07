@@ -201,6 +201,10 @@ TEST_CASE("Float matrix math ops", "[math][float]")
 
 	SECTION("Inverse square root")
 	{
+		mat1.rand(1, 1000);
+		mat2 = mat1;
+		REQUIRE(approxEqual(mat1, mat2));
+
 		mat1.rsqrt();
 
 		for (size_t i = 0; i < mat2.size(); ++i) {
@@ -208,7 +212,7 @@ TEST_CASE("Float matrix math ops", "[math][float]")
 			mat2(i) = 1.0f / std::sqrt(val);
 		}
 
-		REQUIRE(approxEqual(mat1, mat2, 1e-4f));
+		REQUIRE(approxEqual(mat1, mat2));
 	}
 
 	SECTION("Cube")
