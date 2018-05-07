@@ -10,8 +10,8 @@ TEST_CASE("Float matrix sum", "[sum][float]")
 
 	srand(time(0));
 
-	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 2000;
-	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 2000;
+	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 2000 + 1;
+	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 2000 + 1;
 	size_t mat1_size = mat1_rows * mat1_cols;
 
 	Cumat::Matrixf mat1 = Cumat::Matrixf::random(mat1_rows, mat1_cols);
@@ -37,8 +37,8 @@ TEST_CASE("Double matrix sum", "[sum][double]")
 
 	srand(time(0));
 
-	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 2000;
-	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 2000;
+	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 2000 + 1;
+	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 2000 + 1;
 	size_t mat1_size = mat1_rows * mat1_cols;
 
 	Cumat::Matrixd mat1 = Cumat::Matrixd::random(mat1_rows, mat1_cols);

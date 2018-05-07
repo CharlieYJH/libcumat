@@ -211,6 +211,8 @@ namespace Cumat
 
 		Matrix<T>& round(void);
 
+		Matrix<T>& rint(void);
+
 		//----------------------------------------------
 		// Operator Overloads
 		//----------------------------------------------

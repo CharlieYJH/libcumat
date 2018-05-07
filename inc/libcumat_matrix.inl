@@ -685,6 +685,13 @@ Matrix<T>& Matrix<T>::round(void)
 	return *this;
 }
 
+template<typename T>
+Matrix<T>& Matrix<T>::rint(void)
+{
+	*this = Cumat::rint(*this);
+	return *this;
+}
+
 //----------------------------------------------
 // Operator Overloads
 //----------------------------------------------

@@ -10,8 +10,8 @@ TEST_CASE("Float matrix norm", "[norm][float]")
 
 	srand(time(0));
 
-	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 2000;
-	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 2000;
+	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 2000 + 1;
+	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 2000 + 1;
 	size_t mat1_size = mat1_rows * mat1_cols;
 
 	Cumat::Matrixf mat1 = Cumat::Matrixf::random(mat1_rows, mat1_cols);
@@ -41,8 +41,8 @@ TEST_CASE("Double matrix norm", "[norm][double]")
 
 	srand(time(0));
 
-	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 2000;
-	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 2000;
+	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 2000 + 1;
+	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 2000 + 1;
 	size_t mat1_size = mat1_rows * mat1_cols;
 
 	Cumat::Matrixd mat1 = Cumat::Matrixd::random(mat1_rows, mat1_cols);
@@ -52,7 +52,7 @@ TEST_CASE("Double matrix norm", "[norm][double]")
 	REQUIRE(mat1.size() == mat1_size);
 	REQUIRE_FALSE(approxEqual(mat1, 0.0));
 
-	double norm = 0.0f;
+	double norm = 0.0;
 
 	for (size_t i = 0; i < mat1.size(); ++i) {
 		double val = mat1(i);

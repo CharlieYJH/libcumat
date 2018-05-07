@@ -43,6 +43,7 @@ struct atanh;
 struct ceil;
 struct floor;
 struct round;
+struct rint;
 
 template<typename T> class BinaryScalarOp;
 template<typename T> class BinaryScalarOpRight;
@@ -107,6 +108,8 @@ template<typename Expr>
 const UnaryOpExpression<KernelOp::floor, Expr> floor(const Expression<Expr> &u);
 template<typename Expr>
 const UnaryOpExpression<KernelOp::round, Expr> round(const Expression<Expr> &u);
+template<typename Expr>
+const UnaryOpExpression<KernelOp::rint, Expr> rint(const Expression<Expr> &u);
 
 template<typename Expr, typename T, typename>
 const BinaryOpExpression<KernelOp::scalarExpPow<T>, Expr, T> pow(const Expression<Expr> &base, const T &exponent);

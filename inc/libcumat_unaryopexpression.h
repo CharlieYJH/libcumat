@@ -262,6 +262,13 @@ const UnaryOpExpression<KernelOp::round, Expr> round(const Expression<Expr> &u)
 	return UnaryOpExpression<KernelOp::round, Expr>(v);
 }
 
+template<typename Expr>
+const UnaryOpExpression<KernelOp::rint, Expr> rint(const Expression<Expr> &u)
+{
+	const Expr &v = u;
+	return UnaryOpExpression<KernelOp::rint, Expr>(v);
+}
+
 }
 
 #endif

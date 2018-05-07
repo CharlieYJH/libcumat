@@ -179,7 +179,12 @@ struct floor : public UnaryOp
 
 struct round : public UnaryOp
 {
-	round(void) : UnaryOp("rint") {}
+	round(void) : UnaryOp("round") {}
+};
+
+struct rint : public UnaryOp
+{
+	rint(void) : UnaryOp("rint") {}
 };
 
 }
