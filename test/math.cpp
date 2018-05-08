@@ -101,11 +101,11 @@ TEST_CASE("Float matrix math ops", "[math][float]")
 
 	SECTION("Logarithm (base e)")
 	{
-		mat1.log();
+		mat1.abs().log();
 
 		for (size_t i = 0; i < mat2.size(); ++i) {
 			float val = mat2(i);
-			mat2(i) = std::log(val);
+			mat2(i) = std::log(abs(val));
 		}
 
 		REQUIRE(approxEqual(mat1, mat2));
@@ -125,11 +125,11 @@ TEST_CASE("Float matrix math ops", "[math][float]")
 
 	SECTION("Logarithm (base 10)")
 	{
-		mat1.log10();
+		mat1.abs().log10();
 
 		for (size_t i = 0; i < mat2.size(); ++i) {
 			float val = mat2(i);
-			mat2(i) = std::log10(val);
+			mat2(i) = std::log10(abs(val));
 		}
 
 		REQUIRE(approxEqual(mat1, mat2));
@@ -137,11 +137,11 @@ TEST_CASE("Float matrix math ops", "[math][float]")
 
 	SECTION("Logarithm (base 2)")
 	{
-		mat1.log2();
+		mat1.abs().log2();
 
 		for (size_t i = 0; i < mat2.size(); ++i) {
 			float val = mat2(i);
-			mat2(i) = std::log2(val);
+			mat2(i) = std::log2(abs(val));
 		}
 
 		REQUIRE(approxEqual(mat1, mat2));
@@ -189,11 +189,11 @@ TEST_CASE("Float matrix math ops", "[math][float]")
 
 	SECTION("Square root")
 	{
-		mat1.sqrt();
+		mat1.abs().sqrt();
 
 		for (size_t i = 0; i < mat2.size(); ++i) {
 			float val = mat2(i);
-			mat2(i) = std::sqrt(val);
+			mat2(i) = std::sqrt(abs(val));
 		}
 
 		REQUIRE(approxEqual(mat1, mat2));
