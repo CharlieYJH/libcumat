@@ -27,6 +27,7 @@
 #include "libcumat_typestring.h"
 #include "libcumat_cudahandler.h"
 #include "libcumat_reference.h"
+#include "libcumat_constreference.h"
 #include "util/identity_matrix.h"
 
 namespace Cumat
@@ -226,7 +227,11 @@ namespace Cumat
 		// -------------- Accessor --------------
 		MatrixReference<T> operator()(const size_t row, const size_t col);
 
+		MatrixConstReference<T> operator()(const size_t row, const size_t col) const;
+
 		MatrixReference<T> operator()(const size_t idx);
+
+		MatrixConstReference<T> operator()(const size_t idx) const;
 
 		// -------------- Addition --------------
 		template<typename OtherT>

@@ -725,10 +725,24 @@ MatrixReference<T> Matrix<T>::operator()(const size_t row, const size_t col)
 }
 
 template<typename T>
+MatrixConstReference<T> Matrix<T>::operator()(const size_t row, const size_t col) const
+{
+	assert(row < rows_ && col < cols_);
+	return MatrixConstReference<T>(data_, row * cols_ + col);
+}
+
+template<typename T>
 MatrixReference<T> Matrix<T>::operator()(const size_t idx)
 {
 	assert(idx < rows_ * cols_);
 	return MatrixReference<T>(data_, idx);
+}
+
+template<typename T>
+MatrixConstReference<T> Matrix<T>::operator()(const size_t idx) const
+{
+	assert(idx < rows_ * cols_);
+	return MatrixConstReference<T>(data_, idx);
 }
 
 // -------------- Addition --------------
