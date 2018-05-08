@@ -69,6 +69,8 @@ struct log2 : public UnaryOp
 
 struct square
 {
+	square(void) {}
+
 	template<typename Expr>
 	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args, const bool &transpose, bool &has_transpose_expr) const
 	{
@@ -89,6 +91,8 @@ struct rsqrt : public UnaryOp
 
 struct cube
 {
+	cube(void) {}
+
 	template<typename Expr>
 	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args, const bool &transpose, bool &has_transpose_expr) const
 	{

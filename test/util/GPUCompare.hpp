@@ -10,8 +10,20 @@ template<typename T>
 struct approx_vector_equals
 {
 	T eps_;
+
 	approx_vector_equals(T eps) : eps_(eps) {}
-	__host__ __device__ bool operator()(const T &a, const T &b) { return (abs(a - b) < eps_) || (isnan(a) && isnan(b)); }
+
+	__host__ __device__ bool operator()(const T &a, const T &b)
+	{
+		T a_abs = abs(a);
+		T b_abs = abs(b);
+		T diff = abs(a - b);
+
+		if (a == b || diff < eps_)
+			return true;
+		else
+			return (diff <= (eps_ * max(a_abs, b_abs)));
+	}
 };
 
 template<typename T, typename OtherT>
@@ -19,12 +31,24 @@ struct approx_scalar_equals
 {
 	T eps_;
 	OtherT scalar_;
+
 	approx_scalar_equals(OtherT scalar, T eps) : scalar_(scalar), eps_(eps) {}
-	__host__ __device__ bool operator()(const T &a) { return (abs(a - scalar_) < eps_) || (isnan(a) && isnan(scalar_)); }
+
+	__host__ __device__ bool operator()(const T &a)
+	{
+		T a_abs = abs(a);
+		T b_abs = abs(scalar_);
+		T diff = abs(a - scalar_);
+
+		if (a == scalar_ || diff < eps_)
+			return true;
+		else
+			return (diff <= (eps_ * max(a_abs, b_abs)));
+	}
 };
 
 template<typename T>
-bool approxEqual(const Cumat::Matrix<T> &a, const Cumat::Matrix<T> &b, T eps = std::numeric_limits<T>::epsilon() * 100)
+bool approxEqual(const Cumat::Matrix<T> &a, const Cumat::Matrix<T> &b, T eps = std::numeric_limits<float>::epsilon() * 100)
 {
 	if (a.rows() != b.rows() || a.cols() != b.cols())
 		return false;
@@ -39,7 +63,7 @@ bool approxEqual(const Cumat::Matrix<T> &a, const Cumat::Matrix<T> &b, T eps = s
 }
 
 template<typename T, typename OtherT>
-bool approxEqual(const Cumat::Matrix<T> &a, const OtherT &n, T eps = std::numeric_limits<T>::epsilon() * 100)
+bool approxEqual(const Cumat::Matrix<T> &a, const OtherT &n, T eps = std::numeric_limits<float>::epsilon() * 100)
 {
 	size_t vec_size = a.size();
 	thrust::device_vector<bool> bool_vec(vec_size, false);
@@ -51,7 +75,7 @@ bool approxEqual(const Cumat::Matrix<T> &a, const OtherT &n, T eps = std::numeri
 }
 
 template<typename T>
-bool approxEqual(const thrust::device_vector<T> &a, const thrust::device_vector<T> &b)
+bool approxEqual(const thrust::device_vector<T> &a, const thrust::device_vector<T> &b, T eps = std::numeric_limits<float>::epsilon() * 100)
 {
 	if (a.size() != b.size())
 		return false;
