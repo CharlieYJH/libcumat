@@ -44,6 +44,16 @@ Matrix<T>::Matrix(const Matrix<T> &rhs):
 }
 
 template<typename T>
+template<typename OtherT>
+Matrix<T>::Matrix(const std::vector<OtherT> &v):
+	rows_(1),
+	cols_(v.size()),
+	data_(v)
+{
+	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
+}
+
+template<typename T>
 Matrix<T>::Matrix(const size_t rows, const size_t cols):
 	rows_(rows),
 	cols_(cols),

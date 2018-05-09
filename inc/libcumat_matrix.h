@@ -54,6 +54,10 @@ namespace Cumat
 		// Creates a matrix that is a copy of the rhs matrix
 		Matrix(const Matrix<T> &rhs);
 
+		// Initiates a vector (rows = 1, cols = n) from a std::vector
+		template<typename OtherT>
+		Matrix(const std::vector<OtherT> &v);
+
 		// Creates a rows x cols matrix with all elements initiated as 0
 		Matrix(const size_t rows, const size_t cols);
 
