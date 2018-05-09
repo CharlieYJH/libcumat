@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "util/GPUCompare.hpp"
+#include "GPUCompare.hpp"
 #include "Core"
 
 TEST_CASE("Float matrix number fill", "[fill][float]")

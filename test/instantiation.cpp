@@ -1,65 +1,399 @@
 #include "catch.hpp"
-#include "util/GPUCompare.hpp"
+#include "GPUCompare.hpp"
 #include "Core"
+#include <cstdlib>
+#include <time.h>
 
-TEST_CASE("Float matrix basic instantiation", "[basic][instantiation][float]")
+TEST_CASE("Float matrix empty instantiation", "[empty][instantiation][float]")
 {
-	Cumat::init();
-
 	Cumat::Matrixf mat1;
 	REQUIRE(mat1.rows() == 0);
 	REQUIRE(mat1.cols() == 0);
 	REQUIRE(mat1.size() == 0);
-
-	size_t mat2_rows = 125;
-	size_t mat2_cols = 230;
-	size_t mat2_size = mat2_rows * mat2_cols;
-
-	Cumat::Matrixf mat2(mat2_rows, mat2_cols);
-	REQUIRE(mat2.rows() == mat2_rows);
-	REQUIRE(mat2.cols() == mat2_cols);
-	REQUIRE(mat2.size() == mat2_size);
-
-	Cumat::Matrixf mat4 = mat2;
-	REQUIRE(mat4.rows() == mat2.rows());
-	REQUIRE(mat4.cols() == mat2.cols());
-	REQUIRE(mat4.size() == mat2.size());
-
-	Cumat::end();
 }
 
-TEST_CASE("Double matrix basic instantiation", "[basic][instantiation][double]")
+TEST_CASE("Double matrix empty instantiation", "[empty][instantiation][double]")
 {
-	Cumat::init();
-
 	Cumat::Matrixd mat1;
 	REQUIRE(mat1.rows() == 0);
 	REQUIRE(mat1.cols() == 0);
 	REQUIRE(mat1.size() == 0);
+}
 
-	size_t mat2_rows = 250;
-	size_t mat2_cols = 650;
-	size_t mat2_size = mat2_rows * mat2_cols;
+TEST_CASE("Float matrix size instantiation", "[size][instantiation][float]")
+{
+	SECTION("Rows > 0 and Cols > 0")
+	{
+		srand(time(0));
 
-	Cumat::Matrixd mat2(mat2_rows, mat2_cols);
-	REQUIRE(mat2.rows() == mat2_rows);
-	REQUIRE(mat2.cols() == mat2_cols);
-	REQUIRE(mat2.size() == mat2_size);
+		size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+		size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+		size_t mat1_size = mat1_rows * mat1_cols;
 
-	Cumat::Matrixd mat4 = mat2;
-	REQUIRE(mat4.rows() == mat2.rows());
-	REQUIRE(mat4.cols() == mat2.cols());
-	REQUIRE(mat4.size() == mat2.size());
-	
+		REQUIRE(mat1_size > 0);
+
+		Cumat::Matrixf mat1(mat1_rows, mat1_cols);
+		REQUIRE(mat1.rows() == mat1_rows);
+		REQUIRE(mat1.cols() == mat1_cols);
+		REQUIRE(mat1.size() == mat1_size);
+	}
+
+	SECTION("Rows = 0 and Cols > 0")
+	{
+		size_t mat1_rows = 0;
+		size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+
+		Cumat::Matrixf mat1(mat1_rows, mat1_cols);
+		REQUIRE(mat1.rows() == 0);
+		REQUIRE(mat1.cols() == 0);
+		REQUIRE(mat1.size() == 0);
+	}
+
+	SECTION("Rows > 0 and Cols = 0")
+	{
+		size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+		size_t mat1_cols = 0;
+
+		Cumat::Matrixf mat1(mat1_rows, mat1_cols);
+		REQUIRE(mat1.rows() == 0);
+		REQUIRE(mat1.cols() == 0);
+		REQUIRE(mat1.size() == 0);
+	}
+}
+
+TEST_CASE("Double matrix size instantiation", "[size][instantiation][double]")
+{
+	SECTION("Rows > 0 and Cols > 0")
+	{
+		size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+		size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+		size_t mat1_size = mat1_rows * mat1_cols;
+
+		REQUIRE(mat1_size > 0);
+
+		Cumat::Matrixd mat1(mat1_rows, mat1_cols);
+		REQUIRE(mat1.rows() == mat1_rows);
+		REQUIRE(mat1.cols() == mat1_cols);
+		REQUIRE(mat1.size() == mat1_size);
+	}
+
+	SECTION("Rows = 0 and Cols > 0")
+	{
+		size_t mat1_rows = 0;
+		size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+
+		Cumat::Matrixd mat1(mat1_rows, mat1_cols);
+		REQUIRE(mat1.rows() == 0);
+		REQUIRE(mat1.cols() == 0);
+		REQUIRE(mat1.size() == 0);
+	}
+
+	SECTION("Rows > 0 and Cols = 0")
+	{
+		size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+		size_t mat1_cols = 0;
+
+		Cumat::Matrixd mat1(mat1_rows, mat1_cols);
+		REQUIRE(mat1.rows() == 0);
+		REQUIRE(mat1.cols() == 0);
+		REQUIRE(mat1.size() == 0);
+	}
+}
+
+TEST_CASE("Float matrix assignment instantiation", "[assignment][instantiation][float]")
+{
+	Cumat::init();
+
+	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+	size_t mat1_size = mat1_rows * mat1_cols;
+
+	REQUIRE(mat1_size > 0);
+
+	Cumat::Matrixf mat1(mat1_rows, mat1_cols);
+	REQUIRE(mat1.rows() == mat1_rows);
+	REQUIRE(mat1.cols() == mat1_cols);
+	REQUIRE(mat1.size() == mat1_size);
+
+	mat1.rand();
+	REQUIRE_FALSE(approxEqual(mat1, 0));
+
+	Cumat::Matrixf mat2 = mat1;
+	REQUIRE(mat2.rows() == mat1.rows());
+	REQUIRE(mat2.cols() == mat1.cols());
+	REQUIRE(mat2.size() == mat1.size());
+	REQUIRE(approxEqual(mat2, mat1));
+
 	Cumat::end();
+}
+
+TEST_CASE("Double matrix assignment instantiation", "[assignment][instantiation][double]")
+{
+	Cumat::init();
+
+	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+	size_t mat1_size = mat1_rows * mat1_cols;
+
+	REQUIRE(mat1_size > 0);
+
+	Cumat::Matrixd mat1(mat1_rows, mat1_cols);
+	REQUIRE(mat1.rows() == mat1_rows);
+	REQUIRE(mat1.cols() == mat1_cols);
+	REQUIRE(mat1.size() == mat1_size);
+
+	mat1.rand();
+	REQUIRE_FALSE(approxEqual(mat1, 0));
+
+	Cumat::Matrixd mat2 = mat1;
+	REQUIRE(mat2.rows() == mat1.rows());
+	REQUIRE(mat2.cols() == mat1.cols());
+	REQUIRE(mat2.size() == mat1.size());
+	REQUIRE(approxEqual(mat2, mat1));
+
+	Cumat::end();
+}
+
+TEST_CASE("Float matrix thrust device vector instantiation", "[thrust][device_vector][instantiation][float]")
+{
+	size_t mat1_size = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+
+	SECTION("Float to float assignment")
+	{
+		thrust::device_vector<float> vec1(mat1_size);
+		REQUIRE(vec1.size() > 0);
+
+		for (size_t i = 0; i < vec1.size(); ++i)
+			vec1[i] = (float)std::rand() / (float)RAND_MAX;
+
+		Cumat::Matrixf mat1(vec1);
+		REQUIRE(mat1.rows() == 1);
+		REQUIRE(mat1.cols() == vec1.size());
+		REQUIRE(mat1.size() == vec1.size());
+
+		for (size_t i = 0; i < mat1.size(); ++i)
+			CHECK(mat1(i) == Approx(vec1[i]));
+	}
+
+	SECTION("Double to float assignment")
+	{
+		thrust::device_vector<double> vec1(mat1_size);
+		REQUIRE(vec1.size() > 0);
+
+		for (size_t i = 0; i < vec1.size(); ++i)
+			vec1[i] = (double)std::rand() / (double)RAND_MAX;
+
+		Cumat::Matrixf mat1(vec1);
+		REQUIRE(mat1.rows() == 1);
+		REQUIRE(mat1.cols() == vec1.size());
+		REQUIRE(mat1.size() == vec1.size());
+
+		for (size_t i = 0; i < mat1.size(); ++i)
+			CHECK(mat1(i) == Approx(vec1[i]));
+	}
+}
+
+TEST_CASE("Double matrix thrust device vector instantiation", "[thrust][device_vector][instantiation][double]")
+{
+	size_t mat1_size = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+
+	SECTION("Float to double assignment")
+	{
+		thrust::device_vector<float> vec1(mat1_size);
+		REQUIRE(vec1.size() > 0);
+
+		for (size_t i = 0; i < vec1.size(); ++i)
+			vec1[i] = (float)std::rand() / (float)RAND_MAX;
+
+		Cumat::Matrixd mat1(vec1);
+		REQUIRE(mat1.rows() == 1);
+		REQUIRE(mat1.cols() == vec1.size());
+		REQUIRE(mat1.size() == vec1.size());
+
+		for (size_t i = 0; i < mat1.size(); ++i)
+			CHECK(mat1(i) == Approx(vec1[i]));
+	}
+
+	SECTION("Double to double assignment")
+	{
+		thrust::device_vector<double> vec1(mat1_size);
+		REQUIRE(vec1.size() > 0);
+
+		for (size_t i = 0; i < vec1.size(); ++i)
+			vec1[i] = (double)std::rand() / (double)RAND_MAX;
+
+		Cumat::Matrixd mat1(vec1);
+		REQUIRE(mat1.rows() == 1);
+		REQUIRE(mat1.cols() == vec1.size());
+		REQUIRE(mat1.size() == vec1.size());
+
+		for (size_t i = 0; i < mat1.size(); ++i)
+			CHECK(mat1(i) == Approx(vec1[i]));
+	}
+}
+
+TEST_CASE("Float matrix thrust host vector instantiation", "[thrust][host_vector][instantiation][float]")
+{
+	size_t mat1_size = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+
+	SECTION("Float to float assignment")
+	{
+		thrust::host_vector<float> vec1(mat1_size);
+		REQUIRE(vec1.size() > 0);
+
+		for (size_t i = 0; i < vec1.size(); ++i)
+			vec1[i] = (float)std::rand() / (float)RAND_MAX;
+
+		Cumat::Matrixf mat1(vec1);
+		REQUIRE(mat1.rows() == 1);
+		REQUIRE(mat1.cols() == vec1.size());
+		REQUIRE(mat1.size() == vec1.size());
+
+		for (size_t i = 0; i < mat1.size(); ++i)
+			CHECK(mat1(i) == Approx(vec1[i]));
+	}
+
+	SECTION("Double to float assignment")
+	{
+		thrust::host_vector<double> vec1(mat1_size);
+		REQUIRE(vec1.size() > 0);
+
+		for (size_t i = 0; i < vec1.size(); ++i)
+			vec1[i] = (double)std::rand() / (double)RAND_MAX;
+
+		Cumat::Matrixf mat1(vec1);
+		REQUIRE(mat1.rows() == 1);
+		REQUIRE(mat1.cols() == vec1.size());
+		REQUIRE(mat1.size() == vec1.size());
+
+		for (size_t i = 0; i < mat1.size(); ++i)
+			CHECK(mat1(i) == Approx(vec1[i]));
+	}
+}
+
+TEST_CASE("Double matrix thrust host vector instantiation", "[thrust][host_vector][instantiation][double]")
+{
+	size_t mat1_size = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+
+	SECTION("Float to double assignment")
+	{
+		thrust::host_vector<float> vec1(mat1_size);
+		REQUIRE(vec1.size() > 0);
+
+		for (size_t i = 0; i < vec1.size(); ++i)
+			vec1[i] = (float)std::rand() / (float)RAND_MAX;
+
+		Cumat::Matrixd mat1(vec1);
+		REQUIRE(mat1.rows() == 1);
+		REQUIRE(mat1.cols() == vec1.size());
+		REQUIRE(mat1.size() == vec1.size());
+
+		for (size_t i = 0; i < mat1.size(); ++i)
+			CHECK(mat1(i) == Approx(vec1[i]));
+	}
+
+	SECTION("Double to double assignment")
+	{
+		thrust::host_vector<double> vec1(mat1_size);
+		REQUIRE(vec1.size() > 0);
+
+		for (size_t i = 0; i < vec1.size(); ++i)
+			vec1[i] = (double)std::rand() / (double)RAND_MAX;
+
+		Cumat::Matrixd mat1(vec1);
+		REQUIRE(mat1.rows() == 1);
+		REQUIRE(mat1.cols() == vec1.size());
+		REQUIRE(mat1.size() == vec1.size());
+
+		for (size_t i = 0; i < mat1.size(); ++i)
+			CHECK(mat1(i) == Approx(vec1[i]));
+	}
+}
+
+TEST_CASE("Float matrix C++ vector instantiation", "[vector][instantiation][float]")
+{
+	size_t mat1_size = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+
+	SECTION("Float to float assignment")
+	{
+		std::vector<float> vec1(mat1_size);
+		REQUIRE(vec1.size() > 0);
+
+		for (size_t i = 0; i < vec1.size(); ++i)
+			vec1[i] = (float)std::rand() / (float)RAND_MAX;
+
+		Cumat::Matrixf mat1(vec1);
+		REQUIRE(mat1.rows() == 1);
+		REQUIRE(mat1.cols() == vec1.size());
+		REQUIRE(mat1.size() == vec1.size());
+
+		for (size_t i = 0; i < mat1.size(); ++i)
+			CHECK(mat1(i) == Approx(vec1[i]));
+	}
+
+	SECTION("Double to float assignment")
+	{
+		std::vector<double> vec1(mat1_size);
+		REQUIRE(vec1.size() > 0);
+
+		for (size_t i = 0; i < vec1.size(); ++i)
+			vec1[i] = (double)std::rand() / (double)RAND_MAX;
+
+		Cumat::Matrixf mat1(vec1);
+		REQUIRE(mat1.rows() == 1);
+		REQUIRE(mat1.cols() == vec1.size());
+		REQUIRE(mat1.size() == vec1.size());
+
+		for (size_t i = 0; i < mat1.size(); ++i)
+			CHECK(mat1(i) == Approx(vec1[i]));
+	}
+}
+
+TEST_CASE("Double matrix C++ vector instantiation", "[vector][instantiation][double]")
+{
+	size_t mat1_size = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+
+	SECTION("Float to double assignment")
+	{
+		std::vector<float> vec1(mat1_size);
+		REQUIRE(vec1.size() > 0);
+
+		for (size_t i = 0; i < vec1.size(); ++i)
+			vec1[i] = (float)std::rand() / (float)RAND_MAX;
+
+		Cumat::Matrixd mat1(vec1);
+		REQUIRE(mat1.rows() == 1);
+		REQUIRE(mat1.cols() == vec1.size());
+		REQUIRE(mat1.size() == vec1.size());
+
+		for (size_t i = 0; i < mat1.size(); ++i)
+			CHECK(mat1(i) == Approx(vec1[i]));
+	}
+
+	SECTION("Double to double assignment")
+	{
+		std::vector<double> vec1(mat1_size);
+		REQUIRE(vec1.size() > 0);
+
+		for (size_t i = 0; i < vec1.size(); ++i)
+			vec1[i] = (double)std::rand() / (double)RAND_MAX;
+
+		Cumat::Matrixd mat1(vec1);
+		REQUIRE(mat1.rows() == 1);
+		REQUIRE(mat1.cols() == vec1.size());
+		REQUIRE(mat1.size() == vec1.size());
+
+		for (size_t i = 0; i < mat1.size(); ++i)
+			CHECK(mat1(i) == Approx(vec1[i]));
+	}
 }
 
 TEST_CASE("Float matrix fill instantiation", "[fill][instantiation][float]")
 {
 	Cumat::init();
 
-	size_t mat1_rows = 250;
-	size_t mat1_cols = 665;
+	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
 	size_t mat1_size = mat1_rows * mat1_cols;
 	float mat1_val = 2.30;
 
@@ -72,12 +406,12 @@ TEST_CASE("Float matrix fill instantiation", "[fill][instantiation][float]")
 	Cumat::end();
 }
 
-TEST_CASE("double matrix fill instantiation", "[fill][instantiation][double]")
+TEST_CASE("Double matrix fill instantiation", "[fill][instantiation][double]")
 {
 	Cumat::init();
 
-	size_t mat1_rows = 128;
-	size_t mat1_cols = 240;
+	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
 	size_t mat1_size = mat1_rows * mat1_cols;
 	double mat1_val = 4.56102;
 
@@ -94,8 +428,8 @@ TEST_CASE("Float matrix expression instantiation", "[expression][instantiation][
 {
 	Cumat::init();
 
-	size_t mat1_rows = 1020;
-	size_t mat1_cols = 120;
+	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
 	size_t mat1_size = mat1_rows * mat1_cols;
 
 	Cumat::Matrixf mat1(mat1_rows, mat1_cols);
@@ -124,8 +458,8 @@ TEST_CASE("Double matrix expression instantiation", "[expression][instantiation]
 {
 	Cumat::init();
 
-	size_t mat1_rows = 250;
-	size_t mat1_cols = 260;
+	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
 	size_t mat1_size = mat1_rows * mat1_cols;
 
 	Cumat::Matrixd mat1(mat1_rows, mat1_cols);

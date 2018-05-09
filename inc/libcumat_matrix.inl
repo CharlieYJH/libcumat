@@ -37,18 +37,37 @@ template<typename T>
 Matrix<T>::Matrix(const Matrix<T> &rhs):
 	rows_(rhs.rows()),
 	cols_(rhs.cols()),
-	data_(rows_ * cols_)
+	data_(rhs.data_)
 {
 	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
-	Matrix<T>::assign(*this, rhs);
 }
 
 template<typename T>
 template<typename OtherT>
-Matrix<T>::Matrix(const std::vector<OtherT> &v):
+Matrix<T>::Matrix(const thrust::device_vector<OtherT> &rhs):
 	rows_(1),
-	cols_(v.size()),
-	data_(v)
+	cols_(rhs.size())
+{
+	data_ = rhs;
+	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
+}
+
+template<typename T>
+template<typename OtherT>
+Matrix<T>::Matrix(const thrust::host_vector<OtherT> &rhs):
+	rows_(1),
+	cols_(rhs.size()),
+	data_(rhs)
+{
+	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
+}
+
+template<typename T>
+template<typename OtherT>
+Matrix<T>::Matrix(const std::vector<OtherT> &rhs):
+	rows_(1),
+	cols_(rhs.size()),
+	data_(rhs)
 {
 	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
 }

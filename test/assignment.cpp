@@ -30,7 +30,25 @@ TEST_CASE("Float matrix assignments", "[assignment][float]")
 	REQUIRE(mat3.size() == size);
 
 	Cumat::Matrixf mat4 = mat1;
-	REQUIRE(approxEqual(mat1, mat4));
+	REQUIRE(approxEqual(mat4, mat1));
+
+	SECTION("Regular assignment")
+	{
+		mat4 = mat2;
+		REQUIRE_FALSE(approxEqual(mat4, mat1));
+		REQUIRE_FALSE(approxEqual(mat4, mat3));
+		REQUIRE(approxEqual(mat4, mat2));
+
+		mat3 = mat1;
+		REQUIRE_FALSE(approxEqual(mat3, mat4));
+		REQUIRE_FALSE(approxEqual(mat3, mat2));
+		REQUIRE(approxEqual(mat3, mat1));
+
+		mat4 = mat3;
+		REQUIRE_FALSE(approxEqual(mat4, mat2));
+		REQUIRE(approxEqual(mat4, mat3));
+		REQUIRE(approxEqual(mat4, mat1));
+	}
 
 	SECTION("Addtion assignment")
 	{
@@ -107,7 +125,25 @@ TEST_CASE("Double matrix assignments", "[assignment][double]")
 	REQUIRE(mat3.size() == size);
 
 	Cumat::Matrixd mat4 = mat1;
-	REQUIRE(approxEqual(mat1, mat4));
+	REQUIRE(approxEqual(mat4, mat1));
+
+	SECTION("Regular assignment")
+	{
+		mat4 = mat2;
+		REQUIRE_FALSE(approxEqual(mat4, mat1));
+		REQUIRE_FALSE(approxEqual(mat4, mat3));
+		REQUIRE(approxEqual(mat4, mat2));
+
+		mat3 = mat1;
+		REQUIRE_FALSE(approxEqual(mat3, mat4));
+		REQUIRE_FALSE(approxEqual(mat3, mat2));
+		REQUIRE(approxEqual(mat3, mat1));
+
+		mat4 = mat3;
+		REQUIRE_FALSE(approxEqual(mat4, mat2));
+		REQUIRE(approxEqual(mat4, mat3));
+		REQUIRE(approxEqual(mat4, mat1));
+	}
 
 	SECTION("Addtion assignment")
 	{
