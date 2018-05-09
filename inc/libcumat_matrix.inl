@@ -350,6 +350,12 @@ void Matrix<T>::transpose(void)
 	if (rows_ == 0 || cols_ == 0)
 		return;
 
+	// If it's a column or row vector, just swap the two properties, no need for memory allocation
+	if (rows_ == 1 || cols_ == 1) {
+		std::swap(rows_, cols_);
+		return;
+	}
+
 	thrust::device_vector<T> temp(cols_ * rows_);
 
 	T alpha = 1.0;
