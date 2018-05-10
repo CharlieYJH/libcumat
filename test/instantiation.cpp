@@ -158,6 +158,30 @@ TEST_CASE("Float matrix thrust device vector instantiation", "[thrust][device_ve
 {
 	size_t mat1_size = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
 
+	SECTION("Zero size assignment")
+	{
+		thrust::device_vector<float> empty_vec1;
+		thrust::device_vector<double> empty_vec2;
+
+		Cumat::Matrixf mat1(empty_vec1);
+		REQUIRE(mat1.rows() == 0);
+		REQUIRE(mat1.cols() == 0);
+		REQUIRE(mat1.size() == 0);
+		REQUIRE(mat1.thrustVector().size() == 0);
+
+		Cumat::Matrixf mat2(empty_vec2);
+		REQUIRE(mat2.rows() == 0);
+		REQUIRE(mat2.cols() == 0);
+		REQUIRE(mat2.size() == 0);
+		REQUIRE(mat2.thrustVector().size() == 0);
+
+		Cumat::Matrixf mat3(empty_vec2.begin(), empty_vec2.end());
+		REQUIRE(mat3.rows() == 0);
+		REQUIRE(mat3.cols() == 0);
+		REQUIRE(mat3.size() == 0);
+		REQUIRE(mat3.thrustVector().size() == 0);
+	}
+
 	SECTION("Float to float assignment")
 	{
 		thrust::device_vector<float> vec1(mat1_size);
@@ -184,6 +208,23 @@ TEST_CASE("Float matrix thrust device vector instantiation", "[thrust][device_ve
 			vec1[i] = (double)std::rand() / (double)RAND_MAX;
 
 		Cumat::Matrixf mat1(vec1);
+		REQUIRE(mat1.rows() == 1);
+		REQUIRE(mat1.cols() == vec1.size());
+		REQUIRE(mat1.size() == vec1.size());
+
+		for (size_t i = 0; i < mat1.size(); ++i)
+			CHECK(mat1(i) == Approx(vec1[i]));
+	}
+
+	SECTION("Iterator assignment")
+	{
+		thrust::device_vector<float> vec1(mat1_size);
+		REQUIRE(vec1.size() > 0);
+
+		for (size_t i = 0; i < vec1.size(); ++i)
+			vec1[i] = (double)std::rand() / (double)RAND_MAX;
+
+		Cumat::Matrixf mat1(vec1.begin(), vec1.end());
 		REQUIRE(mat1.rows() == 1);
 		REQUIRE(mat1.cols() == vec1.size());
 		REQUIRE(mat1.size() == vec1.size());
@@ -197,6 +238,30 @@ TEST_CASE("Double matrix thrust device vector instantiation", "[thrust][device_v
 {
 	size_t mat1_size = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
 
+	SECTION("Zero size assignment")
+	{
+		thrust::device_vector<float> empty_vec1;
+		thrust::device_vector<double> empty_vec2;
+
+		Cumat::Matrixd mat1(empty_vec1);
+		REQUIRE(mat1.rows() == 0);
+		REQUIRE(mat1.cols() == 0);
+		REQUIRE(mat1.size() == 0);
+		REQUIRE(mat1.thrustVector().size() == 0);
+
+		Cumat::Matrixd mat2(empty_vec2);
+		REQUIRE(mat2.rows() == 0);
+		REQUIRE(mat2.cols() == 0);
+		REQUIRE(mat2.size() == 0);
+		REQUIRE(mat2.thrustVector().size() == 0);
+
+		Cumat::Matrixd mat3(empty_vec2.begin(), empty_vec2.end());
+		REQUIRE(mat3.rows() == 0);
+		REQUIRE(mat3.cols() == 0);
+		REQUIRE(mat3.size() == 0);
+		REQUIRE(mat3.thrustVector().size() == 0);
+	}
+
 	SECTION("Float to double assignment")
 	{
 		thrust::device_vector<float> vec1(mat1_size);
@@ -230,11 +295,52 @@ TEST_CASE("Double matrix thrust device vector instantiation", "[thrust][device_v
 		for (size_t i = 0; i < mat1.size(); ++i)
 			CHECK(mat1(i) == Approx(vec1[i]));
 	}
+
+	SECTION("Iterator assignment")
+	{
+		thrust::device_vector<float> vec1(mat1_size);
+		REQUIRE(vec1.size() > 0);
+
+		for (size_t i = 0; i < vec1.size(); ++i)
+			vec1[i] = (double)std::rand() / (double)RAND_MAX;
+
+		Cumat::Matrixf mat1(vec1.begin(), vec1.end());
+		REQUIRE(mat1.rows() == 1);
+		REQUIRE(mat1.cols() == vec1.size());
+		REQUIRE(mat1.size() == vec1.size());
+
+		for (size_t i = 0; i < mat1.size(); ++i)
+			CHECK(mat1(i) == Approx(vec1[i]));
+	}
 }
 
 TEST_CASE("Float matrix thrust host vector instantiation", "[thrust][host_vector][instantiation][float]")
 {
 	size_t mat1_size = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+
+	SECTION("Zero size assignment")
+	{
+		thrust::host_vector<float> empty_vec1;
+		thrust::host_vector<double> empty_vec2;
+
+		Cumat::Matrixf mat1(empty_vec1);
+		REQUIRE(mat1.rows() == 0);
+		REQUIRE(mat1.cols() == 0);
+		REQUIRE(mat1.size() == 0);
+		REQUIRE(mat1.thrustVector().size() == 0);
+
+		Cumat::Matrixf mat2(empty_vec2);
+		REQUIRE(mat2.rows() == 0);
+		REQUIRE(mat2.cols() == 0);
+		REQUIRE(mat2.size() == 0);
+		REQUIRE(mat2.thrustVector().size() == 0);
+
+		Cumat::Matrixf mat3(empty_vec2.begin(), empty_vec2.end());
+		REQUIRE(mat3.rows() == 0);
+		REQUIRE(mat3.cols() == 0);
+		REQUIRE(mat3.size() == 0);
+		REQUIRE(mat3.thrustVector().size() == 0);
+	}
 
 	SECTION("Float to float assignment")
 	{
@@ -262,6 +368,23 @@ TEST_CASE("Float matrix thrust host vector instantiation", "[thrust][host_vector
 			vec1[i] = (double)std::rand() / (double)RAND_MAX;
 
 		Cumat::Matrixf mat1(vec1);
+		REQUIRE(mat1.rows() == 1);
+		REQUIRE(mat1.cols() == vec1.size());
+		REQUIRE(mat1.size() == vec1.size());
+
+		for (size_t i = 0; i < mat1.size(); ++i)
+			CHECK(mat1(i) == Approx(vec1[i]));
+	}
+
+	SECTION("Iterator assignment")
+	{
+		thrust::host_vector<float> vec1(mat1_size);
+		REQUIRE(vec1.size() > 0);
+
+		for (size_t i = 0; i < vec1.size(); ++i)
+			vec1[i] = (double)std::rand() / (double)RAND_MAX;
+
+		Cumat::Matrixf mat1(vec1.begin(), vec1.end());
 		REQUIRE(mat1.rows() == 1);
 		REQUIRE(mat1.cols() == vec1.size());
 		REQUIRE(mat1.size() == vec1.size());
@@ -275,6 +398,30 @@ TEST_CASE("Double matrix thrust host vector instantiation", "[thrust][host_vecto
 {
 	size_t mat1_size = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
 
+	SECTION("Zero size assignment")
+	{
+		thrust::host_vector<float> empty_vec1;
+		thrust::host_vector<double> empty_vec2;
+
+		Cumat::Matrixd mat1(empty_vec1);
+		REQUIRE(mat1.rows() == 0);
+		REQUIRE(mat1.cols() == 0);
+		REQUIRE(mat1.size() == 0);
+		REQUIRE(mat1.thrustVector().size() == 0);
+
+		Cumat::Matrixd mat2(empty_vec2);
+		REQUIRE(mat2.rows() == 0);
+		REQUIRE(mat2.cols() == 0);
+		REQUIRE(mat2.size() == 0);
+		REQUIRE(mat2.thrustVector().size() == 0);
+
+		Cumat::Matrixd mat3(empty_vec2.begin(), empty_vec2.end());
+		REQUIRE(mat3.rows() == 0);
+		REQUIRE(mat3.cols() == 0);
+		REQUIRE(mat3.size() == 0);
+		REQUIRE(mat3.thrustVector().size() == 0);
+	}
+
 	SECTION("Float to double assignment")
 	{
 		thrust::host_vector<float> vec1(mat1_size);
@@ -308,11 +455,52 @@ TEST_CASE("Double matrix thrust host vector instantiation", "[thrust][host_vecto
 		for (size_t i = 0; i < mat1.size(); ++i)
 			CHECK(mat1(i) == Approx(vec1[i]));
 	}
+
+	SECTION("Iterator assignment")
+	{
+		thrust::host_vector<float> vec1(mat1_size);
+		REQUIRE(vec1.size() > 0);
+
+		for (size_t i = 0; i < vec1.size(); ++i)
+			vec1[i] = (double)std::rand() / (double)RAND_MAX;
+
+		Cumat::Matrixf mat1(vec1.begin(), vec1.end());
+		REQUIRE(mat1.rows() == 1);
+		REQUIRE(mat1.cols() == vec1.size());
+		REQUIRE(mat1.size() == vec1.size());
+
+		for (size_t i = 0; i < mat1.size(); ++i)
+			CHECK(mat1(i) == Approx(vec1[i]));
+	}
 }
 
 TEST_CASE("Float matrix C++ vector instantiation", "[vector][instantiation][float]")
 {
 	size_t mat1_size = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+
+	SECTION("Zero size assignment")
+	{
+		std::vector<float> empty_vec1;
+		std::vector<double> empty_vec2;
+
+		Cumat::Matrixf mat1(empty_vec1);
+		REQUIRE(mat1.rows() == 0);
+		REQUIRE(mat1.cols() == 0);
+		REQUIRE(mat1.size() == 0);
+		REQUIRE(mat1.thrustVector().size() == 0);
+
+		Cumat::Matrixf mat2(empty_vec2);
+		REQUIRE(mat2.rows() == 0);
+		REQUIRE(mat2.cols() == 0);
+		REQUIRE(mat2.size() == 0);
+		REQUIRE(mat2.thrustVector().size() == 0);
+
+		Cumat::Matrixf mat3(empty_vec2.begin(), empty_vec2.end());
+		REQUIRE(mat3.rows() == 0);
+		REQUIRE(mat3.cols() == 0);
+		REQUIRE(mat3.size() == 0);
+		REQUIRE(mat3.thrustVector().size() == 0);
+	}
 
 	SECTION("Float to float assignment")
 	{
@@ -347,11 +535,52 @@ TEST_CASE("Float matrix C++ vector instantiation", "[vector][instantiation][floa
 		for (size_t i = 0; i < mat1.size(); ++i)
 			CHECK(mat1(i) == Approx(vec1[i]));
 	}
+
+	SECTION("Iterator assignment")
+	{
+		std::vector<float> vec1(mat1_size);
+		REQUIRE(vec1.size() > 0);
+
+		for (size_t i = 0; i < vec1.size(); ++i)
+			vec1[i] = (double)std::rand() / (double)RAND_MAX;
+
+		Cumat::Matrixf mat1(vec1.begin(), vec1.end());
+		REQUIRE(mat1.rows() == 1);
+		REQUIRE(mat1.cols() == vec1.size());
+		REQUIRE(mat1.size() == vec1.size());
+
+		for (size_t i = 0; i < mat1.size(); ++i)
+			CHECK(mat1(i) == Approx(vec1[i]));
+	}
 }
 
 TEST_CASE("Double matrix C++ vector instantiation", "[vector][instantiation][double]")
 {
 	size_t mat1_size = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+
+	SECTION("Zero size assignment")
+	{
+		std::vector<float> empty_vec1;
+		std::vector<double> empty_vec2;
+
+		Cumat::Matrixd mat1(empty_vec1);
+		REQUIRE(mat1.rows() == 0);
+		REQUIRE(mat1.cols() == 0);
+		REQUIRE(mat1.size() == 0);
+		REQUIRE(mat1.thrustVector().size() == 0);
+
+		Cumat::Matrixd mat2(empty_vec2);
+		REQUIRE(mat2.rows() == 0);
+		REQUIRE(mat2.cols() == 0);
+		REQUIRE(mat2.size() == 0);
+		REQUIRE(mat2.thrustVector().size() == 0);
+
+		Cumat::Matrixd mat3(empty_vec2.begin(), empty_vec2.end());
+		REQUIRE(mat3.rows() == 0);
+		REQUIRE(mat3.cols() == 0);
+		REQUIRE(mat3.size() == 0);
+		REQUIRE(mat3.thrustVector().size() == 0);
+	}
 
 	SECTION("Float to double assignment")
 	{
@@ -379,6 +608,23 @@ TEST_CASE("Double matrix C++ vector instantiation", "[vector][instantiation][dou
 			vec1[i] = (double)std::rand() / (double)RAND_MAX;
 
 		Cumat::Matrixd mat1(vec1);
+		REQUIRE(mat1.rows() == 1);
+		REQUIRE(mat1.cols() == vec1.size());
+		REQUIRE(mat1.size() == vec1.size());
+
+		for (size_t i = 0; i < mat1.size(); ++i)
+			CHECK(mat1(i) == Approx(vec1[i]));
+	}
+
+	SECTION("Iterator assignment")
+	{
+		std::vector<float> vec1(mat1_size);
+		REQUIRE(vec1.size() > 0);
+
+		for (size_t i = 0; i < vec1.size(); ++i)
+			vec1[i] = (double)std::rand() / (double)RAND_MAX;
+
+		Cumat::Matrixd mat1(vec1.begin(), vec1.end());
 		REQUIRE(mat1.rows() == 1);
 		REQUIRE(mat1.cols() == vec1.size());
 		REQUIRE(mat1.size() == vec1.size());

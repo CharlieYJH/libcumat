@@ -48,6 +48,11 @@ Matrix<T>::Matrix(const thrust::device_vector<OtherT> &rhs):
 	rows_(1),
 	cols_(rhs.size())
 {
+	if (rows_ == 0 || cols_ == 0) {
+		rows_ = 0;
+		cols_ = 0;
+	}
+
 	data_ = rhs;
 	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
 }
@@ -59,6 +64,11 @@ Matrix<T>::Matrix(const thrust::host_vector<OtherT> &rhs):
 	cols_(rhs.size()),
 	data_(rhs)
 {
+	if (rows_ == 0 || cols_ == 0) {
+		rows_ = 0;
+		cols_ = 0;
+	}
+
 	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
 }
 
@@ -69,6 +79,26 @@ Matrix<T>::Matrix(const std::vector<OtherT> &rhs):
 	cols_(rhs.size()),
 	data_(rhs)
 {
+	if (rows_ == 0 || cols_ == 0) {
+		rows_ = 0;
+		cols_ = 0;
+	}
+
+	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
+}
+
+template<typename T>
+template<typename InputIterator>
+Matrix<T>::Matrix(InputIterator first, InputIterator last):
+	rows_(1),
+	cols_(last - first),
+	data_(first, last)
+{
+	if (rows_ == 0 || cols_ == 0) {
+		rows_ = 0;
+		cols_ = 0;
+	}
+
 	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
 }
 

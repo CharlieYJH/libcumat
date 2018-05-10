@@ -54,17 +54,21 @@ namespace Cumat
 		// Creates a matrix that is a copy of the rhs matrix
 		Matrix(const Matrix<T> &rhs);
 
-		// Initiates a vector (rows = 1, cols = n) from a thrust device_vector of a different type
+		// Initiates a row vector from a thrust device_vector of a different type
 		template<typename OtherT>
 		Matrix(const thrust::device_vector<OtherT> &rhs);
 
-		// Initiates a vector (rows = 1, cols = n) from a thrust host_vector of a different type
+		// Initiates a row vector from a thrust host_vector of a different type
 		template<typename OtherT>
 		Matrix(const thrust::host_vector<OtherT> &rhs);
 
-		// Initiates a vector (rows = 1, cols = n) from a std::vector
+		// Initiates a row vector from a std::vector
 		template<typename OtherT>
 		Matrix(const std::vector<OtherT> &rhs);
+
+		// Initiates a row matrix from iterators
+		template<typename InputIterator>
+		Matrix(InputIterator first, InputIterator last);
 
 		// Creates a rows x cols matrix with all elements initiated as 0
 		Matrix(const size_t rows, const size_t cols);
