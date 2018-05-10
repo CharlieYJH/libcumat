@@ -24,7 +24,7 @@ TEST_CASE("Float matrix assignments", "[assignment][float]")
 	REQUIRE(mat2.cols() == cols);
 	REQUIRE(mat2.size() == size);
 
-	Cumat::Matrixf mat3 = Cumat::Matrixf::random(rows, cols);
+	Cumat::Matrixd mat3 = Cumat::Matrixf::random(rows, cols);
 	REQUIRE(mat3.rows() == rows);
 	REQUIRE(mat3.cols() == cols);
 	REQUIRE(mat3.size() == size);
@@ -48,6 +48,54 @@ TEST_CASE("Float matrix assignments", "[assignment][float]")
 		REQUIRE_FALSE(approxEqual(mat4, mat2));
 		REQUIRE(approxEqual(mat4, mat3));
 		REQUIRE(approxEqual(mat4, mat1));
+	}
+
+	SECTION("Regular assignment (different size) (same type)")
+	{
+		size_t new_rows;
+		size_t new_cols;
+		size_t new_size;
+
+		do {
+			new_rows = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
+			new_cols = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
+			new_size = new_rows * new_cols;
+		} while (new_rows == rows || new_cols == cols);
+
+		Cumat::Matrixf mat5 = Cumat::Matrixf::random(new_rows, new_cols);
+		REQUIRE(mat5.rows() == new_rows);
+		REQUIRE(mat5.cols() == new_cols);
+		REQUIRE(mat5.size() == new_size);
+
+		mat5 = mat4;
+		REQUIRE(mat5.rows() == mat4.rows());
+		REQUIRE(mat5.cols() == mat4.cols());
+		REQUIRE(mat5.size() == mat4.size());
+		REQUIRE(approxEqual(mat5, mat4));
+	}
+
+	SECTION("Regular assignment (different size) (different type)")
+	{
+		size_t new_rows;
+		size_t new_cols;
+		size_t new_size;
+
+		do {
+			new_rows = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
+			new_cols = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
+			new_size = new_rows * new_cols;
+		} while (new_rows == rows || new_cols == cols);
+
+		Cumat::Matrixf mat5 = Cumat::Matrixf::random(new_rows, new_cols);
+		REQUIRE(mat5.rows() == new_rows);
+		REQUIRE(mat5.cols() == new_cols);
+		REQUIRE(mat5.size() == new_size);
+
+		mat5 = mat3;
+		REQUIRE(mat5.rows() == mat3.rows());
+		REQUIRE(mat5.cols() == mat3.cols());
+		REQUIRE(mat5.size() == mat3.size());
+		REQUIRE(approxEqual(mat5, mat3));
 	}
 
 	SECTION("Addtion assignment")
@@ -114,7 +162,7 @@ TEST_CASE("Double matrix assignments", "[assignment][double]")
 	REQUIRE(mat1.cols() == cols);
 	REQUIRE(mat1.size() == size);
 
-	Cumat::Matrixd mat2 = Cumat::Matrixd::random(rows, cols);
+	Cumat::Matrixf mat2 = Cumat::Matrixd::random(rows, cols);
 	REQUIRE(mat2.rows() == rows);
 	REQUIRE(mat2.cols() == cols);
 	REQUIRE(mat2.size() == size);
@@ -143,6 +191,54 @@ TEST_CASE("Double matrix assignments", "[assignment][double]")
 		REQUIRE_FALSE(approxEqual(mat4, mat2));
 		REQUIRE(approxEqual(mat4, mat3));
 		REQUIRE(approxEqual(mat4, mat1));
+	}
+
+	SECTION("Regular assignment (different size) (same type)")
+	{
+		size_t new_rows;
+		size_t new_cols;
+		size_t new_size;
+
+		do {
+			new_rows = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
+			new_cols = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
+			new_size = new_rows * new_cols;
+		} while (new_rows == rows || new_cols == cols);
+
+		Cumat::Matrixd mat5 = Cumat::Matrixd::random(new_rows, new_cols);
+		REQUIRE(mat5.rows() == new_rows);
+		REQUIRE(mat5.cols() == new_cols);
+		REQUIRE(mat5.size() == new_size);
+
+		mat5 = mat4;
+		REQUIRE(mat5.rows() == mat4.rows());
+		REQUIRE(mat5.cols() == mat4.cols());
+		REQUIRE(mat5.size() == mat4.size());
+		REQUIRE(approxEqual(mat5, mat4));
+	}
+
+	SECTION("Regular assignment (different size) (different type)")
+	{
+		size_t new_rows;
+		size_t new_cols;
+		size_t new_size;
+
+		do {
+			new_rows = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
+			new_cols = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
+			new_size = new_rows * new_cols;
+		} while (new_rows == rows || new_cols == cols);
+
+		Cumat::Matrixd mat5 = Cumat::Matrixd::random(new_rows, new_cols);
+		REQUIRE(mat5.rows() == new_rows);
+		REQUIRE(mat5.cols() == new_cols);
+		REQUIRE(mat5.size() == new_size);
+
+		mat5 = mat2;
+		REQUIRE(mat5.rows() == mat2.rows());
+		REQUIRE(mat5.cols() == mat2.cols());
+		REQUIRE(mat5.size() == mat2.size());
+		REQUIRE(approxEqual(mat5, mat2));
 	}
 
 	SECTION("Addtion assignment")

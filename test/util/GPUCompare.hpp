@@ -6,17 +6,17 @@
 #include <thrust/count.h>
 #include "Core"
 
-template<typename T>
+template<typename T, typename OtherT>
 struct approx_vector_equals
 {
 	T eps_;
 
 	approx_vector_equals(T eps) : eps_(eps) {}
 
-	__host__ __device__ bool operator()(const T &a, const T &b)
+	__host__ __device__ bool operator()(const T &a, const OtherT &b)
 	{
 		T a_abs = abs(a);
-		T b_abs = abs(b);
+		OtherT b_abs = abs(b);
 		T diff = abs(a - b);
 
 		if (a == b || diff < eps_)
@@ -47,8 +47,8 @@ struct approx_scalar_equals
 	}
 };
 
-template<typename T>
-bool approxEqual(const Cumat::Matrix<T> &a, const Cumat::Matrix<T> &b, T eps = std::numeric_limits<float>::epsilon() * 100)
+template<typename T, typename OtherT>
+bool approxEqual(const Cumat::Matrix<T> &a, const Cumat::Matrix<OtherT> &b, T eps = std::numeric_limits<float>::epsilon() * 100)
 {
 	if (a.rows() != b.rows() || a.cols() != b.cols())
 		return false;
@@ -56,7 +56,7 @@ bool approxEqual(const Cumat::Matrix<T> &a, const Cumat::Matrix<T> &b, T eps = s
 	size_t vec_size = a.size();
 	thrust::device_vector<bool> bool_vec(vec_size, false);
 
-	thrust::transform(a.thrustVector().begin(), a.thrustVector().end(), b.thrustVector().begin(), bool_vec.begin(), approx_vector_equals<T>(eps));
+	thrust::transform(a.thrustVector().begin(), a.thrustVector().end(), b.thrustVector().begin(), bool_vec.begin(), approx_vector_equals<T, OtherT>(eps));
 	size_t result = thrust::count(bool_vec.begin(), bool_vec.end(), true);
 
 	return result == vec_size;
@@ -74,8 +74,8 @@ bool approxEqual(const Cumat::Matrix<T> &a, const OtherT &n, T eps = std::numeri
 	return result == vec_size;
 }
 
-template<typename T>
-bool approxEqual(const thrust::device_vector<T> &a, const thrust::device_vector<T> &b, T eps = std::numeric_limits<float>::epsilon() * 100)
+template<typename T, typename OtherT>
+bool approxEqual(const thrust::device_vector<T> &a, const thrust::device_vector<OtherT> &b, T eps = std::numeric_limits<float>::epsilon() * 100)
 {
 	if (a.size() != b.size())
 		return false;
@@ -83,7 +83,7 @@ bool approxEqual(const thrust::device_vector<T> &a, const thrust::device_vector<
 	size_t vec_size = a.size();
 	thrust::device_vector<bool> bool_vec(vec_size, false);
 
-	thrust::transform(a.begin(), a.end(), b.begin(), bool_vec.begin(), approx_vector_equals<T>());
+	thrust::transform(a.begin(), a.end(), b.begin(), bool_vec.begin(), approx_vector_equals<T, OtherT>());
 	size_t result = thrust::count(bool_vec.begin(), bool_vec.end(), true);
 
 	return result == vec_size;
