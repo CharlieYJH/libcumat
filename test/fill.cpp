@@ -1,14 +1,19 @@
 #include "catch.hpp"
 #include "GPUCompare.hpp"
 #include "Core"
+#include <cstdlib>
+#include <time.h>
 
 TEST_CASE("Float matrix number fill", "[fill][float]")
 {
 	Cumat::init();
 
-	size_t mat1_rows = 2050;
-	size_t mat1_cols = 1054;
+	srand(time(0));
+
+	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
 	size_t mat1_size = mat1_rows * mat1_cols;
+	REQUIRE(mat1_size > 1);
 
 	Cumat::Matrixf mat1(mat1_rows, mat1_cols);
 	REQUIRE(mat1.rows() == mat1_rows);
@@ -90,9 +95,10 @@ TEST_CASE("Double matrix number fill", "[fill][double]")
 {
 	Cumat::init();
 
-	size_t mat1_rows = 2050;
-	size_t mat1_cols = 1054;
+	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
 	size_t mat1_size = mat1_rows * mat1_cols;
+	REQUIRE(mat1_size > 1);
 
 	Cumat::Matrixd mat1(mat1_rows, mat1_cols);
 	REQUIRE(mat1.rows() == mat1_rows);
@@ -174,9 +180,10 @@ TEST_CASE("Float matrix zero fill", "[zero][fill][float]")
 {
 	Cumat::init();
 	
-	size_t mat1_rows = 4001;
-	size_t mat1_cols = 30;
+	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
 	size_t mat1_size = mat1_rows * mat1_cols;
+	REQUIRE(mat1_size > 1);
 
 	Cumat::Matrixf mat1 = Cumat::Matrixf::random(mat1_rows, mat1_cols);
 
@@ -194,10 +201,11 @@ TEST_CASE("Float matrix zero fill", "[zero][fill][float]")
 TEST_CASE("Double matrix zero fill", "[zero][fill][double]")
 {
 	Cumat::init();
-
-	size_t mat1_rows = 45;
-	size_t mat1_cols = 10;
+	
+	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
+	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
 	size_t mat1_size = mat1_rows * mat1_cols;
+	REQUIRE(mat1_size > 1);
 
 	Cumat::Matrixd mat1 = Cumat::Matrixd::random(mat1_rows, mat1_cols);
 
