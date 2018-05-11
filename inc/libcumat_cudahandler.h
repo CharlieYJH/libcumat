@@ -51,11 +51,9 @@ class CudaHandler
 	static std::unordered_map<std::string, CUmodule> module_cache;
 	static std::unordered_map<int, cudaStream_t> cuda_stream;
 	static cudaStream_t curr_stream;
+	static const cudaStream_t default_stream;
 
 	public:
-
-	// CUDA default stream
-	static const cudaStream_t default_stream;
 
 	// Creates all necessary handles needed for CUDA API calls
 	static void init(void);

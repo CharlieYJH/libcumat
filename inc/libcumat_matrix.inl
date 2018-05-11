@@ -344,13 +344,26 @@ void Matrix<T>::swap(Matrix<T> &mat)
 template<typename T>
 void Matrix<T>::fill(const T val)
 {
-	thrust::fill(thrust::cuda::par.on(CudaHandler::curr_stream), data_.begin(), data_.end(), val);
+	thrust::fill(data_.begin(), data_.end(), val);
 }
 
 template<typename T>
 void Matrix<T>::zero(void)
 {
 	Matrix<T>::fill(0);
+}
+
+template<typename T>
+template<typename InputIterator>
+void Matrix<T>::copy(InputIterator first, InputIterator last)
+{
+	size_t size = last - first;
+
+	// If the input size is greater than the current dimensions, resize to a row vector
+	if (size > rows_ * cols_)
+		this->resize(1, size);
+
+	thrust::copy(first, last, data_.begin());
 }
 
 template<typename T>
@@ -467,40 +480,40 @@ Matrix<T>& Matrix<T>::mmul(const Matrix<T> &lhs, const Matrix<T> &rhs, const T b
 template<typename T>
 T Matrix<T>::sum(void)
 {
-	return thrust::reduce(thrust::cuda::par.on(CudaHandler::curr_stream), data_.begin(), data_.end());
+	return thrust::reduce(data_.begin(), data_.end());
 }
 
 template<typename T>
 T Matrix<T>::norm(void)
 {
-	return std::sqrt(thrust::transform_reduce(thrust::cuda::par.on(CudaHandler::curr_stream), data_.begin(), data_.end(), MathOp::square<T>(), 0.0f, thrust::plus<T>()));
+	return std::sqrt(thrust::transform_reduce(data_.begin(), data_.end(), MathOp::square<T>(), 0.0f, thrust::plus<T>()));
 }
 
 template<typename T>
 T Matrix<T>::maxElement(void)
 {
-	typename thrust::device_vector<T>::iterator iter = thrust::max_element(thrust::cuda::par.on(CudaHandler::curr_stream), data_.begin(), data_.end());
+	typename thrust::device_vector<T>::iterator iter = thrust::max_element(data_.begin(), data_.end());
 	return *iter;
 }
 
 template<typename T>
 int Matrix<T>::maxIndex(void)
 {
-	typename thrust::device_vector<T>::iterator iter = thrust::max_element(thrust::cuda::par.on(CudaHandler::curr_stream), data_.begin(), data_.end());
+	typename thrust::device_vector<T>::iterator iter = thrust::max_element(data_.begin(), data_.end());
 	return iter - data_.begin();
 }
 
 template<typename T>
 T Matrix<T>::minElement(void)
 {
-	typename thrust::device_vector<T>::iterator iter = thrust::min_element(thrust::cuda::par.on(CudaHandler::curr_stream), data_.begin(), data_.end());
+	typename thrust::device_vector<T>::iterator iter = thrust::min_element(data_.begin(), data_.end());
 	return *iter;
 }
 
 template<typename T>
 int Matrix<T>::minIndex(void)
 {
-	typename thrust::device_vector<T>::iterator iter = thrust::min_element(thrust::cuda::par.on(CudaHandler::curr_stream), data_.begin(), data_.end());
+	typename thrust::device_vector<T>::iterator iter = thrust::min_element(data_.begin(), data_.end());
 	return iter - data_.begin();
 }
 

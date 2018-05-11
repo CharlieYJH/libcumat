@@ -9,6 +9,7 @@
 #include <thrust/transform_reduce.h>
 #include <thrust/extrema.h>
 #include <thrust/fill.h>
+#include <thrust/copy.h>
 #include <cublas_v2.h>
 #include <curand.h>
 #include <nvrtc.h>
@@ -115,6 +116,11 @@ namespace Cumat
 
 		// Fills matrix with 0
 		void zero(void);
+
+		// Copies the contents from the iterators to the underlying vector
+		// If the vector size is less than the input size, no dimensions are changed, otherwise it's resized to be a row vector
+		template<typename InputIterator>
+		void copy(InputIterator first, InputIterator last);
 
 		// Fills matrix with random numbers between min and max
 		void rand(const T min = -1.0, const T max = 1.0);
