@@ -104,7 +104,13 @@ TEST_CASE("Float matrix multiplication", "[matrix][multiplication][float]")
 
 	SECTION("Matrix multiply function (with expressions)")
 	{
-		gpu_mat3 = mmul(1.3 * exp(gpu_mat1) + 2, tanh(gpu_mat2) * 2 - 3.4f);
+		Cumat::Matrixf gpu_mat4 = Cumat::Matrixf::random(m, k);
+		REQUIRE(gpu_mat4.rows() == m);
+		REQUIRE(gpu_mat4.cols() == k);
+		REQUIRE(gpu_mat4.size() == m * k);
+		REQUIRE_FALSE(approxEqual(gpu_mat4, 0));
+
+		gpu_mat3 = mmul(1.3 * exp(gpu_mat1) + 2, tanh(gpu_mat2) * 2 - 3.4f) + 2 * gpu_mat4;
 
 		for (size_t i = 0; i < cpu_mat1.data.size(); ++i)
 			cpu_mat1.data[i] = 1.3 * std::exp(cpu_mat1.data[i]) + 2;
@@ -113,6 +119,9 @@ TEST_CASE("Float matrix multiplication", "[matrix][multiplication][float]")
 			cpu_mat2.data[i] = std::tanh(cpu_mat2.data[i]) * 2 - 3.4f;
 
 		CPUMatrixMultiply(cpu_mat1, cpu_mat2, cpu_mat3);
+
+		for (size_t i = 0; i < cpu_mat3.data.size(); ++i)
+			cpu_mat3.data[i] += 2 * gpu_mat4(i).val();
 
 		REQUIRE(gpu_mat3.rows() == m);
 		REQUIRE(gpu_mat3.cols() == k);
@@ -222,7 +231,13 @@ TEST_CASE("Double matrix multiplication", "[matrix][multiplication][double]")
 
 	SECTION("Matrix multiply function (with expressions)")
 	{
-		gpu_mat3 = mmul(1.3 * exp(gpu_mat1) + 2, tanh(gpu_mat2) * 2 - 3.4f);
+		Cumat::Matrixf gpu_mat4 = Cumat::Matrixf::random(m, k);
+		REQUIRE(gpu_mat4.rows() == m);
+		REQUIRE(gpu_mat4.cols() == k);
+		REQUIRE(gpu_mat4.size() == m * k);
+		REQUIRE_FALSE(approxEqual(gpu_mat4, 0));
+
+		gpu_mat3 = mmul(1.3 * exp(gpu_mat1) + 2, tanh(gpu_mat2) * 2 - 3.4f) + 2 * gpu_mat4;
 
 		for (size_t i = 0; i < cpu_mat1.data.size(); ++i)
 			cpu_mat1.data[i] = 1.3 * std::exp(cpu_mat1.data[i]) + 2;
@@ -231,6 +246,9 @@ TEST_CASE("Double matrix multiplication", "[matrix][multiplication][double]")
 			cpu_mat2.data[i] = std::tanh(cpu_mat2.data[i]) * 2 - 3.4f;
 
 		CPUMatrixMultiply(cpu_mat1, cpu_mat2, cpu_mat3);
+
+		for (size_t i = 0; i < cpu_mat3.data.size(); ++i)
+			cpu_mat3.data[i] += 2 * gpu_mat4(i).val();
 
 		REQUIRE(gpu_mat3.rows() == m);
 		REQUIRE(gpu_mat3.cols() == k);

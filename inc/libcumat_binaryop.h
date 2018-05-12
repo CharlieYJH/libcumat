@@ -17,8 +17,8 @@ class BinaryVectorOp
 	const std::string cast_;
 	
 	public:
-	BinaryVectorOp(const std::string &preop, const std::string &midop) : preop_(preop), midop_(midop), cast_("") {}
-	BinaryVectorOp(const std::string &preop, const std::string &midop, const std::string &cast) : preop_(preop), midop_(midop), cast_("(" + cast + ")") {}
+	BinaryVectorOp(const std::string &preop, const std::string &midop) : preop_(preop), midop_(" " + midop + " "), cast_("") {}
+	BinaryVectorOp(const std::string &preop, const std::string &midop, const std::string &cast) : preop_(preop), midop_(" " + midop + " "), cast_("(" + cast + ")") {}
 	template<typename Expr1, typename Expr2>
 	std::string operator()(const Expr1 &u, const Expr2 &v, std::string &params, int &num, std::vector<void *> &args, const bool &transpose, bool &has_transpose_expr) const
 	{
@@ -37,7 +37,7 @@ class BinaryScalarOp
 	const std::string cast_;
 
 	public:
-	BinaryScalarOp(const std::string &preop, const std::string &midop, const std::string &cast) : preop_(preop), midop_(midop), cast_(cast) {}
+	BinaryScalarOp(const std::string &preop, const std::string &midop, const std::string &cast) : preop_(preop), midop_(" " + midop + " "), cast_(cast) {}
 };
 
 template<typename T>
