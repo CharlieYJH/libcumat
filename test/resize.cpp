@@ -1,6 +1,6 @@
 #include "catch.hpp"
-#include "util/GPUCompare.hpp"
-#include "Core"
+#include "GPUCompare.hpp"
+#include "libcumat.h"
 
 TEST_CASE("Float matrix resize", "[resize][float]")
 {

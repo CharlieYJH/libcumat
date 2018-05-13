@@ -1,6 +1,6 @@
 #include "catch.hpp"
 #include "GPUCompare.hpp"
-#include "Core"
+#include "libcumat.h"
 #include <cstdlib>
 #include <time.h>
 #include <limits>

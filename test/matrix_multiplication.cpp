@@ -1,7 +1,7 @@
 #include "catch.hpp"
 #include "GPUCompare.hpp"
 #include "CPUMatrix.hpp"
-#include "Core"
+#include "libcumat.h"
 #include <cstdlib>
 #include <time.h>
 

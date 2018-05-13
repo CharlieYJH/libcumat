@@ -4,7 +4,7 @@
 #include <limits>
 #include <thrust/transform.h>
 #include <thrust/count.h>
-#include "Core"
+#include "libcumat.h"
 
 template<typename T, typename OtherT>
 struct approx_vector_equals
