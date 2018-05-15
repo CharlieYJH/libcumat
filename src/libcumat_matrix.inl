@@ -254,13 +254,13 @@ void Matrix<T>::assign(Matrix<T> &mat, const Expression<Expr> &rhs)
 	}
 
 	// Calculated necessary number of threads and blocks needed
-	const size_t total_threads = 256;
+	const unsigned int total_threads = 256;
 
-	const size_t num_threads_x = (has_transpose_expr) ? total_threads / 16 : total_threads;
-	const size_t num_threads_y = total_threads / num_threads_x;
+	const unsigned int num_threads_x = (has_transpose_expr) ? total_threads / 16 : total_threads;
+	const unsigned int num_threads_y = total_threads / num_threads_x;
 
-	const size_t num_blocks_x = (has_transpose_expr) ? (cols + num_threads_x - 1) / (num_threads_x) : (vec_size + num_threads_x - 1) / (num_threads_x);
-	const size_t num_blocks_y = (has_transpose_expr) ? (rows + num_threads_y - 1) / (num_threads_y) : 1;
+	const unsigned int num_blocks_x = (has_transpose_expr) ? (cols + num_threads_x - 1) / (num_threads_x) : (vec_size + num_threads_x - 1) / (num_threads_x);
+	const unsigned int num_blocks_y = (has_transpose_expr) ? (rows + num_threads_y - 1) / (num_threads_y) : 1;
 
 	// Call the kernel from the module
 	CUDA_SAFE_CALL(cuModuleGetFunction(&kernel, module, "cumat_kernel"));
