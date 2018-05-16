@@ -1,10 +1,10 @@
 #ifndef LIBCUMAT_CORE_
 #define LIBCUMAT_CORE_
 
-#include "libcumat_matrix.h"
-#include "libcumat_binaryopexpression.h"
-#include "libcumat_unaryopexpression.h"
-#include "libcumat_transpose.h"
-#include "libcumat_matrixproduct.h"
+#include "src/libcumat_matrix.h"
+#include "src/libcumat_binaryopexpression.h"
+#include "src/libcumat_unaryopexpression.h"
+#include "src/libcumat_transpose.h"
+#include "src/libcumat_matrixproduct.h"
 
 #endif

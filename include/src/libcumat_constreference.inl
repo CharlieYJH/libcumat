@@ -5,6 +5,8 @@
 #ifndef LIBCUMAT_CONSTREFERENCE_INL_
 #define LIBCUMAT_CONSTREFERENCE_INL_
 
+#include <thrust/device_vector.h>
+
 namespace Cumat
 {
 
