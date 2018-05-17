@@ -1,6 +1,6 @@
-project(libcumat)
-
 cmake_minimum_required(VERSION 3.0)
+
+project(libcumat VERSION 1.0)
 
 # Guard against in-source builds
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
@@ -20,10 +20,10 @@ add_library(libcumat INTERFACE)
 include(FindNVRTC)
 
 # Add necessary include directories
+# Note: CUDA include path is automatically included by cuda_add_executable
 target_include_directories(libcumat INTERFACE
 		$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-		$<INSTALL_INTERFACE:include>
-		${CUDA_INCLUDE_DIRS}
+		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
 # Link necessary CUDA libraries
@@ -36,6 +36,13 @@ target_link_libraries(libcumat INTERFACE
 )
 
 include(GNUInstallDirs)
+include (CMakePackageConfigHelpers)
+
+set(LIBCUMAT_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
+set(LIBCUMAT_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR})
+set(LIBCUMAT_LIBRARIES ${CUDA_LIBRARIES} ${CUDA_CUDA_LIBRARY} ${CUDA_CUBLAS_LIBRARIES} ${CUDA_curand_LIBRARY} ${CUDA_nvrtc_LIBRARY})
+set(LIBCUMAT_DEFINITIONS "")
+set(CMAKEPACKAGE_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/libcumat)
 
 # Install Cumat targets
 install(TARGETS libcumat
@@ -44,12 +51,32 @@ install(TARGETS libcumat
 	ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
+# Setup libcumatConfig.cmake file
+configure_package_config_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/cmake/libcumatConfig.cmake.in
+	${CMAKE_CURRENT_BINARY_DIR}/libcumatConfig.cmake
+	PATH_VARS LIBCUMAT_ROOT_DIR LIBCUMAT_INCLUDE_DIRS LIBCUMAT_LIBRARIES LIBCUMAT_DEFINITIONS
+	INSTALL_DESTINATION ${CMAKEPACKAGE_INSTALL_DIR}
+	NO_CHECK_REQUIRED_COMPONENTS_MACRO
+)
+
+# Setup libcumatConfigVersion.cmake file
+write_basic_package_version_file(libcumatConfigVersion.cmake
+	VERSION ${PACKAGE_VERSION}
+	COMPATIBILITY SameMajorVersion
+)
+
 # Install include directory
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-# Install configuration file
-install(EXPORT libcumatTargets
-	FILE libcumatConfig.cmake
-	NAMESPACE libcumat::
-	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/libcumat
+# Install configuration target file
+install(EXPORT libcumatTargets NAMESPACE libcumat:: DESTINATION ${CMAKEPACKAGE_INSTALL_DIR})
+
+# Install config files into package folder
+install(
+	FILES
+		${CMAKE_CURRENT_BINARY_DIR}/libcumatConfig.cmake
+		${CMAKE_CURRENT_BINARY_DIR}/libcumatConfigVersion.cmake
+	DESTINATION
+		${CMAKEPACKAGE_INSTALL_DIR}
 )

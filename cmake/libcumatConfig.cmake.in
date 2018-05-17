@@ -1,0 +1,14 @@
+# This file exports the libcumat::libcumat target which should be passed to target_link_libraries
+# It also sets up library variables (although these are not necessary for use)
+
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/libcumatTargets.cmake")
+
+set(LIBCUMAT_FOUND 1)
+
+set(LIBCUMAT_ROOT_DIR "@PACKAGE_LIBCUMAT_ROOT_DIR@")
+set(LIBCUMAT_INDLUDE_DIR "@PACKAGE_LIBCUMAT_INCLUDE_DIRS@")
+set(LIBCUMAT_INCLUDE_DIRS "@PACKAGE_LIBCUMAT_INCLUDE_DIRS@")
+set(LIBCUMAT_LIBRARIES "@PACKAGE_LIBCUMAT_LIBRARIES@")
+set(LIBCUMAT_DEFINITIONS "@PACKAGE_LIBCUMAT_DEFINITIONS@")
