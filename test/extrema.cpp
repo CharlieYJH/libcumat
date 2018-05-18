@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "GPUCompare.hpp"
+#include "util/GPUCompare.hpp"
 #include "libcumat.h"
 #include <cstdlib>
 #include <time.h>

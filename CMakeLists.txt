@@ -88,7 +88,7 @@ add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_D
 enable_testing()
 
 # By default, tests are left out of the all target
-if(NOT LIBCUMAT_INCLUDE_TESTS_IN_ALL_TARGET)
+if(NOT LIBCUMAT_BUILD_TESTS)
 	add_subdirectory(test EXCLUDE_FROM_ALL)
 else()
 	add_subdirectory(test)

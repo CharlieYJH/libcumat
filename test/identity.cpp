@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "GPUCompare.hpp"
+#include "util/GPUCompare.hpp"
 #include "libcumat.h"
 
 TEST_CASE("Float identity matrix", "[identity][float]")
