@@ -83,3 +83,13 @@ install(
 
 # Add uninstall target
 add_custom_target(uninstall COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/libcumatUninstall.cmake)
+
+# Allows use of ctest from build directory
+enable_testing()
+
+# By default, tests are left out of the all target
+if(NOT LIBCUMAT_INCLUDE_TESTS_IN_ALL_TARGET)
+	add_subdirectory(test EXCLUDE_FROM_ALL)
+else()
+	add_subdirectory(test)
+endif()
