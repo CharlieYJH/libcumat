@@ -35,6 +35,20 @@ cudaStream_t CudaHandler::curr_stream = CudaHandler::default_stream;
 // Public methods
 //----------------------------------------------
 
+CudaHandler::CudaHandler(void)
+{
+	// If this is the first object, initiate all handles and related variables
+	if (objectCounter<CudaHandler>::counter_ == 1)
+		CudaHandler::init();
+}
+
+CudaHandler::~CudaHandler(void)
+{
+	// If this is the last object, destroy all handles and related variables
+	if (objectCounter<CudaHandler>::counter_ == 1)
+		CudaHandler::end();
+}
+
 void CudaHandler::init(void)
 {
 	// Create cuBLAS handle

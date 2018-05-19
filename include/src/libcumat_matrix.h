@@ -38,7 +38,7 @@ namespace Cumat
 	void end(void);
 
 	template<typename T>
-	class Matrix : public Expression<Matrix<T>>, public CudaHandler
+	class Matrix : public Expression<Matrix<T>>, private CudaHandler
 	{
 		private:
 
@@ -55,6 +55,10 @@ namespace Cumat
 
 		// Creates a matrix that is a copy of the rhs matrix
 		Matrix(const Matrix<T> &rhs);
+
+		// Constructs a matrix from a matrix of different type
+		template<typename OtherT>
+		Matrix(const Matrix<OtherT> &rhs);
 
 		// Initiates a row vector from a thrust device_vector of a different type
 		template<typename OtherT>

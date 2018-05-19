@@ -8,6 +8,7 @@
 #include <string>
 
 #include "util/helper_cuda.h"
+#include "libcumat_objectcounter.h"
 
 #define NVRTC_SAFE_CALL(x)                                        \
 	do {                                                          \
@@ -42,7 +43,7 @@
 namespace Cumat
 {
 
-class CudaHandler
+class CudaHandler : public objectCounter<CudaHandler>
 {
 	protected:
 
@@ -54,6 +55,12 @@ class CudaHandler
 	static const cudaStream_t default_stream;
 
 	public:
+
+	// Class constructor
+	CudaHandler(void);
+
+	// Class destructor
+	~CudaHandler(void);
 
 	// Creates all necessary handles needed for CUDA API calls
 	static void init(void);
