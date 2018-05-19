@@ -20,6 +20,42 @@ TEST_CASE("Double matrix empty instantiation", "[empty][instantiation][double]")
 	REQUIRE(mat1.size() == 0);
 }
 
+TEST_CASE("Float matrix direct value instantiation", "[direct][instantiation][float]")
+{
+	Cumat::Matrixf mat1(450, 120);
+	REQUIRE(mat1.rows() == 450);
+	REQUIRE(mat1.cols() == 120);
+	REQUIRE(mat1.size() == 450 * 120);
+	REQUIRE(approxEqual(mat1, 0));
+}
+
+TEST_CASE("Double matrix direct value instantiation", "[direct][instantiation][double]")
+{
+	Cumat::Matrixd mat1(1020, 293);
+	REQUIRE(mat1.rows() == 1020);
+	REQUIRE(mat1.cols() == 293);
+	REQUIRE(mat1.size() == 1020 * 293);
+	REQUIRE(approxEqual(mat1, 0));
+}
+
+TEST_CASE("Float matrix direct value instantiation (with floating point)", "[direct][instantiation][float]")
+{
+	Cumat::Matrixf mat1(1030.38281, 1921.192);
+	REQUIRE(mat1.rows() == 1030);
+	REQUIRE(mat1.cols() == 1921);
+	REQUIRE(mat1.size() == 1030 * 1921);
+	REQUIRE(approxEqual(mat1, 0));
+}
+
+TEST_CASE("Double matrix direct value instantiation (with floating point)", "[direct][instantiation][double]")
+{
+	Cumat::Matrixd mat1(2918.372, 45.128);
+	REQUIRE(mat1.rows() == 2918);
+	REQUIRE(mat1.cols() == 45);
+	REQUIRE(mat1.size() == 2918 * 45);
+	REQUIRE(approxEqual(mat1, 0));
+}
+
 TEST_CASE("Float matrix size instantiation", "[size][instantiation][float]")
 {
 	SECTION("Rows > 0 and Cols > 0")

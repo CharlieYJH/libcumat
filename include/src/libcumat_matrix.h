@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <vector>
 #include <cmath>
+#include <type_traits>
 
 #include "libcumat_expression.h"
 #include "libcumat_math.h"
@@ -68,7 +69,7 @@ namespace Cumat
 		Matrix(const std::vector<OtherT> &rhs);
 
 		// Initiates a row matrix from iterators
-		template<typename InputIterator>
+		template<typename InputIterator, typename = typename std::enable_if<!std::is_integral<InputIterator>::value && !std::is_floating_point<InputIterator>::value, void>::type>
 		Matrix(InputIterator first, InputIterator last);
 
 		// Creates a rows x cols matrix with all elements initiated as 0

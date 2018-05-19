@@ -93,3 +93,10 @@ if(NOT LIBCUMAT_BUILD_TESTS)
 else()
 	add_subdirectory(test)
 endif()
+
+# By default, the example is left out of the all target
+if(NOT LIBCUMAT_BUILD_EXAMPLE)
+	add_subdirectory(example EXCLUDE_FROM_ALL)
+else()
+	add_subdirectory(example)
+endif()

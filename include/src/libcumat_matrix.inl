@@ -88,7 +88,7 @@ Matrix<T>::Matrix(const std::vector<OtherT> &rhs):
 }
 
 template<typename T>
-template<typename InputIterator>
+template<typename InputIterator, typename>
 Matrix<T>::Matrix(InputIterator first, InputIterator last):
 	rows_(1),
 	cols_(last - first),
