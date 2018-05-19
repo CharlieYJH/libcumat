@@ -28,12 +28,10 @@ TEST_CASE("Counting instances of matrix object")
 
 	// Instantiating in scope
 	for (size_t i = 0; i < 300; ++i) {
-		std::cout << "Loop start" << std::endl;
 		Cumat::Matrixd temp = Cumat::Matrixf::random(40, 40);
 		++counter;
 		REQUIRE(Cumat::objectCounter<Cumat::CudaHandler>::count() == counter);
 		--counter;
-		std::cout << "Loop end" << std::endl;
 	}
 
 	// All objects in scope should be automatically destroyed at end of scope

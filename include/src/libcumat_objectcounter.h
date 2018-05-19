@@ -11,12 +11,12 @@ class objectCounter
 	
 	// Keeps track of total number of instantiated objects
 	static unsigned int counter_;
+	~objectCounter(void) { --counter_; }
 
 	public:
 	
 	objectCounter(void) { ++counter_; }
 	objectCounter(const objectCounter&) { ++counter_; }
-	~objectCounter(void) { --counter_; }
 	static unsigned int count(void) { return counter_; }
 };
 
