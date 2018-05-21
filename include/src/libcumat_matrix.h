@@ -34,9 +34,6 @@
 
 namespace Cumat
 {
-	void init(void);
-	void end(void);
-
 	template<typename T>
 	class Matrix : public Expression<Matrix<T>>, private CudaHandler
 	{

@@ -8,16 +8,6 @@
 namespace Cumat
 {
 
-void init(void)
-{
-	CudaHandler::init();
-}
-
-void end(void)
-{
-	CudaHandler::end();
-}
-
 //----------------------------------------------
 // Public methods
 //----------------------------------------------
