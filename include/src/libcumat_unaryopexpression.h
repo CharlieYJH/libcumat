@@ -269,6 +269,15 @@ const UnaryOpExpression<KernelOp::rint, Expr> rint(const Expression<Expr> &u)
 	return UnaryOpExpression<KernelOp::rint, Expr>(v);
 }
 
+// -------------- Miscellaneous Functions --------------
+
+template<typename Expr>
+const UnaryOpExpression<KernelOp::sigmoid, Expr> sigmoid(const Expression<Expr> &u)
+{
+	const Expr &v = u;
+	return UnaryOpExpression<KernelOp::sigmoid, Expr>(v);
+}
+
 }
 
 #endif

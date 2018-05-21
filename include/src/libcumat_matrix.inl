@@ -37,7 +37,7 @@ template<typename OtherT>
 Matrix<T>::Matrix(const Matrix<OtherT> &rhs):
 	rows_(rhs.rows()),
 	cols_(rhs.cols()),
-	data_(rhs.thrustVector())
+	data_(rhs.device_vector())
 {
 	data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
 }
@@ -283,13 +283,13 @@ const Matrix<T>& Matrix<T>::eval(void) const
 }
 
 template<typename T>
-thrust::device_vector<T>& Matrix<T>::thrustVector(void)
+thrust::device_vector<T>& Matrix<T>::device_vector(void)
 {
 	return data_;
 }
 
 template<typename T>
-const thrust::device_vector<T>& Matrix<T>::thrustVector(void) const
+const thrust::device_vector<T>& Matrix<T>::device_vector(void) const
 {
 	return data_;
 }
@@ -736,13 +736,6 @@ Matrix<T>& Matrix<T>::atanh(void)
 }
 
 template<typename T>
-Matrix<T>& Matrix<T>::sigmoid(void)
-{
-	*this = 1.0f / (1.0f + Cumat::exp(-*this));
-	return *this;
-}
-
-template<typename T>
 Matrix<T>& Matrix<T>::ceil(void)
 {
 	*this = Cumat::ceil(*this);
@@ -767,6 +760,13 @@ template<typename T>
 Matrix<T>& Matrix<T>::rint(void)
 {
 	*this = Cumat::rint(*this);
+	return *this;
+}
+
+template<typename T>
+Matrix<T>& Matrix<T>::sigmoid(void)
+{
+    *this = Cumat::sigmoid(*this);
 	return *this;
 }
 

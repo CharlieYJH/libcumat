@@ -56,7 +56,7 @@ bool approxEqual(const Cumat::Matrix<T> &a, const Cumat::Matrix<OtherT> &b, T ep
 	size_t vec_size = a.size();
 	thrust::device_vector<bool> bool_vec(vec_size, false);
 
-	thrust::transform(a.thrustVector().begin(), a.thrustVector().end(), b.thrustVector().begin(), bool_vec.begin(), approx_vector_equals<T, OtherT>(eps));
+	thrust::transform(a.device_vector().begin(), a.device_vector().end(), b.device_vector().begin(), bool_vec.begin(), approx_vector_equals<T, OtherT>(eps));
 	size_t result = thrust::count(bool_vec.begin(), bool_vec.end(), true);
 
 	return result == vec_size;
@@ -68,7 +68,7 @@ bool approxEqual(const Cumat::Matrix<T> &a, const OtherT &n, T eps = std::numeri
 	size_t vec_size = a.size();
 	thrust::device_vector<bool> bool_vec(vec_size, false);
 
-	thrust::transform(a.thrustVector().begin(), a.thrustVector().end(), bool_vec.begin(), approx_scalar_equals<T, OtherT>(n, eps));
+	thrust::transform(a.device_vector().begin(), a.device_vector().end(), bool_vec.begin(), approx_scalar_equals<T, OtherT>(n, eps));
 	size_t result = thrust::count(bool_vec.begin(), bool_vec.end(), true);
 
 	return result == vec_size;

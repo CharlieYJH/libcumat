@@ -93,10 +93,10 @@ namespace Cumat
 		const Matrix<T>& eval(void) const;
 
 		// Returns a reference to the underlying device vector
-		thrust::device_vector<T>& thrustVector(void);
+		thrust::device_vector<T>& device_vector(void);
 
 		// Returns a const reference to the underlying device vector
-		const thrust::device_vector<T>& thrustVector(void) const;
+		const thrust::device_vector<T>& device_vector(void) const;
 
 		// Returns the number of rows
 		size_t rows(void) const;
@@ -228,8 +228,6 @@ namespace Cumat
 
 		Matrix<T>& atanh(void);
 
-		Matrix<T>& sigmoid(void);
-
 		Matrix<T>& ceil(void);
 
 		Matrix<T>& floor(void);
@@ -237,6 +235,8 @@ namespace Cumat
 		Matrix<T>& round(void);
 
 		Matrix<T>& rint(void);
+
+		Matrix<T>& sigmoid(void);
 
 		//----------------------------------------------
 		// Operator Overloads

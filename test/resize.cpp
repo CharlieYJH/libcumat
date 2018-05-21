@@ -23,7 +23,7 @@ TEST_CASE("Float matrix resize", "[resize][float]")
 		REQUIRE(mat1.rows() == new_rows);
 		REQUIRE(mat1.cols() == new_cols);
 		REQUIRE(mat1.size() == new_size);
-		REQUIRE(mat1.thrustVector().size() == new_size);
+		REQUIRE(mat1.device_vector().size() == new_size);
 	}
 
 	SECTION("Resizing to a smaller size")
@@ -36,7 +36,7 @@ TEST_CASE("Float matrix resize", "[resize][float]")
 		REQUIRE(mat1.rows() == new_rows);
 		REQUIRE(mat1.cols() == new_cols);
 		REQUIRE(mat1.size() == new_size);
-		REQUIRE(mat1.thrustVector().size() == new_size);
+		REQUIRE(mat1.device_vector().size() == new_size);
 	}
 
 	SECTION("Resizing to the same size")
@@ -49,7 +49,7 @@ TEST_CASE("Float matrix resize", "[resize][float]")
 		REQUIRE(mat1.rows() == new_rows);
 		REQUIRE(mat1.cols() == new_cols);
 		REQUIRE(mat1.size() == new_size);
-		REQUIRE(mat1.thrustVector().size() == new_size);
+		REQUIRE(mat1.device_vector().size() == new_size);
 	}
 
 	SECTION("Resizing to 0, only row parameter is 0")
@@ -62,7 +62,7 @@ TEST_CASE("Float matrix resize", "[resize][float]")
 		REQUIRE(mat1.rows() == 0);
 		REQUIRE(mat1.cols() == 0);
 		REQUIRE(mat1.size() == new_size);
-		REQUIRE(mat1.thrustVector().size() == new_size);
+		REQUIRE(mat1.device_vector().size() == new_size);
 	}
 
 	SECTION("Resizing to 0, only col parameter is 0")
@@ -75,7 +75,7 @@ TEST_CASE("Float matrix resize", "[resize][float]")
 		REQUIRE(mat1.rows() == 0);
 		REQUIRE(mat1.cols() == 0);
 		REQUIRE(mat1.size() == new_size);
-		REQUIRE(mat1.thrustVector().size() == new_size);
+		REQUIRE(mat1.device_vector().size() == new_size);
 	}
 
 	SECTION("Resizing to 0, both parameters are 0")
@@ -88,7 +88,7 @@ TEST_CASE("Float matrix resize", "[resize][float]")
 		REQUIRE(mat1.rows() == 0);
 		REQUIRE(mat1.cols() == 0);
 		REQUIRE(mat1.size() == new_size);
-		REQUIRE(mat1.thrustVector().size() == new_size);
+		REQUIRE(mat1.device_vector().size() == new_size);
 	}
 }
 
@@ -113,7 +113,7 @@ TEST_CASE("Double matrix resize", "[resize][double]")
 		REQUIRE(mat1.rows() == new_rows);
 		REQUIRE(mat1.cols() == new_cols);
 		REQUIRE(mat1.size() == new_size);
-		REQUIRE(mat1.thrustVector().size() == new_size);
+		REQUIRE(mat1.device_vector().size() == new_size);
 	}
 
 	SECTION("Resizing to a smaller size")
@@ -126,7 +126,7 @@ TEST_CASE("Double matrix resize", "[resize][double]")
 		REQUIRE(mat1.rows() == new_rows);
 		REQUIRE(mat1.cols() == new_cols);
 		REQUIRE(mat1.size() == new_size);
-		REQUIRE(mat1.thrustVector().size() == new_size);
+		REQUIRE(mat1.device_vector().size() == new_size);
 	}
 
 	SECTION("Resizing to the same size")
@@ -139,7 +139,7 @@ TEST_CASE("Double matrix resize", "[resize][double]")
 		REQUIRE(mat1.rows() == new_rows);
 		REQUIRE(mat1.cols() == new_cols);
 		REQUIRE(mat1.size() == new_size);
-		REQUIRE(mat1.thrustVector().size() == new_size);
+		REQUIRE(mat1.device_vector().size() == new_size);
 	}
 
 	SECTION("Resizing to 0, only row parameter is 0")
@@ -152,7 +152,7 @@ TEST_CASE("Double matrix resize", "[resize][double]")
 		REQUIRE(mat1.rows() == 0);
 		REQUIRE(mat1.cols() == 0);
 		REQUIRE(mat1.size() == new_size);
-		REQUIRE(mat1.thrustVector().size() == new_size);
+		REQUIRE(mat1.device_vector().size() == new_size);
 	}
 
 	SECTION("Resizing to 0, only col parameter is 0")
@@ -165,7 +165,7 @@ TEST_CASE("Double matrix resize", "[resize][double]")
 		REQUIRE(mat1.rows() == 0);
 		REQUIRE(mat1.cols() == 0);
 		REQUIRE(mat1.size() == new_size);
-		REQUIRE(mat1.thrustVector().size() == new_size);
+		REQUIRE(mat1.device_vector().size() == new_size);
 	}
 
 	SECTION("Resizing to 0, both parameters are 0")
@@ -178,6 +178,6 @@ TEST_CASE("Double matrix resize", "[resize][double]")
 		REQUIRE(mat1.rows() == 0);
 		REQUIRE(mat1.cols() == 0);
 		REQUIRE(mat1.size() == new_size);
-		REQUIRE(mat1.thrustVector().size() == new_size);
+		REQUIRE(mat1.device_vector().size() == new_size);
 	}
 }

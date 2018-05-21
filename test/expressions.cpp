@@ -139,10 +139,12 @@ TEST_CASE("Matrix expressions", "[operators][expressions]")
 		REQUIRE(mat6.cols() == 0);
 		REQUIRE(mat6.size() == 0);
 
-		mat6 = cbrt(square(4.15f / (mat2 * mat1)));
+		mat6 = cbrt(square(4.15f / sigmoid(mat2 * mat1)));
 
-		for (size_t i = 0; i < mat5.size(); ++i)
-			mat5(i) = std::cbrt((4.15f / (mat2(i).val() * mat1(i).val())) * (4.15f / (mat2(i).val() * mat1(i).val())));
+		for (size_t i = 0; i < mat5.size(); ++i) {
+            float denom = 1.0f / (1.0f + std::exp(-mat2(i).val() * mat1(i).val()));
+			mat5(i) = std::cbrt((4.15f / denom) * (4.15f / denom));
+        }
 
 		REQUIRE(approxEqual(mat5, mat6));
 	}

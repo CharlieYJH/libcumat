@@ -241,19 +241,19 @@ TEST_CASE("Float matrix thrust device vector instantiation", "[thrust][device_ve
 		REQUIRE(mat1.rows() == 0);
 		REQUIRE(mat1.cols() == 0);
 		REQUIRE(mat1.size() == 0);
-		REQUIRE(mat1.thrustVector().size() == 0);
+		REQUIRE(mat1.device_vector().size() == 0);
 
 		Cumat::Matrixf mat2(empty_vec2);
 		REQUIRE(mat2.rows() == 0);
 		REQUIRE(mat2.cols() == 0);
 		REQUIRE(mat2.size() == 0);
-		REQUIRE(mat2.thrustVector().size() == 0);
+		REQUIRE(mat2.device_vector().size() == 0);
 
 		Cumat::Matrixf mat3(empty_vec2.begin(), empty_vec2.end());
 		REQUIRE(mat3.rows() == 0);
 		REQUIRE(mat3.cols() == 0);
 		REQUIRE(mat3.size() == 0);
-		REQUIRE(mat3.thrustVector().size() == 0);
+		REQUIRE(mat3.device_vector().size() == 0);
 	}
 
 	SECTION("Float to float assignment")
@@ -321,19 +321,19 @@ TEST_CASE("Double matrix thrust device vector instantiation", "[thrust][device_v
 		REQUIRE(mat1.rows() == 0);
 		REQUIRE(mat1.cols() == 0);
 		REQUIRE(mat1.size() == 0);
-		REQUIRE(mat1.thrustVector().size() == 0);
+		REQUIRE(mat1.device_vector().size() == 0);
 
 		Cumat::Matrixd mat2(empty_vec2);
 		REQUIRE(mat2.rows() == 0);
 		REQUIRE(mat2.cols() == 0);
 		REQUIRE(mat2.size() == 0);
-		REQUIRE(mat2.thrustVector().size() == 0);
+		REQUIRE(mat2.device_vector().size() == 0);
 
 		Cumat::Matrixd mat3(empty_vec2.begin(), empty_vec2.end());
 		REQUIRE(mat3.rows() == 0);
 		REQUIRE(mat3.cols() == 0);
 		REQUIRE(mat3.size() == 0);
-		REQUIRE(mat3.thrustVector().size() == 0);
+		REQUIRE(mat3.device_vector().size() == 0);
 	}
 
 	SECTION("Float to double assignment")
@@ -401,19 +401,19 @@ TEST_CASE("Float matrix thrust host vector instantiation", "[thrust][host_vector
 		REQUIRE(mat1.rows() == 0);
 		REQUIRE(mat1.cols() == 0);
 		REQUIRE(mat1.size() == 0);
-		REQUIRE(mat1.thrustVector().size() == 0);
+		REQUIRE(mat1.device_vector().size() == 0);
 
 		Cumat::Matrixf mat2(empty_vec2);
 		REQUIRE(mat2.rows() == 0);
 		REQUIRE(mat2.cols() == 0);
 		REQUIRE(mat2.size() == 0);
-		REQUIRE(mat2.thrustVector().size() == 0);
+		REQUIRE(mat2.device_vector().size() == 0);
 
 		Cumat::Matrixf mat3(empty_vec2.begin(), empty_vec2.end());
 		REQUIRE(mat3.rows() == 0);
 		REQUIRE(mat3.cols() == 0);
 		REQUIRE(mat3.size() == 0);
-		REQUIRE(mat3.thrustVector().size() == 0);
+		REQUIRE(mat3.device_vector().size() == 0);
 	}
 
 	SECTION("Float to float assignment")
@@ -481,19 +481,19 @@ TEST_CASE("Double matrix thrust host vector instantiation", "[thrust][host_vecto
 		REQUIRE(mat1.rows() == 0);
 		REQUIRE(mat1.cols() == 0);
 		REQUIRE(mat1.size() == 0);
-		REQUIRE(mat1.thrustVector().size() == 0);
+		REQUIRE(mat1.device_vector().size() == 0);
 
 		Cumat::Matrixd mat2(empty_vec2);
 		REQUIRE(mat2.rows() == 0);
 		REQUIRE(mat2.cols() == 0);
 		REQUIRE(mat2.size() == 0);
-		REQUIRE(mat2.thrustVector().size() == 0);
+		REQUIRE(mat2.device_vector().size() == 0);
 
 		Cumat::Matrixd mat3(empty_vec2.begin(), empty_vec2.end());
 		REQUIRE(mat3.rows() == 0);
 		REQUIRE(mat3.cols() == 0);
 		REQUIRE(mat3.size() == 0);
-		REQUIRE(mat3.thrustVector().size() == 0);
+		REQUIRE(mat3.device_vector().size() == 0);
 	}
 
 	SECTION("Float to double assignment")
@@ -561,19 +561,19 @@ TEST_CASE("Float matrix C++ vector instantiation", "[vector][instantiation][floa
 		REQUIRE(mat1.rows() == 0);
 		REQUIRE(mat1.cols() == 0);
 		REQUIRE(mat1.size() == 0);
-		REQUIRE(mat1.thrustVector().size() == 0);
+		REQUIRE(mat1.device_vector().size() == 0);
 
 		Cumat::Matrixf mat2(empty_vec2);
 		REQUIRE(mat2.rows() == 0);
 		REQUIRE(mat2.cols() == 0);
 		REQUIRE(mat2.size() == 0);
-		REQUIRE(mat2.thrustVector().size() == 0);
+		REQUIRE(mat2.device_vector().size() == 0);
 
 		Cumat::Matrixf mat3(empty_vec2.begin(), empty_vec2.end());
 		REQUIRE(mat3.rows() == 0);
 		REQUIRE(mat3.cols() == 0);
 		REQUIRE(mat3.size() == 0);
-		REQUIRE(mat3.thrustVector().size() == 0);
+		REQUIRE(mat3.device_vector().size() == 0);
 	}
 
 	SECTION("Float to float assignment")
@@ -641,19 +641,19 @@ TEST_CASE("Double matrix C++ vector instantiation", "[vector][instantiation][dou
 		REQUIRE(mat1.rows() == 0);
 		REQUIRE(mat1.cols() == 0);
 		REQUIRE(mat1.size() == 0);
-		REQUIRE(mat1.thrustVector().size() == 0);
+		REQUIRE(mat1.device_vector().size() == 0);
 
 		Cumat::Matrixd mat2(empty_vec2);
 		REQUIRE(mat2.rows() == 0);
 		REQUIRE(mat2.cols() == 0);
 		REQUIRE(mat2.size() == 0);
-		REQUIRE(mat2.thrustVector().size() == 0);
+		REQUIRE(mat2.device_vector().size() == 0);
 
 		Cumat::Matrixd mat3(empty_vec2.begin(), empty_vec2.end());
 		REQUIRE(mat3.rows() == 0);
 		REQUIRE(mat3.cols() == 0);
 		REQUIRE(mat3.size() == 0);
-		REQUIRE(mat3.thrustVector().size() == 0);
+		REQUIRE(mat3.device_vector().size() == 0);
 	}
 
 	SECTION("Float to double assignment")

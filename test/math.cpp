@@ -397,18 +397,6 @@ TEST_CASE("Float matrix math ops", "[math][float]")
 		REQUIRE(approxEqual(mat1, mat2));
 	}
 
-	SECTION("Sigmoid")
-	{
-		mat1.sigmoid();
-
-		for (size_t i = 0; i < mat2.size(); ++i) {
-			float val = mat2(i);
-			mat2(i) = 1.0f / (1 + std::exp(-val));
-		}
-
-		REQUIRE(approxEqual(mat1, mat2));
-	}
-
 	SECTION("Ceiling function")
 	{
 		mat1.ceil();
@@ -460,6 +448,18 @@ TEST_CASE("Float matrix math ops", "[math][float]")
 		for (size_t i = 0; i < mat2.size(); ++i) {
 			float val = mat2(i);
 			mat2(i) = std::rint(val);
+		}
+
+		REQUIRE(approxEqual(mat1, mat2));
+	}
+
+	SECTION("Sigmoid")
+	{
+		mat1.sigmoid();
+
+		for (size_t i = 0; i < mat2.size(); ++i) {
+			float val = mat2(i);
+			mat2(i) = 1.0f / (1.0f + std::exp(-val));
 		}
 
 		REQUIRE(approxEqual(mat1, mat2));

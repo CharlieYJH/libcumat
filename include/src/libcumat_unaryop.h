@@ -191,6 +191,18 @@ struct rint : public UnaryOp
 	rint(void) : UnaryOp("rint") {}
 };
 
+struct sigmoid
+{
+	sigmoid(void) {}
+
+	template<typename Expr>
+	std::string operator()(const Expr &u, std::string &params, int &num, std::vector<void *> &args, const bool &transpose, bool &has_transpose_expr) const
+	{
+		std::string var = u.buildKernel(params, num, args, transpose, has_transpose_expr);
+		return "(1.0f/(1.0f+exp(-" + var + ")))";
+	}
+};
+
 }
 
 }
