@@ -7,17 +7,21 @@ namespace Cumat
 template<typename T>
 class objectCounter
 {
-	protected:
-	
-	// Keeps track of total number of instantiated objects
-	static unsigned int counter_;
-	~objectCounter(void) { --counter_; }
+    protected:
+    
+    // Keeps track of total number of instantiated objects
+    static unsigned int counter_;
 
-	public:
-	
-	objectCounter(void) { ++counter_; }
-	objectCounter(const objectCounter&) { ++counter_; }
-	static unsigned int count(void) { return counter_; }
+    // Prevents deletion of objects from base pointer
+    ~objectCounter(void) { --counter_; }
+
+    public:
+    
+    objectCounter(void) { ++counter_; }
+
+    objectCounter(const objectCounter&) { ++counter_; }
+
+    static unsigned int count(void) { return counter_; }
 };
 
 template<typename T>

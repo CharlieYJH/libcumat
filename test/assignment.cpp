@@ -6,280 +6,280 @@
 
 TEST_CASE("Float matrix assignments", "[assignment][float]")
 {
-	srand(time(0));
+    srand(time(0));
 
-	size_t rows = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
-	size_t cols = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
-	size_t size = rows * cols;
+    size_t rows = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
+    size_t cols = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
+    size_t size = rows * cols;
 
-	Cumat::Matrixf mat1 = Cumat::Matrixf::random(rows, cols);
-	REQUIRE(mat1.rows() == rows);
-	REQUIRE(mat1.cols() == cols);
-	REQUIRE(mat1.size() == size);
+    Cumat::Matrixf mat1 = Cumat::Matrixf::random(rows, cols);
+    REQUIRE(mat1.rows() == rows);
+    REQUIRE(mat1.cols() == cols);
+    REQUIRE(mat1.size() == size);
 
-	Cumat::Matrixf mat2 = Cumat::Matrixf::random(rows, cols);
-	REQUIRE(mat2.rows() == rows);
-	REQUIRE(mat2.cols() == cols);
-	REQUIRE(mat2.size() == size);
+    Cumat::Matrixf mat2 = Cumat::Matrixf::random(rows, cols);
+    REQUIRE(mat2.rows() == rows);
+    REQUIRE(mat2.cols() == cols);
+    REQUIRE(mat2.size() == size);
 
-	Cumat::Matrixd mat3 = Cumat::Matrixf::random(rows, cols);
-	REQUIRE(mat3.rows() == rows);
-	REQUIRE(mat3.cols() == cols);
-	REQUIRE(mat3.size() == size);
+    Cumat::Matrixd mat3 = Cumat::Matrixf::random(rows, cols);
+    REQUIRE(mat3.rows() == rows);
+    REQUIRE(mat3.cols() == cols);
+    REQUIRE(mat3.size() == size);
 
-	Cumat::Matrixf mat4 = mat1;
-	REQUIRE(approxEqual(mat4, mat1));
+    Cumat::Matrixf mat4 = mat1;
+    REQUIRE(approxEqual(mat4, mat1));
 
-	SECTION("Regular assignment")
-	{
-		mat4 = mat2;
-		REQUIRE_FALSE(approxEqual(mat4, mat1));
-		REQUIRE_FALSE(approxEqual(mat4, mat3));
-		REQUIRE(approxEqual(mat4, mat2));
+    SECTION("Regular assignment")
+    {
+        mat4 = mat2;
+        REQUIRE_FALSE(approxEqual(mat4, mat1));
+        REQUIRE_FALSE(approxEqual(mat4, mat3));
+        REQUIRE(approxEqual(mat4, mat2));
 
-		mat3 = mat1;
-		REQUIRE_FALSE(approxEqual(mat3, mat4));
-		REQUIRE_FALSE(approxEqual(mat3, mat2));
-		REQUIRE(approxEqual(mat3, mat1));
+        mat3 = mat1;
+        REQUIRE_FALSE(approxEqual(mat3, mat4));
+        REQUIRE_FALSE(approxEqual(mat3, mat2));
+        REQUIRE(approxEqual(mat3, mat1));
 
-		mat4 = mat3;
-		REQUIRE_FALSE(approxEqual(mat4, mat2));
-		REQUIRE(approxEqual(mat4, mat3));
-		REQUIRE(approxEqual(mat4, mat1));
-	}
+        mat4 = mat3;
+        REQUIRE_FALSE(approxEqual(mat4, mat2));
+        REQUIRE(approxEqual(mat4, mat3));
+        REQUIRE(approxEqual(mat4, mat1));
+    }
 
-	SECTION("Regular assignment (different size) (same type)")
-	{
-		size_t new_rows;
-		size_t new_cols;
-		size_t new_size;
+    SECTION("Regular assignment (different size) (same type)")
+    {
+        size_t new_rows;
+        size_t new_cols;
+        size_t new_size;
 
-		do {
-			new_rows = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
-			new_cols = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
-			new_size = new_rows * new_cols;
-		} while (new_rows == rows || new_cols == cols);
+        do {
+            new_rows = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
+            new_cols = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
+            new_size = new_rows * new_cols;
+        } while (new_rows == rows || new_cols == cols);
 
-		Cumat::Matrixf mat5 = Cumat::Matrixf::random(new_rows, new_cols);
-		REQUIRE(mat5.rows() == new_rows);
-		REQUIRE(mat5.cols() == new_cols);
-		REQUIRE(mat5.size() == new_size);
+        Cumat::Matrixf mat5 = Cumat::Matrixf::random(new_rows, new_cols);
+        REQUIRE(mat5.rows() == new_rows);
+        REQUIRE(mat5.cols() == new_cols);
+        REQUIRE(mat5.size() == new_size);
 
-		mat5 = mat4;
-		REQUIRE(mat5.rows() == mat4.rows());
-		REQUIRE(mat5.cols() == mat4.cols());
-		REQUIRE(mat5.size() == mat4.size());
-		REQUIRE(approxEqual(mat5, mat4));
-	}
+        mat5 = mat4;
+        REQUIRE(mat5.rows() == mat4.rows());
+        REQUIRE(mat5.cols() == mat4.cols());
+        REQUIRE(mat5.size() == mat4.size());
+        REQUIRE(approxEqual(mat5, mat4));
+    }
 
-	SECTION("Regular assignment (different size) (different type)")
-	{
-		size_t new_rows;
-		size_t new_cols;
-		size_t new_size;
+    SECTION("Regular assignment (different size) (different type)")
+    {
+        size_t new_rows;
+        size_t new_cols;
+        size_t new_size;
 
-		do {
-			new_rows = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
-			new_cols = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
-			new_size = new_rows * new_cols;
-		} while (new_rows == rows || new_cols == cols);
+        do {
+            new_rows = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
+            new_cols = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
+            new_size = new_rows * new_cols;
+        } while (new_rows == rows || new_cols == cols);
 
-		Cumat::Matrixf mat5 = Cumat::Matrixf::random(new_rows, new_cols);
-		REQUIRE(mat5.rows() == new_rows);
-		REQUIRE(mat5.cols() == new_cols);
-		REQUIRE(mat5.size() == new_size);
+        Cumat::Matrixf mat5 = Cumat::Matrixf::random(new_rows, new_cols);
+        REQUIRE(mat5.rows() == new_rows);
+        REQUIRE(mat5.cols() == new_cols);
+        REQUIRE(mat5.size() == new_size);
 
-		mat5 = mat3;
-		REQUIRE(mat5.rows() == mat3.rows());
-		REQUIRE(mat5.cols() == mat3.cols());
-		REQUIRE(mat5.size() == mat3.size());
-		REQUIRE(approxEqual(mat5, mat3));
-	}
+        mat5 = mat3;
+        REQUIRE(mat5.rows() == mat3.rows());
+        REQUIRE(mat5.cols() == mat3.cols());
+        REQUIRE(mat5.size() == mat3.size());
+        REQUIRE(approxEqual(mat5, mat3));
+    }
 
-	SECTION("Addtion assignment")
-	{
-		for (size_t i = 0; i < mat4.size(); ++i)
-			mat4(i) = mat1(i).val() + mat3(i).val() * 3.4 + std::exp(mat2(i).val() / 2.4);
+    SECTION("Addtion assignment")
+    {
+        for (size_t i = 0; i < mat4.size(); ++i)
+            mat4(i) = mat1(i).val() + mat3(i).val() * 3.4 + std::exp(mat2(i).val() / 2.4);
 
-		REQUIRE_FALSE(approxEqual(mat1, mat4));
+        REQUIRE_FALSE(approxEqual(mat1, mat4));
 
-		mat1 += mat3 * 3.4 + exp(mat2 / 2.4);
+        mat1 += mat3 * 3.4 + exp(mat2 / 2.4);
 
-		REQUIRE(approxEqual(mat1, mat4));
-	}
+        REQUIRE(approxEqual(mat1, mat4));
+    }
 
-	SECTION("Subtraction assignment")
-	{
-		for (size_t i = 0; i < mat4.size(); ++i)
-			mat4(i) = mat1(i).val() - (mat2(i).val() - mat1(i).val() + mat3(i).val() * 0.4 * mat3(i).val());
+    SECTION("Subtraction assignment")
+    {
+        for (size_t i = 0; i < mat4.size(); ++i)
+            mat4(i) = mat1(i).val() - (mat2(i).val() - mat1(i).val() + mat3(i).val() * 0.4 * mat3(i).val());
 
-		REQUIRE_FALSE(approxEqual(mat1, mat4));
+        REQUIRE_FALSE(approxEqual(mat1, mat4));
 
-		mat1 -= mat2 - mat1 + mat3 * 0.4 * mat3;
+        mat1 -= mat2 - mat1 + mat3 * 0.4 * mat3;
 
-		REQUIRE(approxEqual(mat1, mat4));
-	}
+        REQUIRE(approxEqual(mat1, mat4));
+    }
 
-	SECTION("Multiplication assignment")
-	{
-		for (size_t i = 0; i < mat4.size(); ++i)
-			mat4(i) = mat1(i).val() * (mat2(i).val() + mat3(i).val() * mat3(i).val() * mat3(i).val() * 0.34f + mat1(i).val());
+    SECTION("Multiplication assignment")
+    {
+        for (size_t i = 0; i < mat4.size(); ++i)
+            mat4(i) = mat1(i).val() * (mat2(i).val() + mat3(i).val() * mat3(i).val() * mat3(i).val() * 0.34f + mat1(i).val());
 
-		REQUIRE_FALSE(approxEqual(mat1, mat4));
+        REQUIRE_FALSE(approxEqual(mat1, mat4));
 
-		mat1 *= mat2 + cube(mat3) * 0.34f + mat1;
+        mat1 *= mat2 + cube(mat3) * 0.34f + mat1;
 
-		REQUIRE(approxEqual(mat1, mat4));
-	}
+        REQUIRE(approxEqual(mat1, mat4));
+    }
 
-	SECTION("Division assignment")
-	{
-		for (size_t i = 0; i < mat4.size(); ++i)
-			mat4(i) = mat1(i).val() / (std::abs(mat3(i).val()) * 100.323 + std::cbrt(mat1(i).val()));
+    SECTION("Division assignment")
+    {
+        for (size_t i = 0; i < mat4.size(); ++i)
+            mat4(i) = mat1(i).val() / (std::abs(mat3(i).val()) * 100.323 + std::cbrt(mat1(i).val()));
 
-		REQUIRE_FALSE(approxEqual(mat1, mat4));
+        REQUIRE_FALSE(approxEqual(mat1, mat4));
 
-		mat1 /= abs(mat3) * 100.323 + cbrt(mat1);
+        mat1 /= abs(mat3) * 100.323 + cbrt(mat1);
 
-		REQUIRE(approxEqual(mat1, mat4, 1e-3f));
-	}
+        REQUIRE(approxEqual(mat1, mat4, 1e-3f));
+    }
 }
 
 TEST_CASE("Double matrix assignments", "[assignment][double]")
 {
-	size_t rows = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
-	size_t cols = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
-	size_t size = rows * cols;
+    size_t rows = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
+    size_t cols = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
+    size_t size = rows * cols;
 
-	Cumat::Matrixd mat1 = Cumat::Matrixd::random(rows, cols);
-	REQUIRE(mat1.rows() == rows);
-	REQUIRE(mat1.cols() == cols);
-	REQUIRE(mat1.size() == size);
+    Cumat::Matrixd mat1 = Cumat::Matrixd::random(rows, cols);
+    REQUIRE(mat1.rows() == rows);
+    REQUIRE(mat1.cols() == cols);
+    REQUIRE(mat1.size() == size);
 
-	Cumat::Matrixf mat2 = Cumat::Matrixd::random(rows, cols);
-	REQUIRE(mat2.rows() == rows);
-	REQUIRE(mat2.cols() == cols);
-	REQUIRE(mat2.size() == size);
+    Cumat::Matrixf mat2 = Cumat::Matrixd::random(rows, cols);
+    REQUIRE(mat2.rows() == rows);
+    REQUIRE(mat2.cols() == cols);
+    REQUIRE(mat2.size() == size);
 
-	Cumat::Matrixd mat3 = Cumat::Matrixd::random(rows, cols);
-	REQUIRE(mat3.rows() == rows);
-	REQUIRE(mat3.cols() == cols);
-	REQUIRE(mat3.size() == size);
+    Cumat::Matrixd mat3 = Cumat::Matrixd::random(rows, cols);
+    REQUIRE(mat3.rows() == rows);
+    REQUIRE(mat3.cols() == cols);
+    REQUIRE(mat3.size() == size);
 
-	Cumat::Matrixd mat4 = mat1;
-	REQUIRE(approxEqual(mat4, mat1));
+    Cumat::Matrixd mat4 = mat1;
+    REQUIRE(approxEqual(mat4, mat1));
 
-	SECTION("Regular assignment")
-	{
-		mat4 = mat2;
-		REQUIRE_FALSE(approxEqual(mat4, mat1));
-		REQUIRE_FALSE(approxEqual(mat4, mat3));
-		REQUIRE(approxEqual(mat4, mat2));
+    SECTION("Regular assignment")
+    {
+        mat4 = mat2;
+        REQUIRE_FALSE(approxEqual(mat4, mat1));
+        REQUIRE_FALSE(approxEqual(mat4, mat3));
+        REQUIRE(approxEqual(mat4, mat2));
 
-		mat3 = mat1;
-		REQUIRE_FALSE(approxEqual(mat3, mat4));
-		REQUIRE_FALSE(approxEqual(mat3, mat2));
-		REQUIRE(approxEqual(mat3, mat1));
+        mat3 = mat1;
+        REQUIRE_FALSE(approxEqual(mat3, mat4));
+        REQUIRE_FALSE(approxEqual(mat3, mat2));
+        REQUIRE(approxEqual(mat3, mat1));
 
-		mat4 = mat3;
-		REQUIRE_FALSE(approxEqual(mat4, mat2));
-		REQUIRE(approxEqual(mat4, mat3));
-		REQUIRE(approxEqual(mat4, mat1));
-	}
+        mat4 = mat3;
+        REQUIRE_FALSE(approxEqual(mat4, mat2));
+        REQUIRE(approxEqual(mat4, mat3));
+        REQUIRE(approxEqual(mat4, mat1));
+    }
 
-	SECTION("Regular assignment (different size) (same type)")
-	{
-		size_t new_rows;
-		size_t new_cols;
-		size_t new_size;
+    SECTION("Regular assignment (different size) (same type)")
+    {
+        size_t new_rows;
+        size_t new_cols;
+        size_t new_size;
 
-		do {
-			new_rows = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
-			new_cols = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
-			new_size = new_rows * new_cols;
-		} while (new_rows == rows || new_cols == cols);
+        do {
+            new_rows = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
+            new_cols = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
+            new_size = new_rows * new_cols;
+        } while (new_rows == rows || new_cols == cols);
 
-		Cumat::Matrixd mat5 = Cumat::Matrixd::random(new_rows, new_cols);
-		REQUIRE(mat5.rows() == new_rows);
-		REQUIRE(mat5.cols() == new_cols);
-		REQUIRE(mat5.size() == new_size);
+        Cumat::Matrixd mat5 = Cumat::Matrixd::random(new_rows, new_cols);
+        REQUIRE(mat5.rows() == new_rows);
+        REQUIRE(mat5.cols() == new_cols);
+        REQUIRE(mat5.size() == new_size);
 
-		mat5 = mat4;
-		REQUIRE(mat5.rows() == mat4.rows());
-		REQUIRE(mat5.cols() == mat4.cols());
-		REQUIRE(mat5.size() == mat4.size());
-		REQUIRE(approxEqual(mat5, mat4));
-	}
+        mat5 = mat4;
+        REQUIRE(mat5.rows() == mat4.rows());
+        REQUIRE(mat5.cols() == mat4.cols());
+        REQUIRE(mat5.size() == mat4.size());
+        REQUIRE(approxEqual(mat5, mat4));
+    }
 
-	SECTION("Regular assignment (different size) (different type)")
-	{
-		size_t new_rows;
-		size_t new_cols;
-		size_t new_size;
+    SECTION("Regular assignment (different size) (different type)")
+    {
+        size_t new_rows;
+        size_t new_cols;
+        size_t new_size;
 
-		do {
-			new_rows = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
-			new_cols = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
-			new_size = new_rows * new_cols;
-		} while (new_rows == rows || new_cols == cols);
+        do {
+            new_rows = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
+            new_cols = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
+            new_size = new_rows * new_cols;
+        } while (new_rows == rows || new_cols == cols);
 
-		Cumat::Matrixd mat5 = Cumat::Matrixd::random(new_rows, new_cols);
-		REQUIRE(mat5.rows() == new_rows);
-		REQUIRE(mat5.cols() == new_cols);
-		REQUIRE(mat5.size() == new_size);
+        Cumat::Matrixd mat5 = Cumat::Matrixd::random(new_rows, new_cols);
+        REQUIRE(mat5.rows() == new_rows);
+        REQUIRE(mat5.cols() == new_cols);
+        REQUIRE(mat5.size() == new_size);
 
-		mat5 = mat2;
-		REQUIRE(mat5.rows() == mat2.rows());
-		REQUIRE(mat5.cols() == mat2.cols());
-		REQUIRE(mat5.size() == mat2.size());
-		REQUIRE(approxEqual(mat5, mat2));
-	}
+        mat5 = mat2;
+        REQUIRE(mat5.rows() == mat2.rows());
+        REQUIRE(mat5.cols() == mat2.cols());
+        REQUIRE(mat5.size() == mat2.size());
+        REQUIRE(approxEqual(mat5, mat2));
+    }
 
-	SECTION("Addtion assignment")
-	{
-		for (size_t i = 0; i < mat4.size(); ++i)
-			mat4(i) = mat1(i).val() + mat3(i).val() * 3.4 + std::exp(mat2(i).val() / 2.4);
+    SECTION("Addtion assignment")
+    {
+        for (size_t i = 0; i < mat4.size(); ++i)
+            mat4(i) = mat1(i).val() + mat3(i).val() * 3.4 + std::exp(mat2(i).val() / 2.4);
 
-		REQUIRE_FALSE(approxEqual(mat1, mat4));
+        REQUIRE_FALSE(approxEqual(mat1, mat4));
 
-		mat1 += mat3 * 3.4 + exp(mat2 / 2.4);
+        mat1 += mat3 * 3.4 + exp(mat2 / 2.4);
 
-		REQUIRE(approxEqual(mat1, mat4));
-	}
+        REQUIRE(approxEqual(mat1, mat4));
+    }
 
-	SECTION("Subtraction assignment")
-	{
-		for (size_t i = 0; i < mat4.size(); ++i)
-			mat4(i) = mat1(i).val() - (mat2(i).val() - mat1(i).val() + mat3(i).val() * 0.4 * mat3(i).val());
+    SECTION("Subtraction assignment")
+    {
+        for (size_t i = 0; i < mat4.size(); ++i)
+            mat4(i) = mat1(i).val() - (mat2(i).val() - mat1(i).val() + mat3(i).val() * 0.4 * mat3(i).val());
 
-		REQUIRE_FALSE(approxEqual(mat1, mat4));
+        REQUIRE_FALSE(approxEqual(mat1, mat4));
 
-		mat1 -= mat2 - mat1 + mat3 * 0.4 * mat3;
+        mat1 -= mat2 - mat1 + mat3 * 0.4 * mat3;
 
-		REQUIRE(approxEqual(mat1, mat4));
-	}
+        REQUIRE(approxEqual(mat1, mat4));
+    }
 
-	SECTION("Multiplication assignment")
-	{
-		for (size_t i = 0; i < mat4.size(); ++i)
-			mat4(i) = mat1(i).val() * (mat2(i).val() + mat3(i).val() * mat3(i).val() * mat3(i).val() * 0.34f + mat1(i).val());
+    SECTION("Multiplication assignment")
+    {
+        for (size_t i = 0; i < mat4.size(); ++i)
+            mat4(i) = mat1(i).val() * (mat2(i).val() + mat3(i).val() * mat3(i).val() * mat3(i).val() * 0.34f + mat1(i).val());
 
-		REQUIRE_FALSE(approxEqual(mat1, mat4));
+        REQUIRE_FALSE(approxEqual(mat1, mat4));
 
-		mat1 *= mat2 + cube(mat3) * 0.34f + mat1;
+        mat1 *= mat2 + cube(mat3) * 0.34f + mat1;
 
-		REQUIRE(approxEqual(mat1, mat4));
-	}
+        REQUIRE(approxEqual(mat1, mat4));
+    }
 
-	SECTION("Division assignment")
-	{
-		for (size_t i = 0; i < mat4.size(); ++i)
-			mat4(i) = mat1(i).val() / (std::abs(mat3(i).val()) * 100.323 + std::cbrt(mat1(i).val()));
+    SECTION("Division assignment")
+    {
+        for (size_t i = 0; i < mat4.size(); ++i)
+            mat4(i) = mat1(i).val() / (std::abs(mat3(i).val()) * 100.323 + std::cbrt(mat1(i).val()));
 
-		REQUIRE_FALSE(approxEqual(mat1, mat4));
+        REQUIRE_FALSE(approxEqual(mat1, mat4));
 
-		mat1 /= abs(mat3) * 100.323 + cbrt(mat1);
+        mat1 /= abs(mat3) * 100.323 + cbrt(mat1);
 
-		REQUIRE(approxEqual(mat1, mat4));
-	}
+        REQUIRE(approxEqual(mat1, mat4));
+    }
 }
