@@ -6,8 +6,6 @@
 
 TEST_CASE("Float matrix assignments", "[assignment][float]")
 {
-	Cumat::init();
-
 	srand(time(0));
 
 	size_t rows = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
@@ -145,14 +143,10 @@ TEST_CASE("Float matrix assignments", "[assignment][float]")
 
 		REQUIRE(approxEqual(mat1, mat4, 1e-3f));
 	}
-
-	Cumat::end();
 }
 
 TEST_CASE("Double matrix assignments", "[assignment][double]")
 {
-	Cumat::init();
-
 	size_t rows = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
 	size_t cols = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
 	size_t size = rows * cols;
@@ -288,6 +282,4 @@ TEST_CASE("Double matrix assignments", "[assignment][double]")
 
 		REQUIRE(approxEqual(mat1, mat4));
 	}
-
-	Cumat::end();
 }

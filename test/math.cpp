@@ -6,8 +6,6 @@
 
 TEST_CASE("Float matrix math ops", "[math][float]")
 {
-	Cumat::init();
-
 	srand(time(0));
 
 	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
@@ -466,6 +464,4 @@ TEST_CASE("Float matrix math ops", "[math][float]")
 
 		REQUIRE(approxEqual(mat1, mat2));
 	}
-
-	Cumat::end();
 }

@@ -7,8 +7,6 @@
 
 TEST_CASE("Float matrix multiplication", "[matrix][multiplication][float]")
 {
-	Cumat::init();
-
 	srand(time(0));
 
 	size_t m = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
@@ -130,14 +128,10 @@ TEST_CASE("Float matrix multiplication", "[matrix][multiplication][float]")
 		for (size_t i = 0; i < gpu_mat3.size(); ++i)
 			CHECK(gpu_mat3(i) == Approx(cpu_mat3.data[i]).epsilon(0.01));
 	}
-
-	Cumat::end();
 }
 
 TEST_CASE("Double matrix multiplication", "[matrix][multiplication][double]")
 {
-	Cumat::init();
-
 	size_t m = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
 	size_t n = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
 	size_t k = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
@@ -257,6 +251,4 @@ TEST_CASE("Double matrix multiplication", "[matrix][multiplication][double]")
 		for (size_t i = 0; i < gpu_mat3.size(); ++i)
 			CHECK(gpu_mat3(i) == Approx(cpu_mat3.data[i]).epsilon(0.01));
 	}
-
-	Cumat::end();
 }

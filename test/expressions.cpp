@@ -6,8 +6,6 @@
 
 TEST_CASE("Matrix expressions", "[operators][expressions]")
 {
-	Cumat::init();
-
 	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
 	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 500 + 1;
 	size_t mat1_size = mat1_rows * mat1_cols;
@@ -316,6 +314,4 @@ TEST_CASE("Matrix expressions", "[operators][expressions]")
 
 		REQUIRE(approxEqual(mat5, mat6));
 	}
-
-	Cumat::end();
 }

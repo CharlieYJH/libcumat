@@ -6,8 +6,6 @@
 
 TEST_CASE("Float matrix sum", "[sum][float]")
 {
-	Cumat::init();
-
 	srand(time(0));
 
 	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 2000 + 1;
@@ -27,14 +25,10 @@ TEST_CASE("Float matrix sum", "[sum][float]")
 		sum += mat1(i).val();
 
 	REQUIRE(mat1.sum() == Approx(sum).epsilon(0.05));
-
-	Cumat::end();
 }
 
 TEST_CASE("Double matrix sum", "[sum][double]")
 {
-	Cumat::init();
-
 	srand(time(0));
 
 	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 2000 + 1;
@@ -54,6 +48,4 @@ TEST_CASE("Double matrix sum", "[sum][double]")
 		sum += mat1(i).val();
 
 	REQUIRE(mat1.sum() == Approx(sum));
-
-	Cumat::end();
 }

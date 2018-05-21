@@ -6,8 +6,6 @@
 
 TEST_CASE("Float matrix norm", "[norm][float]")
 {
-	Cumat::init();
-
 	srand(time(0));
 
 	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 2000 + 1;
@@ -31,14 +29,10 @@ TEST_CASE("Float matrix norm", "[norm][float]")
 	norm = std::sqrt(norm);
 
 	REQUIRE(mat1.norm() == Approx(norm).epsilon(0.05));
-
-	Cumat::end();
 }
 
 TEST_CASE("Double matrix norm", "[norm][double]")
 {
-	Cumat::init();
-
 	srand(time(0));
 
 	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 2000 + 1;
@@ -62,6 +56,4 @@ TEST_CASE("Double matrix norm", "[norm][double]")
 	norm = std::sqrt(norm);
 
 	REQUIRE(mat1.norm() == Approx(norm));
-
-	Cumat::end();
 }

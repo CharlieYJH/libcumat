@@ -6,8 +6,6 @@
 
 TEST_CASE("Float matrix number fill", "[fill][float]")
 {
-	Cumat::init();
-
 	srand(time(0));
 
 	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
@@ -93,8 +91,6 @@ TEST_CASE("Float matrix number fill", "[fill][float]")
 
 TEST_CASE("Double matrix number fill", "[fill][double]")
 {
-	Cumat::init();
-
 	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
 	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
 	size_t mat1_size = mat1_rows * mat1_cols;
@@ -178,8 +174,6 @@ TEST_CASE("Double matrix number fill", "[fill][double]")
 
 TEST_CASE("Float matrix zero fill", "[zero][fill][float]")
 {
-	Cumat::init();
-	
 	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
 	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
 	size_t mat1_size = mat1_rows * mat1_cols;
@@ -194,14 +188,10 @@ TEST_CASE("Float matrix zero fill", "[zero][fill][float]")
 
 	mat1.zero();
 	REQUIRE(approxEqual(mat1, 0.0f));
-
-	Cumat::end();
 }
 
 TEST_CASE("Double matrix zero fill", "[zero][fill][double]")
 {
-	Cumat::init();
-	
 	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
 	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 3000 + 1;
 	size_t mat1_size = mat1_rows * mat1_cols;
@@ -216,6 +206,4 @@ TEST_CASE("Double matrix zero fill", "[zero][fill][double]")
 
 	mat1.zero();
 	REQUIRE(approxEqual(mat1, 0.0));
-
-	Cumat::end();
 }

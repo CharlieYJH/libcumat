@@ -7,8 +7,6 @@
 
 TEST_CASE("Float matrix extrema", "[extrema][float]")
 {
-	Cumat::init();
-
 	srand(time(0));
 
 	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 2000 + 1;
@@ -45,14 +43,10 @@ TEST_CASE("Float matrix extrema", "[extrema][float]")
 	REQUIRE(mat1.maxIndex() == max_index);
 	REQUIRE(mat1.minElement() == Approx(min_element));
 	REQUIRE(mat1.minIndex() == min_index);
-
-	Cumat::end();
 }
 
 TEST_CASE("Double matrix extrema", "[extrema][double]")
 {
-	Cumat::init();
-
 	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 2000 + 1;
 	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 2000 + 1;
 	size_t mat1_size = mat1_rows * mat1_cols;
@@ -87,6 +81,4 @@ TEST_CASE("Double matrix extrema", "[extrema][double]")
 	REQUIRE(mat1.maxIndex() == max_index);
 	REQUIRE(mat1.minElement() == Approx(min_element));
 	REQUIRE(mat1.minIndex() == min_index);
-
-	Cumat::end();
 }

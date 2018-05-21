@@ -4,8 +4,6 @@
 
 TEST_CASE("Float matrix swap", "[swap][float]")
 {
-	Cumat::init();
-
 	size_t mat1_rows = 250;
 	size_t mat1_cols = 120;
 	size_t mat1_size = mat1_rows * mat1_cols;
@@ -45,14 +43,10 @@ TEST_CASE("Float matrix swap", "[swap][float]")
 
 	REQUIRE(approxEqual(mat4, mat2));
 	REQUIRE_FALSE(approxEqual(mat4, mat1));
-
-	Cumat::end();
 }
 
 TEST_CASE("Double matrix swap", "[swap][float]")
 {
-	Cumat::init();
-
 	size_t mat1_rows = 250;
 	size_t mat1_cols = 120;
 	size_t mat1_size = mat1_rows * mat1_cols;
@@ -92,6 +86,4 @@ TEST_CASE("Double matrix swap", "[swap][float]")
 
 	REQUIRE(approxEqual(mat4, mat2));
 	REQUIRE_FALSE(approxEqual(mat4, mat1));
-
-	Cumat::end();
 }

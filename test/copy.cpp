@@ -6,8 +6,6 @@
 
 TEST_CASE("Float matrix copy", "[copy][float]")
 {
-	Cumat::init();
-
 	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 1000 + 1;
 	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 1000 + 1;
 	size_t mat1_size = mat1_rows * mat1_cols;
@@ -170,14 +168,10 @@ TEST_CASE("Float matrix copy", "[copy][float]")
 		REQUIRE(mat1.size() == new_size);
 		REQUIRE(approxEqual(mat1, Cumat::Matrixf(vec)));
 	}
-
-	Cumat::end();
 }
 
 TEST_CASE("Double matrix copy", "[copy][double]")
 {
-	Cumat::init();
-
 	size_t mat1_rows = ((double)std::rand() / (double)RAND_MAX) * 1000 + 1;
 	size_t mat1_cols = ((double)std::rand() / (double)RAND_MAX) * 1000 + 1;
 	size_t mat1_size = mat1_rows * mat1_cols;
@@ -340,6 +334,4 @@ TEST_CASE("Double matrix copy", "[copy][double]")
 		REQUIRE(mat1.size() == new_size);
 		REQUIRE(approxEqual(mat1, Cumat::Matrixd(vec)));
 	}
-
-	Cumat::end();
 }

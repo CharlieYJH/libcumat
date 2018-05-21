@@ -4,8 +4,6 @@
 
 TEST_CASE("Float matrix resize", "[resize][float]")
 {
-	Cumat::init();
-
 	size_t mat1_rows = 250;
 	size_t mat1_cols = 250;
 	size_t mat1_size = mat1_rows * mat1_cols;
@@ -92,14 +90,10 @@ TEST_CASE("Float matrix resize", "[resize][float]")
 		REQUIRE(mat1.size() == new_size);
 		REQUIRE(mat1.thrustVector().size() == new_size);
 	}
-
-	Cumat::end();
 }
 
 TEST_CASE("Double matrix resize", "[resize][double]")
 {
-	Cumat::init();
-
 	size_t mat1_rows = 250;
 	size_t mat1_cols = 250;
 	size_t mat1_size = mat1_rows * mat1_cols;
@@ -186,6 +180,4 @@ TEST_CASE("Double matrix resize", "[resize][double]")
 		REQUIRE(mat1.size() == new_size);
 		REQUIRE(mat1.thrustVector().size() == new_size);
 	}
-
-	Cumat::end();
 }

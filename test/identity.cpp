@@ -4,8 +4,6 @@
 
 TEST_CASE("Float identity matrix", "[identity][float]")
 {
-	Cumat::init();
-
 	SECTION("Identity matrix assignment")
 	{
 		size_t mat1_rows = 1045;
@@ -74,14 +72,10 @@ TEST_CASE("Float identity matrix", "[identity][float]")
 
 		REQUIRE(approxEqual(mat1, Cumat::Matrixf::identity(mat1_rows, mat1_cols)));
 	}
-
-	Cumat::end();
 }
 
 TEST_CASE("Double identity matrix", "[identity][double]")
 {
-	Cumat::init();
-
 	SECTION("Identity matrix assignment")
 	{
 		size_t mat1_rows = 1045;
@@ -150,6 +144,4 @@ TEST_CASE("Double identity matrix", "[identity][double]")
 
 		REQUIRE(approxEqual(mat1, Cumat::Matrixd::identity(mat1_rows, mat1_cols)));
 	}
-
-	Cumat::end();
 }
