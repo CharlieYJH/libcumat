@@ -17,9 +17,9 @@ template<typename Expr>
 Matrix<T>::Matrix(const Expression<Expr> &rhs):
     rows_(rhs.rows()),
     cols_(rhs.cols()),
-    data_(rows_ * cols_)
+    data_(rows_ * cols_),
+    data_ptr_((CUdeviceptr)thrust::raw_pointer_cast(data_.data()))
 {
-    data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
     Matrix<T>::assign(*this, rhs);
 }
 
@@ -27,20 +27,18 @@ template<typename T>
 Matrix<T>::Matrix(const Matrix<T> &rhs):
     rows_(rhs.rows()),
     cols_(rhs.cols()),
-    data_(rhs.data_)
-{
-    data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
-}
+    data_(rhs.data_),
+    data_ptr_((CUdeviceptr)thrust::raw_pointer_cast(data_.data()))
+{}
 
 template<typename T>
 template<typename OtherT>
 Matrix<T>::Matrix(const Matrix<OtherT> &rhs):
     rows_(rhs.rows()),
     cols_(rhs.cols()),
-    data_(rhs.device_vector())
-{
-    data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
-}
+    data_(rhs.device_vector()),
+    data_ptr_((CUdeviceptr)thrust::raw_pointer_cast(data_.data()))
+{}
 
 template<typename T>
 template<typename OtherT>
@@ -62,14 +60,13 @@ template<typename OtherT>
 Matrix<T>::Matrix(const thrust::host_vector<OtherT> &rhs):
     rows_(1),
     cols_(rhs.size()),
-    data_(rhs)
+    data_(rhs),
+    data_ptr_((CUdeviceptr)thrust::raw_pointer_cast(data_.data()))
 {
     if (rows_ == 0 || cols_ == 0) {
         rows_ = 0;
         cols_ = 0;
     }
-
-    data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
 }
 
 template<typename T>
@@ -77,14 +74,13 @@ template<typename OtherT>
 Matrix<T>::Matrix(const std::vector<OtherT> &rhs):
     rows_(1),
     cols_(rhs.size()),
-    data_(rhs)
+    data_(rhs),
+    data_ptr_((CUdeviceptr)thrust::raw_pointer_cast(data_.data()))
 {
     if (rows_ == 0 || cols_ == 0) {
         rows_ = 0;
         cols_ = 0;
     }
-
-    data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
 }
 
 template<typename T>
@@ -92,52 +88,48 @@ template<typename InputIterator, typename>
 Matrix<T>::Matrix(InputIterator first, InputIterator last):
     rows_(1),
     cols_(last - first),
-    data_(first, last)
+    data_(first, last),
+    data_ptr_((CUdeviceptr)thrust::raw_pointer_cast(data_.data()))
 {
     if (rows_ == 0 || cols_ == 0) {
         rows_ = 0;
         cols_ = 0;
     }
-
-    data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
 }
 
 template<typename T>
 Matrix<T>::Matrix(const size_t rows, const size_t cols):
     rows_(rows),
     cols_(cols),
-    data_(rows_ * cols_)
+    data_(rows_ * cols_),
+    data_ptr_((CUdeviceptr)thrust::raw_pointer_cast(data_.data()))
 {
     if (rows == 0 || cols == 0) {
         rows_ = 0;
         cols_ = 0;
     }
-
-    data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
 }
 
 template<typename T>
 Matrix<T>::Matrix(const size_t rows, const size_t cols, const T val):
     rows_(rows),
     cols_(cols),
-    data_(rows_ * cols_, val)
+    data_(rows_ * cols_, val),
+    data_ptr_((CUdeviceptr)thrust::raw_pointer_cast(data_.data()))
 {
     if (rows == 0 || cols == 0) {
         rows_ = 0;
         cols_ = 0;
     }
-
-    data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
 }
 
 template<typename T>
 Matrix<T>::Matrix(void):
     rows_(0),
     cols_(0),
-    data_(rows_ * cols_)
-{
-    data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
-}
+    data_(rows_ * cols_),
+    data_ptr_((CUdeviceptr)thrust::raw_pointer_cast(data_.data()))
+{}
 
 template<typename T>
 template<typename Expr>
