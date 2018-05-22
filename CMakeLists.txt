@@ -95,7 +95,7 @@ else()
 endif()
 
 # By default, the example is left out of the all target
-if(NOT LIBCUMAT_BUILD_EXAMPLE)
+if(NOT LIBCUMAT_BUILD_EXAMPLES)
     add_subdirectory(example EXCLUDE_FROM_ALL)
 else()
     add_subdirectory(example)
