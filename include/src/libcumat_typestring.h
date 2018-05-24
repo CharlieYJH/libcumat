@@ -11,12 +11,16 @@ template<typename T>
 struct TypeString {};
 
 template<>
+struct TypeString<float> { static const std::string type; };
+const std::string TypeString<float>::type = "float";
+
+template<>
 struct TypeString<double> { static const std::string type; };
 const std::string TypeString<double>::type = "double";
 
 template<>
-struct TypeString<float> { static const std::string type; };
-const std::string TypeString<float>::type = "float";
+struct TypeString<long double> { static const std::string type; };
+const std::string TypeString<long double>::type = "long double";
 
 template<>
 struct TypeString<int> { static const std::string type; };
