@@ -248,6 +248,8 @@ namespace Cumat
 
         Matrix<T>& operator=(const Matrix<T> &rhs);
 
+        Matrix<T>& operator=(const T &rhs);
+
         // -------------- Accessor --------------
         MatrixReference<T> operator()(const size_t row, const size_t col);
 

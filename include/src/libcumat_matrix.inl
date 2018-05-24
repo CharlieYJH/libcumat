@@ -786,6 +786,13 @@ Matrix<T>& Matrix<T>::operator=(const Matrix<T> &rhs)
     return *this;
 }
 
+template<typename T>
+Matrix<T>& Matrix<T>::operator=(const T &rhs)
+{
+    this->fill(rhs);
+    return *this;
+}
+
 // -------------- Accessor --------------
 template<typename T>
 MatrixReference<T> Matrix<T>::operator()(const size_t row, const size_t col)

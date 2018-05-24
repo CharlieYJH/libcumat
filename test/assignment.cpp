@@ -99,7 +99,7 @@ TEST_CASE("Float matrix assignments", "[assignment][float]")
     SECTION("Addtion assignment")
     {
         for (size_t i = 0; i < mat4.size(); ++i)
-            mat4(i) = mat1(i).val() + mat3(i).val() * 3.4 + std::exp(mat2(i).val() / 2.4);
+            mat4(i) = mat1(i) + mat3(i) * 3.4 + std::exp(mat2(i) / 2.4);
 
         REQUIRE_FALSE(approxEqual(mat1, mat4));
 
@@ -111,7 +111,7 @@ TEST_CASE("Float matrix assignments", "[assignment][float]")
     SECTION("Subtraction assignment")
     {
         for (size_t i = 0; i < mat4.size(); ++i)
-            mat4(i) = mat1(i).val() - (mat2(i).val() - mat1(i).val() + mat3(i).val() * 0.4 * mat3(i).val());
+            mat4(i) = mat1(i) - (mat2(i) - mat1(i) + mat3(i) * 0.4 * mat3(i));
 
         REQUIRE_FALSE(approxEqual(mat1, mat4));
 
@@ -123,7 +123,7 @@ TEST_CASE("Float matrix assignments", "[assignment][float]")
     SECTION("Multiplication assignment")
     {
         for (size_t i = 0; i < mat4.size(); ++i)
-            mat4(i) = mat1(i).val() * (mat2(i).val() + mat3(i).val() * mat3(i).val() * mat3(i).val() * 0.34f + mat1(i).val());
+            mat4(i) = mat1(i) * (mat2(i) + mat3(i) * mat3(i) * mat3(i) * 0.34f + mat1(i));
 
         REQUIRE_FALSE(approxEqual(mat1, mat4));
 
@@ -135,13 +135,28 @@ TEST_CASE("Float matrix assignments", "[assignment][float]")
     SECTION("Division assignment")
     {
         for (size_t i = 0; i < mat4.size(); ++i)
-            mat4(i) = mat1(i).val() / (std::abs(mat3(i).val()) * 100.323 + std::cbrt(mat1(i).val()));
+            mat4(i) = mat1(i) / (std::abs(mat3(i)) * 100.323 + std::cbrt(mat1(i)));
 
         REQUIRE_FALSE(approxEqual(mat1, mat4));
 
         mat1 /= abs(mat3) * 100.323 + cbrt(mat1);
 
         REQUIRE(approxEqual(mat1, mat4, 1e-3f));
+    }
+
+    SECTION("Numerical assignment")
+    {
+        mat1 = 3;
+        REQUIRE(mat1.rows() == rows);
+        REQUIRE(mat1.cols() == cols);
+        REQUIRE(mat1.size() == size);
+        REQUIRE(approxEqual(mat1, 3));
+
+        mat2 = mat1(0, 0) + mat1(0, 0);
+        REQUIRE(mat2.rows() == rows);
+        REQUIRE(mat2.cols() == cols);
+        REQUIRE(mat2.size() == size);
+        REQUIRE(approxEqual(mat2, 6));
     }
 }
 
@@ -238,7 +253,7 @@ TEST_CASE("Double matrix assignments", "[assignment][double]")
     SECTION("Addtion assignment")
     {
         for (size_t i = 0; i < mat4.size(); ++i)
-            mat4(i) = mat1(i).val() + mat3(i).val() * 3.4 + std::exp(mat2(i).val() / 2.4);
+            mat4(i) = mat1(i) + mat3(i) * 3.4 + std::exp(mat2(i) / 2.4);
 
         REQUIRE_FALSE(approxEqual(mat1, mat4));
 
@@ -250,7 +265,7 @@ TEST_CASE("Double matrix assignments", "[assignment][double]")
     SECTION("Subtraction assignment")
     {
         for (size_t i = 0; i < mat4.size(); ++i)
-            mat4(i) = mat1(i).val() - (mat2(i).val() - mat1(i).val() + mat3(i).val() * 0.4 * mat3(i).val());
+            mat4(i) = mat1(i) - (mat2(i) - mat1(i) + mat3(i) * 0.4 * mat3(i));
 
         REQUIRE_FALSE(approxEqual(mat1, mat4));
 
@@ -262,7 +277,7 @@ TEST_CASE("Double matrix assignments", "[assignment][double]")
     SECTION("Multiplication assignment")
     {
         for (size_t i = 0; i < mat4.size(); ++i)
-            mat4(i) = mat1(i).val() * (mat2(i).val() + mat3(i).val() * mat3(i).val() * mat3(i).val() * 0.34f + mat1(i).val());
+            mat4(i) = mat1(i) * (mat2(i) + mat3(i) * mat3(i) * mat3(i) * 0.34f + mat1(i));
 
         REQUIRE_FALSE(approxEqual(mat1, mat4));
 
@@ -274,12 +289,27 @@ TEST_CASE("Double matrix assignments", "[assignment][double]")
     SECTION("Division assignment")
     {
         for (size_t i = 0; i < mat4.size(); ++i)
-            mat4(i) = mat1(i).val() / (std::abs(mat3(i).val()) * 100.323 + std::cbrt(mat1(i).val()));
+            mat4(i) = mat1(i) / (std::abs(mat3(i)) * 100.323 + std::cbrt(mat1(i)));
 
         REQUIRE_FALSE(approxEqual(mat1, mat4));
 
         mat1 /= abs(mat3) * 100.323 + cbrt(mat1);
 
         REQUIRE(approxEqual(mat1, mat4));
+    }
+
+    SECTION("Numerical assignment")
+    {
+        mat1 = 3.4;
+        REQUIRE(mat1.rows() == rows);
+        REQUIRE(mat1.cols() == cols);
+        REQUIRE(mat1.size() == size);
+        REQUIRE(approxEqual(mat1, 3.4));
+
+        mat2 = mat1(0, 0) * 2;
+        REQUIRE(mat2.rows() == rows);
+        REQUIRE(mat2.cols() == cols);
+        REQUIRE(mat2.size() == size);
+        REQUIRE(approxEqual(mat2, 3.4 * 2));
     }
 }
