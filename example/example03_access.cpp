@@ -68,9 +68,7 @@ int main(int argc, char const* argv[])
     // ==================================================================================
     // Assigning matrix elements
     // ==================================================================================
-    // Assigning matrix elements uses the same syntax as accessing. However, there are
-    // a few caveats when using matrix elements accessed using the () operator in a
-    // matrix expression. These are further explained in example04_matrix_expressions.
+    // Assigning matrix elements uses the same syntax as accessing.
 
     // For assignments, the syntax works naturally as you would expect
     mat1(2, 3) = 3;
