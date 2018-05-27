@@ -6,10 +6,10 @@
 // 01. Instantiation
 // 02. Printing
 // > 03. Accessing/assigning matrix elements
-// 04. Matrix modification methods
+// 04. Matrix expressions
 // 05. Matrix transpose methods
-// 06. Matrix math methods
-// 07. Matrix expressions
+// 06. Matrix modification methods
+// 07. Matrix math methods
 //
 // This example is built under the "example03_access" target when building.
 // It can also be built by default by defining LIBCUMAT_BUILD_EXAMPLE when running CMake:

@@ -17,8 +17,11 @@ class BinaryVectorOp
     const std::string cast_;
     
     public:
+
     BinaryVectorOp(const std::string &preop, const std::string &midop) : preop_(preop), midop_(" " + midop + " "), cast_("") {}
+
     BinaryVectorOp(const std::string &preop, const std::string &midop, const std::string &cast) : preop_(preop), midop_(" " + midop + " "), cast_("(" + cast + ")") {}
+
     template<typename Expr1, typename Expr2>
     std::string operator()(const Expr1 &u, const Expr2 &v, std::string &params, int &num, std::vector<void *> &args, const bool &transpose, bool &has_transpose_expr) const
     {
@@ -32,11 +35,13 @@ template<typename T>
 class BinaryScalarOp
 {
     protected:
+
     const std::string preop_;
     const std::string midop_;
     const std::string cast_;
 
     public:
+
     BinaryScalarOp(const std::string &preop, const std::string &midop, const std::string &cast) : preop_(preop), midop_(" " + midop + " "), cast_(cast) {}
 };
 
@@ -44,8 +49,11 @@ template<typename T>
 class BinaryScalarOpRight : public BinaryScalarOp<T>
 {
     public:
+
     BinaryScalarOpRight(const std::string &preop, const std::string &midop) : BinaryScalarOp(preop, midop, "") {}
+
     BinaryScalarOpRight(const std::string &preop, const std::string &midop, const std::string &cast) : BinaryScalarOp(preop, midop, "(" + cast + ")") {}
+
     template<typename Expr>
     std::string operator()(const Expr &u, const T &n, std::string &params, int &num, std::vector<void *> &args, const bool &transpose, bool &has_transpose_expr) const
     {
@@ -64,8 +72,11 @@ template<typename T>
 class BinaryScalarOpLeft : public BinaryScalarOp<T>
 {
     public:
+
     BinaryScalarOpLeft(const std::string &preop, const std::string &midop) : BinaryScalarOp(preop, midop, "") {}
+
     BinaryScalarOpLeft(const std::string &preop, const std::string &midop, const std::string &cast) : BinaryScalarOp(preop, midop, "(" + cast + ")") {}
+
     template<typename Expr>
     std::string operator()(const Expr &u, const T &n, std::string &params, int &num, std::vector<void *> &args, const bool &transpose, bool &has_transpose_expr) const
     {
