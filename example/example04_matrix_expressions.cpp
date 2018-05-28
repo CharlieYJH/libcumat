@@ -59,6 +59,15 @@
 // multiplication is performed. No extra copy is made from mat2 because it is a
 // trivial matrix.
 //
+// Finally, an expression can be evaluated without assigning to a matrix
+// using the eval() method.
+//
+//  Ex. (1 + mat1 * mat2).eval();
+//
+// This creates a temporary matrix holding the result of this expression. Any
+// matrix math methods can then be applied to this expression. This is covered
+// more in example 07.
+//
 // A full list of component wise operators is listed below:
 // ------------------------------------------------------------------
 // Unary Operators
@@ -156,21 +165,21 @@ int main(int argc, char const* argv[])
     // ==================================================================================
     // Component wise matrix expressions (with transpose)
     // ==================================================================================
-    // transpose() can be used to tranpose a matrix in an expression without evaluating
+    // transpose() can be used to transpose a matrix in an expression without evaluating
     // a temporary. Note that this doesn't change the matrix it's given.
 
-    mat1 = -mat2 * abs(transpose(mat3));
+    mat1 = -mat2 * abs(transpose(mat3)) + mat2(1, 1);
     
     std::cout << std::endl;
     std::cout << "------------------------------------------------------------------" << std::endl;
     std::cout << "04. Matrix expressions" << std::endl;
-    std::cout << "  Component wise matrix expressions (with tranpose)" << std::endl;
+    std::cout << "  Component wise matrix expressions (with transpose)" << std::endl;
     std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
     std::cout << "mat2: " << std::endl << std::endl;
     std::cout << mat2 << std::endl << std::endl;
     std::cout << "mat3: " << std::endl << std::endl;
     std::cout << mat3 << std::endl << std::endl;
-    std::cout << "mat1 = -mat2 * abs(tranpose(mat3)): " << std::endl << std::endl;
+    std::cout << "mat1 = -mat2 * abs(transpose(mat3)) + mat2(1, 1): " << std::endl << std::endl;
     std::cout << mat1 << std::endl;
 
     // ==================================================================================
@@ -198,6 +207,28 @@ int main(int argc, char const* argv[])
     std::cout << mat4 << std::endl << std::endl;
     std::cout << "mat1 = sin(2 * mat4) - transpose(mmul(mat2 + 3, mat3 / 0.5f)): " << std::endl << std::endl;
     std::cout << mat1 << std::endl;
+
+    // ==================================================================================
+    // Component wise matrix expressions (with eval)
+    // ==================================================================================
+    // Any expression can be evaluated without assignment using the eval() method.
+
+    // This creates a temporary matrix with the result of this expression
+    (1 + -sigmoid(exp(mat2 + 2))).eval();
+
+    // We can get the norm of this expression with the .norm() matrix method
+    float expression_norm = (1 + -sigmoid(exp(mat2 + 2))).eval().norm();
+    
+    std::cout << std::endl;
+    std::cout << "------------------------------------------------------------------" << std::endl;
+    std::cout << "04. Matrix expressions" << std::endl;
+    std::cout << "  Component wise matrix expressions (with eval)" << std::endl;
+    std::cout << "------------------------------------------------------------------" << std::endl << std::endl;
+    std::cout << "mat2: " << std::endl << std::endl;
+    std::cout << mat2 << std::endl << std::endl;
+    std::cout << "(1 + -sigmoid(abs(mat2 + 2))):" << std::endl << std::endl;
+    std::cout << (1 + -sigmoid(abs(mat2 + 2))).eval() << std::endl << std::endl;
+    std::cout << "Norm: " << expression_norm << std::endl;
 
     return 0;
 }
