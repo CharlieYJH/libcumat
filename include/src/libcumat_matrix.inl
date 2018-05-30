@@ -251,8 +251,8 @@ void Matrix<T>::assign(Matrix<T> &mat, const Expression<Expr> &rhs)
     const unsigned int num_threads_x = (has_transpose_expr) ? total_threads / 16 : total_threads;
     const unsigned int num_threads_y = total_threads / num_threads_x;
 
-    const unsigned int num_blocks_x = (has_transpose_expr) ? (cols + num_threads_x - 1) / (num_threads_x) : (vec_size + num_threads_x - 1) / (num_threads_x);
-    const unsigned int num_blocks_y = (has_transpose_expr) ? (rows + num_threads_y - 1) / (num_threads_y) : 1;
+    const unsigned int num_blocks_x = (has_transpose_expr) ? ((unsigned int)cols + num_threads_x - 1) / (num_threads_x) : ((unsigned int)vec_size + num_threads_x - 1) / (num_threads_x);
+    const unsigned int num_blocks_y = (has_transpose_expr) ? ((unsigned int)rows + num_threads_y - 1) / (num_threads_y) : 1;
 
     // Call the kernel from the module
     CUDA_SAFE_CALL(cuModuleGetFunction(&kernel, module, "cumat_kernel"));
@@ -418,7 +418,7 @@ void Matrix<T>::transpose(void)
     T *A = thrust::raw_pointer_cast(data_.data());
     T *B = thrust::raw_pointer_cast(temp.data());
 
-    CudaHandler::cublasTranspose<T>(rows_, cols_, alpha, A, beta, B);
+    CudaHandler::cublasTranspose<T>((int)rows_, (int)cols_, alpha, A, beta, B);
 
     data_.swap(temp);
     data_ptr_ = (CUdeviceptr)thrust::raw_pointer_cast(data_.data());
@@ -442,7 +442,7 @@ Matrix<T>& Matrix<T>::transpose(Matrix<T> &mat)
     T *A = thrust::raw_pointer_cast(data_.data());
     T *B = thrust::raw_pointer_cast(mat.data_.data());
 
-    CudaHandler::cublasTranspose<T>(mat.rows_, mat.cols_, alpha, B, beta, A);
+    CudaHandler::cublasTranspose<T>((int)mat.rows_, (int)mat.cols_, alpha, B, beta, A);
 
     return *this;
 }

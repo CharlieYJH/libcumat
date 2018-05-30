@@ -162,7 +162,7 @@ int main(int argc, char const* argv[])
     // Use the overlaoded .transpose() method to do an out-of-place transpose. This is
     // the most efficient transpose method.
 
-    Cumat::Matrixf mat_A = Cumat::Matrixf::random(5, 6);
+    Cumat::Matrixf mat_A = Cumat::Matrixf::random(5, 5);
     Cumat::Matrixf mat_B = Cumat::Matrixf::random(5, 6);
 
     std::cout << std::endl;
