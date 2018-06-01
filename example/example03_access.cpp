@@ -22,8 +22,8 @@
 // ==================================================================================
 // There are two ways to access individual matrix elements:
 //
-//  1. Accessing using row and column index: mat(r, c)
-//  2. Accessing using a linear index: mat(i)
+//  (1) Accessing using row and column index: mat(r, c)
+//  (2) Accessing using a linear index: mat(i)
 // 
 // All matrices are stored in row-major order, so a linear index i corresponds to
 // row (i / total_cols) and column (i % total_cols). Similarly, row and column

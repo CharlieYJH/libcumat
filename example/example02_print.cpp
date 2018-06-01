@@ -24,7 +24,7 @@
 // notation. This means that in order to print a certain matrix, you would print it
 // like any commonly printable variable in C++ using the << operator.
 // 
-// General syntax: <stream-object> << mat;
+//  General syntax: <stream-object> << mat;
 //
 // Note: whenever such a print occurs, assuming the matrix has N rows and
 // M columns, N x M number of memory accesses occur on the GPU. This can cause a
