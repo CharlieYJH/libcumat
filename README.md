@@ -40,6 +40,7 @@ nvrtc
 These can be found in the 64-bit library folder in the CUDA toolkit installation directory.
 
 ## Usage
+### Instantiation
 A float or double matrix can be instantiated by creating a matrix object with row/col parameters. By default, all elements are initiated to zero.
 ```cpp
 Cumat::Matrixf mat(4, 5);    // Creates a 4x5 float matrix
