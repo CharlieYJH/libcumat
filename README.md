@@ -46,4 +46,8 @@ A float or double matrix can be instantiated by creating a matrix object with ro
 Cumat::Matrixf mat(4, 5);    // Creates a 4x5 float matrix
 Cumat::Matrixd mat(4, 5);    // Creates a 4x5 double matrix
 ```
-The library also features many other ways of instantiating a matrix to suit different needs. Examples of these can be found in `example01_instantiation.cpp` in the `example/` folder.
+The library also features many other ways of instantiating a matrix to suit different needs. Examples of these can be found in `example01_instantiation.cpp` in the `example/` folder. For example, a randomly initiated matrix can be instantiated as shown below.
+```cpp
+// Creates a 512 x 512 float matrix that is filled with random values
+Cumat::Matrixf mat = Cumat::Matrixf::random(512, 512);
+```
