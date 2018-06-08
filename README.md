@@ -43,8 +43,8 @@ These can be found in the 64-bit library folder in the CUDA toolkit installation
 ### Instantiation
 A float or double matrix can be instantiated by creating a matrix object with row/col parameters. By default, all elements are initiated to zero.
 ```cpp
-Cumat::Matrixf mat(4, 5);    // Creates a 4x5 float matrix
-Cumat::Matrixd mat(4, 5);    // Creates a 4x5 double matrix
+Cumat::Matrixf mat(4, 5);    // Creates a 4 x 5 float matrix
+Cumat::Matrixd mat(4, 5);    // Creates a 4 x 5 double matrix
 ```
 The library also features many other ways of instantiating a matrix to suit different needs. Examples of these can be found in `example01_instantiation.cpp` in the `example/` folder. For example, a randomly initiated matrix can be instantiated as shown below.
 ```cpp
