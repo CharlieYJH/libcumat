@@ -51,3 +51,9 @@ The library also features many other ways of instantiating a matrix to suit diff
 // Creates a 512 x 512 float matrix that is filled with random values
 Cumat::Matrixf mat = Cumat::Matrixf::random(512, 512);
 ```
+### Expressions
+This library makes use of expression templates to allow matrix expressions to be evaluated efficiently. For example, we can write an expression such as the one below.
+```cpp
+result = mat1 + mat2 - mat3 * mat3 / exp(mat4);
+```
+Here, each of ```mat#``` and ```result``` are matrices/vectors. Using expression templates, the expression is evaluated as whole, rather than creating temporaries for each operation.
