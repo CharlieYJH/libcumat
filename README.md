@@ -57,3 +57,11 @@ This library makes use of expression templates to allow matrix expressions to be
 result = mat1 + mat2 - mat3 * mat3 / exp(mat4);
 ```
 Here, each of ```mat#``` and ```result``` are matrices/vectors. Using expression templates, the expression is evaluated as whole, rather than creating temporaries for each operation.
+
+### Matrix Multiplication/Transpose
+
+This library also supports matrix multiplication/transpose along with these expressions. Two matrices can be multiplied by using the ```mmul()``` function. A matrix can be transposed by using the ```transpose()``` function. We can mix these functions with matrix expressions like the example below.
+```cpp
+result = mmul(mat1, mat2) + 2 * transpose(mat3);
+```
+Note that every ```mmul()``` call necessarily produces a temporary matrix because of how matrix multiplication works. The ```*``` operator can be used for coefficient-wise multiplication. More information about matrix multiplication/transpose can be found in the ```example/``` folder.
