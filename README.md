@@ -68,7 +68,7 @@ Note that every ```mmul()``` call necessarily produces a temporary matrix becaus
 
 ### Accessing Matrix Elements
 
-Individual elements of matrices can be accessed using parentheses. An example of this is shown below.
+Individual elements of matrices can be accessed using parentheses. Note that all matrices are zero-indexed. An example of this is shown below.
 ```cpp
 float num = mat(4, 5);    // Assigns num to the element at row 4 and column 5 of mat
 mat(4, 5) = 2;            // Assigns 2 to the element at row 4 and column 5 of mat
