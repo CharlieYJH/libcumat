@@ -65,3 +65,18 @@ This library also supports matrix multiplication/transpose along with these expr
 result = mmul(mat1, mat2) + 2 * transpose(mat3);
 ```
 Note that every ```mmul()``` call necessarily produces a temporary matrix because of how matrix multiplication works. The ```*``` operator can be used for coefficient-wise multiplication. More information about matrix multiplication/transpose can be found in the ```example/``` folder.
+
+### Accessing Matrix Elements
+
+Individual elements of matrices can be accessed using parentheses. An example of this is shown below.
+```cpp
+float num = mat(4, 5);    // Assigns num to the element at row 4 and column 5 of mat
+mat(4, 5) = 2;            // Assigns 2 to the element at row 4 and column 5 of mat
+```
+This accesses the element at row 4 and column 5 of the zero-indexed ```mat```. Of course, you can also mix this with matrix expressions to write expressions like the one below.
+```cpp
+result = mat1 + mat1(3, 3);    // Adds the element at row 3 and column 3 of mat1 to every element in mat1
+```
+Do note that since the underlying matrices are stored on the GPU, everytime an element is accessed like this a memory access has to happen to copy it onto the CPU. Furthermore, if an element is being assigned, then another memory access has to happen in order to write it from the CPU to the GPU. This can be a bottleneck if done too often, so it is best to use this access operator conservatively.
+
+For more examples of accessing matrix elements, check out the example file in the ```example/``` folder.
